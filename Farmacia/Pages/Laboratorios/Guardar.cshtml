@@ -1,0 +1,16 @@
+﻿@page "{id?}"
+@model Farmacia.Pages.Laboratorios.GuardarModel
+
+<h3 class="fw-bold mb-3">
+    @((Model.Lab.IdLaboratorio == 0) ? "Nuevo Laboratorio" : "Editar Laboratorio")
+</h3>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Nombre del Laboratorio</label>
+        <input asp-for="Lab.LaboratorioNombre" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">Guardar</button>
+    <a asp-page="Index" class="btn btn-secondary">Cancelar</a>
+</form>

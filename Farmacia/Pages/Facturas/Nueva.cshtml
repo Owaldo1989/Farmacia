@@ -1,0 +1,461 @@
+﻿@page
+@model Farmacia.Pages.Facturas.NuevaModel
+@{
+    ViewData["Title"] = "Nueva Factura";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+<style>
+    .producto-card {
+        cursor: pointer;
+        transition: transform 0.1s ease-in-out, box-shadow 0.1s;
+    }
+
+    .producto-card:hover {
+        transform: scale(1.01);
+        box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    }
+
+    .badge-inv-bajo { background-color: #dc3545; }
+    .badge-inv-normal { background-color: #0d6efd; }
+    .badge-inv-alto { background-color: #198754; }
+
+    .input-number {
+        max-width: 90px;
+    }
+</style>
+
+<div class="container mt-3">
+
+    <h3 class="fw-bold mb-3">🧾 Nueva Factura</h3>
+
+    <!-- Fecha -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Fecha</label>
+            <input class="form-control" value="@Model.Factura.Fecha.ToString("dd/MM/yyyy HH:mm")" readonly />
+        </div>
+    </div>
+
+    <!-- BOTÓN BUSCAR PRODUCTO -->
+    <div class="d-flex justify-content-between mb-2">
+        <button class="btn btn-dark" onclick="abrirBuscador()">
+            🔍 Buscar Producto (F2)
+        </button>
+    </div>
+
+    <!-- DETALLE FACTURA -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Detalle de la Factura</h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width:130px;">Código Barra</th>
+                            <th>Producto</th>
+                            <th style="width:110px;">Precio</th>
+                            <th style="width:110px;">Cantidad</th>
+                            <th style="width:120px;">SubTotal</th>
+                            <th style="width:80px;">Quitar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalleBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="text-end mt-3">
+                Total: <span class="fw-bold text-success" id="lblTotal">C$ 0.00</span>
+            </h4>
+
+            <button class="btn btn-success btn-lg w-100 mt-2" type="button" onclick="abrirPago()">
+                💵 Registrar Pago
+            </button>
+        </div>
+    </div>
+
+    <!-- FORM HIDDEN PARA POST -->
+    <form method="post" id="formFactura">
+        <input type="hidden" asp-for="Factura.IdFacturaCliente" value="@Model.Factura.IdFacturaCliente" />
+        <input type="hidden" asp-for="Factura.Fecha" value="@Model.Factura.Fecha.ToString("o")" />
+        <input type="hidden" asp-for="Factura.Paciente" id="hdPaciente" />
+        <input type="hidden" asp-for="Factura.PagoCordoba" id="hdPagoCordoba" />
+        <input type="hidden" asp-for="Factura.PagoDolar" id="hdPagoDolar" />
+        <input type="hidden" asp-for="Factura.Vuelto" id="hdVuelto" />
+        <input type="hidden" asp-for="DetalleJson" id="hdDetalleJson" />
+    </form>
+</div>
+
+
+<!-- =============== MODAL BUSCAR PRODUCTO =============== -->
+<div class="modal fade" id="modalBuscarProducto" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Buscar Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="input-group mb-3">
+                    <input id="txtBuscarProd" type="text" class="form-control"
+                           placeholder="Buscar nombre, genérico, recomendado, código..."
+                           onkeydown="if(event.key==='Enter'){buscarProducto()}">
+                    <button class="btn btn-primary" onclick="buscarProducto()">Buscar</button>
+                </div>
+
+                <div id="resultadosProductos">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL CANTIDAD / PRECIO -->
+<div class="modal fade" id="modalCantidad" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Agregar Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="mdl_IdProducto" />
+                <input type="hidden" id="mdl_CodBarra" />
+
+                <div class="mb-2">
+                    <label class="form-label">Producto</label>
+                    <input id="mdl_NombreProducto" class="form-control" readonly />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Fecha de Vencimiento</label>
+                    <input id="mdl_Vence" class="form-control" readonly />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Precio</label>
+                    <input id="mdl_Precio" type="number" step="0.01" class="form-control" />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Cantidad</label>
+                    <input id="mdl_Cantidad" type="number" step="0.01" value="1" class="form-control" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" onclick="agregarAlDetalle()">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- =============== MODAL PAGO =============== -->
+<div class="modal fade" id="modalPago" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Registrar Pago</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <label>Paciente</label>
+                <input id="txtPaciente" class="form-control mb-2" />
+
+                <label>Total</label>
+                <input id="txtTotal" class="form-control mb-2" readonly />
+
+                <label>Pago C$</label>
+                <input id="txtPagoC" class="form-control mb-2" oninput="calcularVuelto()" />
+
+                <label>Pago USD</label>
+                <input id="txtPagoD" class="form-control mb-2" oninput="calcularVuelto()" />
+
+                <label>Vuelto (C$)</label>
+                <input id="txtVuelto" class="form-control fw-bold" readonly />
+
+                <small id="txtMensajeVuelto"></small>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnGuardarFactura"
+                        type="button"
+                        onclick="guardarFactura()">
+                    Guardar Factura
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+<script>
+const tasaCambio = 36.5;
+
+// ============ ABRIR BUSCADOR ============
+function abrirBuscador() {
+    document.getElementById("txtBuscarProd").value = "";
+    document.getElementById("resultadosProductos").innerHTML = "";
+    new bootstrap.Modal(document.getElementById("modalBuscarProducto")).show();
+}
+
+// ============ BUSCAR PRODUCTO ============
+function buscarProducto() {
+    let filtro = document.getElementById("txtBuscarProd").value;
+
+    fetch(`?handler=BuscarProductos&filtro=${encodeURIComponent(filtro)}`)
+        .then(r => r.json())
+        .then(data => {
+
+            let html = `
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Vence</th>
+                            <th>Stock</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            data.forEach(p => {
+
+                let vence = p.fechaVencimiento
+                    ? new Date(p.fechaVencimiento).toLocaleDateString()
+                    : "N/A";
+
+                html += `
+                    <tr>
+                        <td>${p.codBarra}</td>
+                        <td>${p.nombreProducto}</td>
+                        <td>C$ ${p.precioVenta.toFixed(2)}</td>
+                        <td>${vence}</td>
+                        <td>${p.inventario}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm"
+                                onclick="abrirModalCantidad(${p.idProducto}, '${p.codBarra}', '${p.nombreProducto.replace("'", "\\'")}', '${vence}', ${p.precioVenta})">
+                                ➕
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+
+            html += "</tbody></table>";
+            document.getElementById("resultadosProductos").innerHTML = html;
+        });
+}
+
+
+// ============ MODAL CANTIDAD ============
+function abrirModalCantidad(id, cod, nombre, vence, precio) {
+    document.getElementById("mdl_IdProducto").value = id;
+    document.getElementById("mdl_CodBarra").value = cod;
+    document.getElementById("mdl_NombreProducto").value = nombre;
+    document.getElementById("mdl_Vence").value = vence;
+    document.getElementById("mdl_Precio").value = precio.toFixed(2);
+    document.getElementById("mdl_Cantidad").value = 1;
+
+    new bootstrap.Modal(document.getElementById("modalCantidad")).show();
+}
+
+
+// ============ AGREGAR AL DETALLE ============
+function agregarAlDetalle() {
+
+    let id = document.getElementById("mdl_IdProducto").value;
+    let cod = document.getElementById("mdl_CodBarra").value;
+    let nombre = document.getElementById("mdl_NombreProducto").value;
+    let precio = parseFloat(document.getElementById("mdl_Precio").value);
+    let cantidad = parseFloat(document.getElementById("mdl_Cantidad").value);
+
+    let tbody = document.getElementById("detalleBody");
+    let existente = tbody.querySelector(`tr[data-id='${id}']`);
+
+    if (existente) {
+        let cantInput = existente.querySelector(".det-cantidad");
+        cantInput.value = (parseFloat(cantInput.value) + cantidad).toFixed(2);
+
+        recalcularFila(null, existente);
+    }
+    else {
+        let subtotal = precio * cantidad;
+
+  let tr = document.createElement("tr");
+tr.dataset.id = id;
+
+tr.innerHTML = `
+  <td class="col-codbarra">${cod}</td>
+<td class="col-nombre"><strong>${nombre}</strong></td>
+    <td><input type="number" step="0.10" class="form-control det-precio input-number" value="${precio.toFixed(2)}" /></td>
+    <td><input type="number" step="1" class="form-control det-cantidad input-number" value="${cantidad.toFixed(2)}" /></td>
+    <td class="det-subtotal text-end">${subtotal.toFixed(2)}</td>
+    <td class="text-center">
+        <button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); recalcularTotal()">✖</button>
+    </td>
+`;
+
+
+        tbody.appendChild(tr);
+
+        tr.querySelector(".det-precio").addEventListener("input", e => recalcularFila(e, tr));
+        tr.querySelector(".det-cantidad").addEventListener("input", e => recalcularFila(e, tr));
+    }
+
+    recalcularTotal();
+    bootstrap.Modal.getInstance(document.getElementById("modalCantidad")).hide();
+}
+
+
+// ============ RECALCULAR SUBTOTAL ============
+function recalcularFila(e, row) {
+    row = row || e.target.closest("tr");
+    let cant = parseFloat(row.querySelector(".det-cantidad").value);
+    let precio = parseFloat(row.querySelector(".det-precio").value);
+    row.querySelector(".det-subtotal").innerText = (cant * precio).toFixed(2);
+    recalcularTotal();
+}
+
+
+// ============ RECALCULAR TOTAL ============
+function recalcularTotal() {
+    let total = 0;
+    document.querySelectorAll("#detalleBody .det-subtotal").forEach(x => {
+        total += parseFloat(x.innerText);
+    });
+    document.getElementById("lblTotal").innerText = "C$ " + total.toFixed(2);
+}
+
+
+// ============ MODAL PAGO ============
+function abrirPago() {
+    let total = parseFloat(document.getElementById("lblTotal").innerText.replace("C$", ""));
+
+    if (total <= 0) {
+        Swal.fire("Atención", "Debe agregar productos.", "warning");
+        return;
+    }
+
+    document.getElementById("txtTotal").value = total.toFixed(2);
+    document.getElementById("txtPagoC").value = "";
+    document.getElementById("txtPagoD").value = "";
+    document.getElementById("txtVuelto").value = "";
+
+    new bootstrap.Modal(document.getElementById("modalPago")).show();
+}
+
+
+// ============ CALCULAR VUELTO ============
+function calcularVuelto() {
+    let total = parseFloat(document.getElementById("txtTotal").value);
+    let pagoC = parseFloat(document.getElementById("txtPagoC").value) || 0;
+    let pagoD = parseFloat(document.getElementById("txtPagoD").value) || 0;
+
+    let pagado = pagoC + (pagoD * tasaCambio);
+    let vuelto = pagado - total;
+
+    let txtVuelto = document.getElementById("txtVuelto");
+    let msg = document.getElementById("txtMensajeVuelto");
+    let btn = document.getElementById("btnGuardarFactura");
+
+    txtVuelto.value = vuelto.toFixed(2);
+
+    if (vuelto < 0) {
+        txtVuelto.style.color = "red";
+        msg.innerText = "Pago insuficiente";
+        msg.style.color = "red";
+        btn.disabled = true;
+    } else {
+        txtVuelto.style.color = "blue";
+        msg.innerText = vuelto > 0 ? "Debe entregar vuelto" : "Pago exacto";
+        msg.style.color = "blue";
+        btn.disabled = false;
+    }
+}
+
+
+// ============ GUARDAR FACTURA ============
+function guardarFactura() {
+
+    let paciente = document.getElementById("txtPaciente").value;
+    if (!paciente.trim()) {
+        Swal.fire("Error", "Debe registrar el nombre del paciente.", "error");
+        return;
+    }
+
+    let detalle = [];
+    document.querySelectorAll("#detalleBody tr").forEach(tr => {
+		
+		
+	detalle.push({
+    IdProducto: parseInt(tr.dataset.id),
+    NombreProducto: tr.querySelector(".col-nombre").innerText.trim(),
+    CodBarra: tr.querySelector(".col-codbarra").innerText.trim(),
+    Cantidad: parseFloat(tr.querySelector(".det-cantidad").value) || 0,
+    Precio: parseFloat(tr.querySelector(".det-precio").value) || 0
+});
+
+
+
+    });
+
+    if (detalle.length === 0) {
+        Swal.fire("Error", "Debe agregar productos.", "error");
+        return;
+    }
+
+    document.getElementById("hdPaciente").value = paciente;
+    document.getElementById("hdPagoCordoba").value = document.getElementById("txtPagoC").value;
+    document.getElementById("hdPagoDolar").value = document.getElementById("txtPagoD").value;
+    document.getElementById("hdVuelto").value = document.getElementById("txtVuelto").value;
+
+    document.getElementById("hdDetalleJson").value = JSON.stringify(detalle);
+
+    document.getElementById("formFactura").submit();
+}
+
+
+// SWEET ALERT DESDE SERVIDOR
+@if (TempData["Ok"] != null)
+{
+    <text>
+    Swal.fire({ icon: "success", title: "Éxito", text: "@TempData["Ok"]", timer: 2000, showConfirmButton: false });
+    </text>
+}
+
+@if (TempData["Error"] != null)
+{
+    <text>
+    Swal.fire({ icon: "error", title: "Error", text: "@TempData["Error"]" });
+    </text>
+}
+
+document.addEventListener("keydown", e =>{
+    if(e.key==="F2"){
+        e.preventDefault();
+        abrirBuscador();
+    }
+});
+</script>
+
+}

@@ -1,0 +1,11 @@
+﻿@page "{id}"
+@model Farmacia.Pages.Laboratorios.EliminarModel
+
+<h3 class="fw-bold">¿Eliminar Laboratorio?</h3>
+
+<p>Laboratorio: <strong>@Model.Lab.LaboratorioNombre</strong></p>
+
+<form method="post">
+    <button class="btn btn-danger">Eliminar</button>
+    <a asp-page="Index" class="btn btn-secondary">Cancelar</a>
+</form>

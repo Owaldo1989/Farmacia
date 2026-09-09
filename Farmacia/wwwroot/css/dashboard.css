@@ -1,0 +1,49 @@
+﻿/* DASHBOARD PRINCIPAL DE FARMACIA */
+
+.card-dashboard {
+    border-radius: 12px;
+    padding: 25px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    transition: transform .2s;
+}
+
+    .card-dashboard:hover {
+        transform: translateY(-5px);
+    }
+
+.card-dia {
+    background: #28a745;
+}
+
+.card-semana {
+    background: #17a2b8;
+}
+
+.card-mes {
+    background: #007bff;
+}
+
+.card-vencer {
+    background: #ffc107;
+    color: #333;
+}
+
+.card-stock {
+    background: #dc3545;
+}
+
+/* Botones de menú */
+.menu-btn {
+    padding: 25px;
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform .2s;
+}
+
+    .menu-btn:hover {
+        transform: scale(1.05);
+    }

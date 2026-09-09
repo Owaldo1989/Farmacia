@@ -1,0 +1,20 @@
+﻿/* FORMULARIOS GENERALES */
+
+.form-label {
+    font-weight: 600;
+}
+
+.form-control {
+    border-radius: 6px;
+}
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+    }
+
+/* Botón guardar */
+.btn-guardar {
+    font-weight: 600;
+    padding: 8px 18px;
+}

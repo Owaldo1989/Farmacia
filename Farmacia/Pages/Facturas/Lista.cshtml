@@ -1,0 +1,320 @@
+﻿@page
+@model Farmacia.Pages.Facturas.ListaModel
+
+@{
+    ViewData["Title"] = "Listado de Facturas";
+}
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+<!-- DATATABLES -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css" />
+
+
+<style>
+
+.ios-modal {
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.ios-header {
+    background: linear-gradient(135deg, #007bff, #00a2ff);
+    color: white;
+    border-radius: 18px 18px 0 0;
+}
+
+.ios-label {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.ios-box {
+    background: #f3f6ff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 600;
+}
+
+.ios-total {
+    background: #198754;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+    .acciones-btns {
+        display: flex;
+        gap: .35rem;
+        justify-content: center;
+    }
+
+    .btn-accion {
+        min-width: 85px;
+        font-size: .80rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    .titulo-pagina {
+        font-weight: 700;
+        color: #0d6efd;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <h3 class="titulo-pagina mb-4">📄 Facturas Realizadas</h3>
+
+    <!-- FILTROS -->
+    <div class="card card-filtros mb-4 shadow-sm p-3">
+        <form method="get" class="row g-3">
+
+            <div class="col-md-3">
+                <label class="fw-bold">Fecha Inicio</label>
+                <input type="date" asp-for="FechaInicio" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Fecha Final</label>
+                <input type="date" asp-for="FechaFin" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="fw-bold">Paciente</label>
+                <input type="text" id="filtroPaciente" class="form-control" placeholder="Buscar paciente...">
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100 fw-bold">🔍 Buscar</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-responsive shadow-sm rounded">
+        <table id="tablaFacturas" class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th>No</th>
+                    <th>Fecha</th>
+                    <th>Paciente</th>
+                    <th>Total</th>
+                    <th>Pagó (C$)</th>
+                    <th>Pagó (US$)</th>
+                    <th>Vuelto</th>
+                    <th style="width:240px;">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var f in Model.Listado)
+                {
+                    <tr>
+                        <td>@f.IdFactura</td>
+                        <td>@f.Fecha.ToString("dd/MM/yyyy hh:mm tt")</td>
+                        <td>@f.Paciente</td>
+                        <td class="fw-bold text-success">C$ @f.Total.ToString("#,##0.00")</td>
+                        <td>C$ @f.PagoCordoba.ToString("#,##0.00")</td>
+                        <td>$ @f.PagoDolar.ToString("#,##0.00")</td>
+                        <td class="text-primary fw-bold">C$ @f.Vuelto.ToString("#,##0.00")</td>
+
+                        <td>
+                            <div class="acciones-btns">
+
+                                <button class="btn btn-info btn-sm btn-accion"
+                                        onclick="verDetalle(@f.IdFactura)">
+                                    📄 Ver
+                                </button>
+
+                                <button class="btn btn-primary btn-sm btn-accion"
+                                        onclick="reimprimir(@f.IdFactura)">
+                                    🖨️ Imprimir
+                                </button>
+
+                                <button class="btn btn-danger btn-sm btn-accion"
+                                        onclick="anular(@f.IdFactura)">
+                                    ❌ Anular
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- MODAL DETALLE FACTURA -->
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content ios-modal">
+
+            <div class="modal-header ios-header">
+                <h5 class="modal-title">🧾 Detalle de Factura</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="ios-label">Fecha</label>
+                        <div id="detFecha" class="ios-box"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="ios-label">Paciente</label>
+                        <div id="detPaciente" class="ios-box"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="ios-label">Total</label>
+                        <div id="detTotal" class="ios-total"></div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-secondary">💊 Productos</h5>
+
+                <div class="table-responsive mt-2">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cód. Barra</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>SubTotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleTabla"></tbody>
+                    </table>
+                </div>
+
+                <div class="row text-end mt-4">
+                    <div class="col-md-4 offset-md-8 ios-box p-3">
+                        <div><b>Pago C$:</b> <span id="detPagoC"></span></div>
+                        <div><b>Pago US$:</b> <span id="detPagoD"></span></div>
+                        <div class="mt-2"><b>Vuelto:</b> <span id="detVuelto"></span></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button class="btn btn-primary" id="btnReprint">🖨️ Reimprimir</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <!-- JS DataTables -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+
+    <script>
+
+        // Inicializar DataTables
+       let tabla = new DataTable('#tablaFacturas', {
+    pageLength: 5,
+    lengthMenu: [5, 25, 100, -1],
+
+    layout: {
+        topStart: {
+            buttons: [
+                { extend: 'excel', text: '📗 Excel' },
+                { extend: 'pdf', text: '📕 PDF' },
+                { extend: 'print', text: '🖨️ Imprimir' }
+            ],
+            // ✅ aquí activamos el combo de registros
+            lengthMenu: true
+        },
+        topEnd: {
+            search: {
+                placeholder: "Buscar..."
+            }
+        }
+    }
+});
+
+
+        // Filtro por paciente
+        document.getElementById("filtroPaciente").addEventListener("keyup", function () {
+            tabla.column(2).search(this.value).draw();
+        });
+
+        // Reimpresión
+        function reimprimir(id) {
+            window.open(`/Facturas/VerTicket/${id}`, "_blank");
+        }
+
+        function anular(id) {
+            Swal.fire({
+                title: "¿Anular factura?",
+                text: "Esto no se puede deshacer",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, anular",
+                cancelButtonText: "Cancelar"
+            }).then(r => {
+                if (r.isConfirmed) {
+                    window.location.href = `?handler=Anular&id=${id}`;
+                }
+            });
+        }
+
+        function verDetalle(id) {
+            fetch(`/Facturas/Lista?handler=Detalle&id=${id}`)
+                .then(r => r.json())
+                .then(data => {
+
+                    document.getElementById("detFecha").innerText = data.fecha;
+                    document.getElementById("detPaciente").innerText = data.paciente;
+                    document.getElementById("detTotal").innerText = "C$ " + data.total;
+
+                    document.getElementById("detPagoC").innerText = "C$ " + data.pagoCordoba;
+                    document.getElementById("detPagoD").innerText = "$ " + data.pagoDolar;
+                    document.getElementById("detVuelto").innerText = "C$ " + data.vuelto;
+
+                    const tabla = document.getElementById("detalleTabla");
+                    tabla.innerHTML = "";
+
+                    data.detalles.forEach(d => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${d.nombreProducto}</td>
+                                <td>${d.codBarra}</td>
+                                <td>${d.cantidad}</td>
+                                <td>C$ ${d.precio}</td>
+                                <td class="fw-bold">C$ ${d.subTotal}</td>
+                            </tr>`;
+                    });
+
+                    document.getElementById("btnReprint").onclick =
+                        () => window.open(`/Facturas/VerTicket/${id}`, "_blank");
+
+                    new bootstrap.Modal(document.getElementById("modalDetalle")).show();
+                });
+        }
+
+    </script>
+}

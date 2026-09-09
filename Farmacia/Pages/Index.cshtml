@@ -1,0 +1,197 @@
+﻿@page
+@model Farmacia.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+<style>
+
+    body {
+        background: #f5f6fa;
+        font-family: 'Segoe UI';
+    }
+
+    .dashboard-card {
+        border-radius: 12px;
+        padding: 25px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform .2s;
+    }
+
+    .dashboard-card:hover { transform: translateY(-5px); }
+
+    .card-dia { background: #28a745; }
+    .card-semana { background: #17a2b8; }
+    .card-mes { background: #007bff; }
+    .card-vencer { background: #ffc107; color:#333; }
+    .card-stock { background: #dc3545; }
+
+    .card-venta { background: #0d6efd; }
+    .card-costo { background: #fd7e14; }
+    .card-utilidad { background: #198754; }
+
+    .menu-btn {
+        padding: 25px;
+        border-radius: 12px;
+        background: #fff;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform .2s;
+    }
+
+    .menu-btn:hover { transform: scale(1.05); }
+
+    .menu-btn i {
+        font-size: 40px;
+        color: #007bff;
+    }
+
+    .alert-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+</style>
+
+<div class="container py-4">
+
+    <!-- Bienvenida -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Dashboard – Sistema Farmacia</h3>
+        <div class="fw-semibold text-end">
+            <div><i class="bi bi-person-circle"></i> @HttpContext.Session.GetString("Nombre")</div>
+            <small class="text-muted">Rol: @HttpContext.Session.GetString("Rol")</small><br />
+            <a class="btn btn-danger btn-sm mt-2" href="/Login">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <!-- Tarjetas principales -->
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-dia">
+                <h5><i class="bi bi-currency-exchange"></i> Ventas del Día</h5>
+                <h2>C$ @Model.VentaDia.ToString("N2")</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-semana">
+                <h5><i class="bi bi-bar-chart"></i> Ventas Semana</h5>
+                <h2>C$ @Model.VentaSemana.ToString("N2")</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-mes">
+                <h5><i class="bi bi-calendar-month"></i> Ventas del Mes</h5>
+                <h2>C$ @Model.VentaMes.ToString("N2")</h2>
+            </div>
+        </div>
+
+     <div class="col-md-6">
+    <div class="dashboard-card card-vencer">
+        <h5><i class="bi bi-hourglass-split"></i> Productos Próximos a Vencer</h5>
+        <h2>@Model.PorVencer Productos</h2>
+
+        <a href="/Productos/PorVencer" class="btn btn-dark btn-sm mt-3">
+            Ver detalle <i class="bi bi-arrow-right-circle"></i>
+        </a>
+    </div>
+</div>
+
+
+        <div class="col-md-6">
+            <div class="dashboard-card card-stock">
+                <h5><i class="bi bi-exclamation-triangle"></i> Sin Existencias</h5>
+                <h2>@Model.SinStock Productos</h2>
+				
+				 <a href="/Productos/SinInventario" class="btn btn-dark btn-sm mt-3">
+            Ver detalle <i class="bi bi-arrow-right-circle"></i>
+        </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ✅ Acciones rápidas (restauradas) -->
+    <h4 class="fw-bold mt-5 mb-3">Acciones Rápidas</h4>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="menu-btn" onclick="location.href='/Facturas/Nueva'">
+                <i class="bi bi-receipt-cutoff"></i>
+                <h6 class="mt-2 fw-bold">Facturar</h6>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="menu-btn" onclick="location.href='/Inventario'">
+                <i class="bi bi-box-seam"></i>
+                <h6 class="mt-2 fw-bold">Inventario</h6>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="menu-btn" onclick="location.href='/Productos/Nuevo'">
+                <i class="bi bi-plus-circle"></i>
+                <h6 class="mt-2 fw-bold">Nuevo Producto</h6>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="menu-btn" onclick="location.href='/Reportes'">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                <h6 class="mt-2 fw-bold">Reportes</h6>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Resumen financiero -->
+    <h4 class="fw-bold mt-5 mb-3">Resumen Financiero del Mes</h4>
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-venta">
+                <h5><i class="bi bi-cash-coin"></i> Venta Total</h5>
+                <h2>C$ @Model.UtilVenta.ToString("N2")</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-costo">
+                <h5><i class="bi bi-truck"></i> Costo Total</h5>
+                <h2>C$ @Model.UtilCosto.ToString("N2")</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card card-utilidad">
+                <h5><i class="bi bi-graph-up-arrow"></i> Utilidad</h5>
+                <h2>C$ @Model.UtilUtilidad.ToString("N2")</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Alertas -->
+    <h4 class="fw-bold mt-5 mb-3">Alertas del Sistema</h4>
+
+    <div class="alert-box">
+        <ul class="mb-0">
+            <li>@Model.SinStock productos deben revisarse por bajo inventario.</li>
+            <li>@Model.PorVencer productos vencen pronto.</li>
+            <li>La última compra fue hace 2 días.</li>
+        </ul>
+    </div>
+
+</div>

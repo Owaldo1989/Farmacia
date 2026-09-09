@@ -1,0 +1,62 @@
+﻿/* ESTILOS GENERALES PARA CRUD DE CATÁLOGOS (UNIDADES, CATEGORÍAS, PROVEEDORES) */
+
+/* Encabezado elegante */
+.titulo-seccion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Botón superior */
+.btn-agregar {
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+/* Tabla responsiva */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.table th {
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.90rem;
+}
+
+/* Botones de acción uniformes */
+.btn-accion {
+    width: 90px;
+    margin: 2px 0;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #eee;
+}
+
+.modal-body label {
+    font-weight: 600;
+}
+
+/* Responsividad para pantallas antiguas */
+@@media (max-width: 1024px) {
+    .table th, .table td {
+        font-size: 0.85rem;
+    }
+
+    .btn-accion {
+        width: 100%;
+    }
+}

@@ -1,0 +1,168 @@
+﻿@page
+@model Farmacia.Pages.UnidadesModel
+@{
+    ViewData["Title"] = "Unidades de Medida";
+}
+
+
+
+<div class="container mt-4">
+
+    <div class="titulo-seccion mb-3">
+        <h3 class="fw-bold">Unidades de Medida</h3>
+
+        <button class="btn btn-primary btn-agregar" onclick="nuevaUnidad()">
+            ➕ Nueva Unidad
+        </button>
+    </div>
+
+    <!-- TABLA RESPONSIVA -->
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped table-bordered align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 70px;">ID</th>
+                    <th style="width: 200px;">Unidad</th>
+                    <th>Descripción</th>
+                    <th style="width: 170px;" class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Listado)
+                {
+                    <tr>
+                        <td>@u.IdUnidad</td>
+                        <td>@u.NombreUnidad</td>
+                        <td>@u.Descripcion</td>
+
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm btn-accion" onclick="editar(@u.IdUnidad)">
+                                ✏️ Editar
+                            </button>
+
+                            <button class="btn btn-danger btn-sm btn-accion" onclick="eliminar(@u.IdUnidad)">
+                                🗑️ Borrar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL FORMULARIO -->
+<div class="modal fade" id="modalUnidad" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Unidad de Medida</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- IMPORTANTE: ID EXPLÍCITO DEL HIDDEN -->
+                    <input type="hidden" id="Unidad_IdUnidad" name="Unidad.IdUnidad" value="@Model.Unidad?.IdUnidad" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre Unidad</label>
+                        <input class="form-control" asp-for="Unidad.NombreUnidad" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" asp-for="Unidad.Descripcion" rows="3"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary btn-guardar">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    // NUEVA UNIDAD
+    function nuevaUnidad() {
+        document.getElementById("Unidad_IdUnidad").value = 0;
+        document.getElementById("Unidad_NombreUnidad").value = "";
+        document.getElementById("Unidad_Descripcion").value = "";
+
+        new bootstrap.Modal(document.getElementById("modalUnidad")).show();
+    }
+
+    // EDITAR
+    function editar(id) {
+        window.location.href = "/Unidades?id=" + id;
+    }
+
+    // ELIMINAR CON SWEETALERT2
+    function eliminar(id) {
+        Swal.fire({
+            title: "¿Eliminar unidad?",
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then((r) => {
+            if (r.isConfirmed) {
+                window.location.href = "/Unidades?eliminar=" + id;
+            }
+        });
+    }
+</script>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // ✔ MENSAJE DE ÉXITO
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Completado',
+                    text: '@TempData["Ok"]',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+                </text>
+            }
+
+            // ❌ MENSAJE DE ERROR
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '@TempData["Error"]'
+                });
+                </text>
+            }
+
+            // ✏️ ABRIR MODAL AUTOMÁTICAMENTE AL EDITAR
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+                new bootstrap.Modal(document.getElementById("modalUnidad")).show();
+                </text>
+            }
+
+        });
+    </script>
+}

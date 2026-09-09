@@ -1,0 +1,29 @@
+﻿/* TABLAS GENERALES PARA TODO EL SISTEMA */
+
+.table {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+    .table thead {
+        background: #343a40;
+        color: white;
+    }
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background: #eef3ff;
+}
+
+/* Columnas alineadas */
+td, th {
+    text-align: left;
+}
+
+/* Ajuste automático de textos largos */
+td {
+    word-break: break-word;
+}

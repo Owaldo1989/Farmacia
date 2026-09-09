@@ -1,0 +1,34 @@
+﻿@page "{id:int}"
+@model Farmacia.Pages.Facturas.VerTicketModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Imprimiendo Ticket…</title>
+</head>
+<body>
+
+<script>
+    window.onload = function () {
+
+        // Abrir el PDF en una pestaña NUEVA
+        var urlPdf = "/Facturas/Ticket/@Model.FacturaId";
+        var popup = window.open(urlPdf, "_blank");
+
+        // Si no se puede abrir (bloqueo del navegador)
+        if (!popup) {
+            alert("Debe permitir ventanas emergentes para imprimir el ticket.");
+        }
+
+        // Después de 2 segundos volvemos a Facturación
+        setTimeout(() => {
+            window.location.href = "/Facturas/Nueva";
+        }, 2000);
+    };
+</script>
+
+</body>
+</html>

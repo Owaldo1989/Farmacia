@@ -1,0 +1,354 @@
+﻿@page
+@model Farmacia.Pages.Productos.NuevoModel
+@{
+    ViewData["Title"] = "Productos";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+<style>
+    .producto-nombre {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+    .producto-secundario {
+        font-size: 0.85rem;
+    }
+    .vence-pronto {
+        color: red;
+        font-weight: bold;
+    }
+    .badge-stock { font-size: 0.8rem; padding: 3px 6px; }
+    .badge-bajo { background-color: #dc3545; }
+    .badge-normal { background-color: #0d6efd; }
+    .badge-alto { background-color: #198754; }
+    hr { opacity: 0.2; }
+</style>
+
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold">Productos</h3>
+
+        <button class="btn btn-primary" onclick="nuevoProducto()">
+            ➕ Nuevo Producto
+        </button>
+    </div>
+
+    <!-- ================= BUSCADOR ================= -->
+    <form method="get" class="d-flex mb-3" id="formBuscar">
+        <input id="txtBuscar"
+               name="buscar"
+               class="form-control me-2"
+               placeholder="Buscar por nombre, genérico, recomendado para..."
+               value="@Model.BuscarTexto"
+               autocomplete="off" />
+
+        <button type="submit" class="btn btn-primary">
+            🔍 Filtrar
+        </button>
+    </form>
+
+
+    <!-- ========== TABLA ========== -->
+    <div class="table-responsive shadow-sm">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:90px;">ID</th>
+                    <th>Producto</th>
+                    <th style="width:170px;" class="text-center">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var p in Model.Listado)
+                {
+                    var bajaExistencia = p.Inventario <= 5;
+                    var fechaV = p.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "N/A";
+
+                    bool porVencer = false;
+                    if (p.FechaVencimiento != null)
+                    {
+                        var dias = (p.FechaVencimiento.Value - DateTime.Now).Days;
+                        porVencer = dias <= 30;
+                    }
+
+                    <tr>
+                        <td class="align-middle fw-bold">@p.IdProducto</td>
+
+                        <td>
+                            <div class="producto-nombre">
+                                @p.NombreProducto
+                                <span class="text-muted">(Cod: @p.CodBarra)</span>
+                            </div>
+
+                            <div class="producto-secundario">
+                                <b>Categoría:</b> @p.CategoriaNombre |
+                                <b>Precio:</b> C$ @p.PrecioVenta |
+                                <b>Stock:</b>
+
+                                @if (bajaExistencia)
+                                {
+                                    <span class="badge badge-stock badge-bajo">Bajo (@p.Inventario)</span>
+                                }
+                                else if (p.Inventario < 20)
+                                {
+                                    <span class="badge badge-stock badge-normal">Normal (@p.Inventario)</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-stock badge-alto">Alto (@p.Inventario)</span>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="producto-secundario">
+                                <b>Genérico:</b> @p.NombreGenerico <br />
+                                <b>Recomendado Para:</b> @p.RecomendadoPara <br />
+                                <b>Vence:</b>
+                                @if (porVencer)
+                                {
+                                    <span class="vence-pronto">@fechaV</span>
+                                }
+                                else
+                                {
+                                    @fechaV
+                                }
+                                <br />
+
+                                <b>Proveedor:</b> @p.ProveedorNombre |
+                                <b>Unidad:</b> @p.UnidadNombre
+                            </div>
+                        </td>
+
+                        <td class="text-center align-middle">
+                            <button class="btn btn-warning btn-sm mb-1"
+                                    onclick="editar(@p.IdProducto)">
+                                ✏️ Editar
+                            </button>
+
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="eliminar(@p.IdProducto)">
+                                🗑️ Borrar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+
+<!-- ============== MODAL ============== -->
+<div class="modal fade" id="modalProducto" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form method="post">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Producto</h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" asp-for="Producto.IdProducto" id="Producto_IdProducto" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">Código de Barra</label>
+                            <input class="form-control" asp-for="Producto.CodBarra" id="Producto_CodBarra" required />
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label">Nombre Producto</label>
+                            <input class="form-control" asp-for="Producto.NombreProducto" id="Producto_NombreProducto" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Genérico</label>
+                            <input class="form-control" asp-for="Producto.NombreGenerico" id="Producto_NombreGenerico" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Recomendado Para</label>
+                            <input class="form-control" asp-for="Producto.RecomendadoPara" id="Producto_RecomendadoPara" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha Vencimiento</label>
+                            <input type="date" class="form-control" asp-for="Producto.FechaVencimiento" id="Producto_FechaVencimiento" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Precio Costo</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   asp-for="Producto.PrecioCosto" id="Producto_PrecioCosto" required />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Costo Promedio</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   asp-for="Producto.CostoPromedio" id="Producto_CostoPromedio" required />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Precio Venta</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   asp-for="Producto.PrecioVenta" id="Producto_PrecioVenta" required />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Inventario</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   asp-for="Producto.Inventario" id="Producto_Inventario" required />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-control" asp-for="Producto.IdCategoria" id="Producto_IdCategoria" required>
+                                <option value="">Seleccione</option>
+                                @foreach (var c in Model.Categorias)
+                                {
+                                    <option value="@c.IdCategoria">@c.NombreCategoria</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-control" asp-for="Producto.IdProveedor" id="Producto_IdProveedor" required>
+                                <option value="">Seleccione</option>
+                                @foreach (var p in Model.Proveedores)
+                                {
+                                    <option value="@p.IdProveedor">@p.NombreProveedor</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Unidad</label>
+                            <select class="form-control" asp-for="Producto.IdUnidad" id="Producto_IdUnidad" required>
+                                <option value="">Seleccione</option>
+                                @foreach (var u in Model.Unidades)
+                                {
+                                    <option value="@u.IdUnidad">@u.NombreUnidad</option>
+                                }
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        // ==================== NUEVO =====================
+        function nuevoProducto() {
+
+            // SOLO limpiamos campos del producto, NO el token antiforgery
+            document.getElementById("Producto_IdProducto").value = 0;
+            document.getElementById("Producto_CodBarra").value = "";
+            document.getElementById("Producto_NombreProducto").value = "";
+            document.getElementById("Producto_NombreGenerico").value = "";
+            document.getElementById("Producto_RecomendadoPara").value = "";
+            document.getElementById("Producto_FechaVencimiento").value = "";
+            document.getElementById("Producto_PrecioCosto").value = "";
+            document.getElementById("Producto_CostoPromedio").value = "";
+            document.getElementById("Producto_PrecioVenta").value = "";
+            document.getElementById("Producto_Inventario").value = "";
+            document.getElementById("Producto_IdCategoria").value = "";
+            document.getElementById("Producto_IdProveedor").value = "";
+            document.getElementById("Producto_IdUnidad").value = "";
+
+            new bootstrap.Modal(document.getElementById("modalProducto")).show();
+        }
+
+        // ==================== EDITAR =====================
+        function editar(id) {
+            window.location.href = "/Productos/Nuevo?id=" + id;
+        }
+
+        // ==================== ELIMINAR =====================
+        function eliminar(id) {
+            Swal.fire({
+                title: "¿Eliminar producto?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    window.location.href = "/Productos/Nuevo?eliminar=" + id;
+                }
+            });
+        }
+
+        // ==================== MENSAJES =====================
+        @if (TempData["Ok"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: "success",
+                title: "Completado",
+                text: "@TempData["Ok"]",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            </text>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "@TempData["Error"]"
+            });
+            </text>
+        }
+
+        // ============= ABRIR MODAL EN EDICIÓN =============
+        @if (TempData["Editar"] != null)
+        {
+            <text>
+            document.addEventListener("DOMContentLoaded", function () {
+                new bootstrap.Modal(document.getElementById("modalProducto")).show();
+            });
+            </text>
+        }
+
+        // ============ FILTRO CON ENTER ============
+        document.getElementById("txtBuscar").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById("formBuscar").submit();
+            }
+        });
+
+    </script>
+}
