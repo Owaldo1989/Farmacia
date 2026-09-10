@@ -1,0 +1,431 @@
+﻿@page
+
+@model Farmacia.Pages.Configuracion.TipoCambioModel
+
+}
+
+
+<link rel="stylesheet"
+      href="~/css/tipo-cambio.css"
+      asp-append-version="true" />
+
+
+<div class="exchange-page">
+
+
+    <!-- ENCABEZADO -->
+
+    <div class="exchange-header">
+
+        <div>
+
+            <div class="exchange-eyebrow">
+
+                <i class="bi bi-gear"></i>
+
+                Configuración
+
+            </div>
+
+
+            <h1>
+                Tipo de cambio
+            </h1>
+
+
+            <p>
+                Administra la tasa utilizada para pagos en dólares.
+            </p>
+
+        </div>
+
+
+        <div class="exchange-current">
+
+            <div class="current-icon">
+
+                <i class="bi bi-currency-dollar"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Tasa vigente
+                </span>
+
+                <strong>
+                    C$ @Model.TasaVigente.ToString("N4")
+                </strong>
+
+                <small>
+                    por US$ 1.00
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    @if (TempData["Ok"] != null)
+    {
+        <div class="exchange-success">
+
+            <i class="bi bi-check-circle"></i>
+
+            <span>
+                @TempData["Ok"]
+            </span>
+
+        </div>
+    }
+
+
+
+    <!-- CONTENIDO -->
+
+    <div class="exchange-layout">
+
+
+        <!-- =============================================
+             NUEVA TASA
+        ============================================== -->
+
+        <section class="exchange-card new-rate-card">
+
+
+            <div class="card-header-modern">
+
+                <div class="card-icon">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Nueva tasa
+                    </h2>
+
+                    <p>
+                        Define el valor y la fecha desde que tendrá vigencia.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <form method="post">
+
+
+                <div asp-validation-summary="ModelOnly"
+                     class="validation-summary">
+                </div>
+
+
+
+                <!-- FECHA -->
+
+                <div class="modern-field">
+
+                    <label asp-for="FechaDesde">
+
+                        Fecha de vigencia
+
+                    </label>
+
+
+                    <div class="modern-control">
+
+                        <i class="bi bi-calendar3"></i>
+
+                        <input asp-for="FechaDesde"
+                               type="date" />
+
+                    </div>
+
+
+                    <span asp-validation-for="FechaDesde"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+
+
+                <!-- TASA -->
+
+                <div class="modern-field">
+
+                    <label asp-for="Tasa">
+
+                        Tipo de cambio
+
+                    </label>
+
+
+                    <div class="rate-input">
+
+                        <span class="rate-prefix">
+
+                            US$ 1 =
+
+                        </span>
+
+
+                        <span class="currency-symbol">
+
+                            C$
+
+                        </span>
+
+
+                        <input asp-for="Tasa"
+                               type="number"
+                               step="0.0001"
+                               min="0.0001"
+                               placeholder="36.5000" />
+
+                    </div>
+
+
+                    <span asp-validation-for="Tasa"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+
+
+                <!-- INFORMACIÓN -->
+
+                <div class="rate-notice">
+
+                    <i class="bi bi-info-circle"></i>
+
+                    <div>
+
+                        <strong>
+                            Importante
+                        </strong>
+
+                        <span>
+                            Las facturas conservarán la tasa utilizada
+                            al momento de registrarse.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <button type="submit"
+                        class="btn-save-rate">
+
+                    <i class="bi bi-check-lg"></i>
+
+                    Registrar tasa
+
+                </button>
+
+
+            </form>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             HISTORIAL
+        ============================================== -->
+
+        <section class="exchange-card history-card">
+
+
+            <div class="card-header-modern history-header">
+
+                <div>
+
+                    <h2>
+                        Historial
+                    </h2>
+
+                    <p>
+                        Últimos tipos de cambio registrados.
+                    </p>
+
+                </div>
+
+
+                <div class="history-icon">
+
+                    <i class="bi bi-clock-history"></i>
+
+                </div>
+
+            </div>
+
+
+
+            @if (Model.Historial != null &&
+                 Model.Historial.Any())
+            {
+
+                <div class="exchange-table-wrapper">
+
+                    <table class="exchange-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Vigente desde
+                                </th>
+
+                                <th>
+                                    Tasa
+                                </th>
+
+                                <th>
+                                    Registrado
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in Model.Historial)
+                            {
+
+                                var vigente =
+                                    item.Tasa ==
+                                    Model.TasaVigente;
+
+                                <tr>
+
+                                    <td>
+
+                                        <div class="date-cell">
+
+                                            <i class="bi bi-calendar3"></i>
+
+                                            @item.FechaDesde.ToString("dd/MM/yyyy")
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong class="rate-value">
+
+                                            C$ @item.Tasa.ToString("N4")
+
+                                        </strong>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="registered-date">
+
+                                            @item.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (vigente)
+                                        {
+
+                                            <span class="status-current">
+
+                                                <span></span>
+
+                                                Vigente
+
+                                            </span>
+
+                                        }
+
+                                        else
+                                        {
+
+                                            <span class="status-history">
+
+                                                Histórico
+
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+            else
+            {
+
+                <div class="empty-history">
+
+                    <i class="bi bi-clock-history"></i>
+
+                    <strong>
+                        Sin historial
+                    </strong>
+
+                    <span>
+                        No existen tasas registradas.
+                    </span>
+
+                </div>
+
+            }
+
+
+        </section>
+
+
+    </div>
+
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

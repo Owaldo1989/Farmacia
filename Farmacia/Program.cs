@@ -14,6 +14,7 @@ builder.Services.AddTransient<UnidadDAL>();
 builder.Services.AddTransient<UsuarioDAL>();
 builder.Services.AddTransient<FacturaDAL>();
 builder.Services.AddTransient<ProductoDAL>();
+    builder.Services.AddTransient<TipoCambioDAL>();
 // Cache para Session
 builder.Services.AddDistributedMemoryCache();
 

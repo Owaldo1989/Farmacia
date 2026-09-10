@@ -1,31 +1,142 @@
-﻿@page
+﻿@page "/Laboratorio/Laboratorio"
 @model Farmacia.Pages.Laboratorios.LaboratoriosModel
+@{
+    ViewData["Title"] = "Laboratorios";
+}
 
-<h3 class="fw-bold mb-3">
-    <i class="bi bi-building"></i> Laboratorios
-</h3>
+<div class="container mt-4">
+    <div class="titulo-seccion mb-3">
+        <h3 class="fw-bold">Laboratorios</h3>
 
-<a class="btn btn-primary mb-3" asp-page="Guardar">Nuevo Laboratorio</a>
+        <button type="button" class="btn btn-primary btn-agregar" onclick="nuevoLaboratorio()">
+            ➕ Nuevo Laboratorio
+        </button>
+    </div>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Laboratorio</th>
-            <th style="width:150px">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var l in Model.Lista)
-        {
-            <tr>
-                <td>@l.IdLaboratorio</td>
-                <td>@l.LaboratorioNombre</td>
-                <td>
-                    <a asp-page="Guardar" asp-route-id="@l.IdLaboratorio" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-page="Eliminar" asp-route-id="@l.IdLaboratorio" class="btn btn-danger btn-sm">Eliminar</a>
-                </td>
-            </tr>
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped table-bordered align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:80px;">ID</th>
+                    <th>Laboratorio</th>
+                    <th style="width:170px;" class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var laboratorio in Model.Listado)
+                {
+                    <tr>
+                        <td>@laboratorio.IdLaboratorio</td>
+                        <td>@laboratorio.LaboratorioNombre</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-warning btn-sm btn-accion"
+                                    onclick="editarLaboratorio(@laboratorio.IdLaboratorio)">
+                                ✏️ Editar
+                            </button>
+
+                            <button type="button" class="btn btn-danger btn-sm btn-accion"
+                                    onclick="eliminarLaboratorio(@laboratorio.IdLaboratorio)">
+                                🗑️ Borrar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalLaboratorio" tabindex="-1" aria-labelledby="modalLaboratorioTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalLaboratorioTitulo">Laboratorio</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" asp-for="Laboratorio.IdLaboratorio" />
+
+                    <div class="mb-3">
+                        <label asp-for="Laboratorio.LaboratorioNombre" class="form-label">Nombre del Laboratorio</label>
+                        <input asp-for="Laboratorio.LaboratorioNombre" class="form-control"
+                               maxlength="150" autocomplete="off" required />
+                        <span asp-validation-for="Laboratorio.LaboratorioNombre" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function nuevoLaboratorio() {
+            document.getElementById("Laboratorio_IdLaboratorio").value = 0;
+            document.getElementById("Laboratorio_LaboratorioNombre").value = "";
+            document.getElementById("modalLaboratorioTitulo").textContent = "Nuevo Laboratorio";
+            new bootstrap.Modal(document.getElementById("modalLaboratorio")).show();
         }
-    </tbody>
-</table>
+
+        function editarLaboratorio(id) {
+            window.location.href = "@Url.Page("/Laboratorios/Laboratorios")?id=" + id;
+        }
+
+        function eliminarLaboratorio(id) {
+            Swal.fire({
+                title: "¿Eliminar laboratorio?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then((resultado) => {
+                if (resultado.isConfirmed) {
+                    window.location.href = "@Url.Page("/Laboratorios/Laboratorios")?eliminar=" + id;
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: "success",
+                    title: "Completado",
+                    text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Ok"])),
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+                </text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"]))
+                });
+                </text>
+            }
+
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+                document.getElementById("modalLaboratorioTitulo").textContent = "Editar Laboratorio";
+                new bootstrap.Modal(document.getElementById("modalLaboratorio")).show();
+                </text>
+            }
+        });
+    </script>
+}

@@ -1,140 +1,767 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var ruta = Context.Request.Path.Value?.ToLower() ?? "";
+
+    var esInicio =
+        ruta == "/" ||
+        ruta == "/index";
+
+    var esFacturas =
+        ruta.StartsWith("/facturas");
+
+    var esInventario =
+        ruta.StartsWith("/inventario");
+
+    var esProductos =
+        ruta.StartsWith("/productos");
+
+    var esCategorias =
+        ruta.StartsWith("/categorias");
+
+    var esUnidades =
+        ruta.StartsWith("/unidades");
+
+    var esProveedores =
+        ruta.StartsWith("/proveedores");
+
+    var esLaboratorios =
+        ruta.StartsWith("/laboratorio") ||
+        ruta.StartsWith("/laboratorios");
+
+    var esReportes =
+        ruta.StartsWith("/reportes");
+
+    var catalogosActivo =
+        esProductos ||
+        esCategorias ||
+        esUnidades ||
+        esProveedores ||
+        esLaboratorios;
+
+    var nombre =
+        Context.Session.GetString("Nombre");
+
+    var rol =
+        Context.Session.GetString("Rol");
+}
+
+<!DOCTYPE html>
+
+<html lang="es">
+
 <head>
+
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Farmacia</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-	<link rel="stylesheet" href="~/css/catalogos.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/tablas.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/formularios.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="~/Farmacia.styles.css" asp-append-version="true" />
+    <title>
+        @ViewData["Title"] - Farmacia
+    </title>
+
+
+    <!-- BOOTSTRAP -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+
+    <!-- ICONOS -->
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+
+    <!-- FUENTE -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+
+    <!-- ===================================================
+         PALETA GLOBAL
+    ==================================================== -->
+
+    <link rel="stylesheet"
+          href="~/css/theme.css"
+          asp-append-version="true" />
+
+
+    <!-- CSS EXISTENTES -->
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/catalogos.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/tablas.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/formularios.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/dashboard.css"
+          asp-append-version="true" />
+
+
+    <!-- LAYOUT NUEVO -->
+
+    <link rel="stylesheet"
+          href="~/css/layout.css"
+          asp-append-version="true" />
+
+
+    <link rel="stylesheet"
+          href="~/Farmacia.styles.css"
+          asp-append-version="true" />
+
 </head>
+
 
 <body>
 
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
 
-                <a class="navbar-brand" asp-page="/Index">Farmacia</a>
+    <!-- =====================================================
+         SIDEBAR OVERLAY MÓVIL
+    ====================================================== -->
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-
-                    <!-- MENÚ IZQUIERDO -->
-                    <ul class="navbar-nav flex-grow-1">
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-page="/Index">Home</a>
-                        </li>
-
-                        <!-- MENÚ CATÁLOGOS -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                Catálogos
-                            </a>
-                            <ul class="dropdown-menu">
-							  <li>
-                                    <a class="dropdown-item" href="/Productos/Nuevo">Productos</a>
-                                </li>
-								  <li>
-                                    <a class="dropdown-item" href="/Laboratorio/Laboratorio">Laboratios</a>
-                                </li>
+    <div class="sidebar-overlay"
+         id="sidebarOverlay"></div>
 
 
-                                <li>
-                                    <a class="dropdown-item" href="/Unidades">Unidades de Medida</a>
-                                </li>
 
-                                <li>
-                                    <a class="dropdown-item" href="/Categorias">Categorías</a>
-                                </li>
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-                                <li>
-                                    <a class="dropdown-item" href="/Proveedores">Proveedores</a>
-                                </li>
+    <aside class="app-sidebar"
+           id="appSidebar">
 
-                            </ul>
-                        </li>
-						
-						<!-- MENÚ CATÁLOGOS -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                Facturas
-                            </a>
-                            <ul class="dropdown-menu">
 
-                                <li>
-                                    <a class="dropdown-item" href="/Facturas/Nueva">Nueva Factura</a>
-                                </li>
+        <!-- LOGO -->
 
-                                <li>
-                                    <a class="dropdown-item" href="/Facturas/Lista">Buscar Factura</a>
-                                </li>
+        <div class="sidebar-brand">
 
-                              
+            <div class="brand-symbol">
 
-                            </ul>
-                        </li>
+                <i class="bi bi-capsule"></i>
 
-                    </ul>
+            </div>
 
-                    </ul>
-					
-					
-					
-					
-					 
-					
 
-                    <!-- MENÚ DERECHO -->
-                    <ul class="navbar-nav">
+            <div class="brand-text">
 
-                        <li class="nav-item">
-                            <span class="nav-link text-dark">
-                                @Context.Session.GetString("Nombre")
-                            </span>
-                        </li>
+                <strong>
+                    Farmacia
+                </strong>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-danger" href="/Login">Salir</a>
-                        </li>
+                <span>
+                    Sistema de gestión
+                </span>
 
-                    </ul>
+            </div>
+
+
+            <button type="button"
+                    class="sidebar-close"
+                    id="sidebarClose">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MENÚ
+        ================================================== -->
+
+        <nav class="sidebar-navigation">
+
+
+            <span class="sidebar-title">
+                PRINCIPAL
+            </span>
+
+
+
+            <!-- INICIO -->
+
+            <a href="/Index"
+               class="sidebar-link @(esInicio ? "active" : "")">
+
+                <span class="sidebar-icon">
+                    <i class="bi bi-grid"></i>
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+
+            <!-- =================================================
+                 OPERACIONES
+            ================================================== -->
+
+            <span class="sidebar-title sidebar-group-title">
+                OPERACIONES
+            </span>
+
+
+
+            <!-- NUEVA VENTA -->
+
+            <a href="/Facturas/Nueva"
+               class="sidebar-link @(ruta == "/facturas/nueva" ? "active" : "")">
+
+                <span class="sidebar-icon">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </span>
+
+                <span>
+                    Nueva venta
+                </span>
+
+            </a>
+
+
+
+            <!-- FACTURAS -->
+
+            <a href="/Facturas/Lista"
+               class="sidebar-link @(ruta == "/facturas/lista" ? "active" : "")">
+
+                <span class="sidebar-icon">
+                    <i class="bi bi-receipt"></i>
+                </span>
+
+                <span>
+                    Facturas
+                </span>
+
+            </a>
+
+
+
+            <!-- INVENTARIO -->
+
+            <a href="/Inventario"
+               class="sidebar-link @(esInventario ? "active" : "")">
+
+                <span class="sidebar-icon">
+                    <i class="bi bi-box-seam"></i>
+                </span>
+
+                <span>
+                    Inventario
+                </span>
+
+            </a>
+
+
+
+            <!-- =================================================
+                 CATÁLOGOS
+            ================================================== -->
+
+            <span class="sidebar-title sidebar-group-title">
+                ADMINISTRACIÓN
+            </span>
+
+
+            @if (string.Equals(
+        rol,
+        "Administrador",
+        StringComparison.OrdinalIgnoreCase))
+{
+    <a href="/Configuracion/TipoCambio"
+       class="sidebar-link @(ruta.StartsWith("/configuracion") ? "active" : "")">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-gear"></i>
+
+        </span>
+
+        <span>
+            Configuración
+        </span>
+
+    </a>
+}
+
+
+            <button class="sidebar-link sidebar-dropdown-button @(catalogosActivo ? "active" : "")"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuCatalogos"
+                    aria-expanded="@(catalogosActivo ? "true" : "false")">
+
+
+                <span class="sidebar-icon">
+                    <i class="bi bi-folder2-open"></i>
+                </span>
+
+
+                <span class="sidebar-link-text">
+                    Catálogos
+                </span>
+
+
+                <i class="bi bi-chevron-down submenu-arrow"></i>
+
+            </button>
+
+
+
+            <div class="collapse @(catalogosActivo ? "show" : "")"
+                 id="menuCatalogos">
+
+
+                <div class="sidebar-submenu">
+
+
+                    <!-- PRODUCTOS -->
+
+                    <a href="/Productos/Nuevo"
+                       class="submenu-link @(esProductos ? "active" : "")">
+
+                        <span class="submenu-dot"></span>
+
+                        Productos
+
+                    </a>
+
+
+
+                    <!-- LABORATORIOS -->
+
+                    <a href="/Laboratorio/Laboratorio"
+                       class="submenu-link @(esLaboratorios ? "active" : "")">
+
+                        <span class="submenu-dot"></span>
+
+                        Laboratorios
+
+                    </a>
+
+
+
+                    <!-- UNIDADES -->
+
+                    <a href="/Unidades"
+                       class="submenu-link @(esUnidades ? "active" : "")">
+
+                        <span class="submenu-dot"></span>
+
+                        Unidades de medida
+
+                    </a>
+
+
+
+                    <!-- CATEGORÍAS -->
+
+                    <a href="/Categorias"
+                       class="submenu-link @(esCategorias ? "active" : "")">
+
+                        <span class="submenu-dot"></span>
+
+                        Categorías
+
+                    </a>
+
+
+
+                    <!-- PROVEEDORES -->
+
+                    <a href="/Proveedores"
+                       class="submenu-link @(esProveedores ? "active" : "")">
+
+                        <span class="submenu-dot"></span>
+
+                        Proveedores
+
+                    </a>
+
 
                 </div>
-            </div>
-        </nav>
-    </header>
 
-    <!-- 🔥 ZONA OBLIGATORIA PARA CONTENIDO -->
-    <div class="container">
-        <main role="main" class="pb-3">
+            </div>
+
+
+
+            <!-- REPORTES -->
+
+            <a href="/Reportes"
+               class="sidebar-link @(esReportes ? "active" : "")">
+
+                <span class="sidebar-icon">
+
+                    <i class="bi bi-bar-chart-line"></i>
+
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+
+        <!-- =================================================
+             USUARIO
+        ================================================== -->
+
+        <div class="sidebar-user">
+
+
+            <div class="sidebar-user-avatar">
+
+                <i class="bi bi-person"></i>
+
+            </div>
+
+
+            <div class="sidebar-user-info">
+
+                <strong>
+                    @nombre
+                </strong>
+
+                <span>
+                    @rol
+                </span>
+
+            </div>
+
+
+            <a href="/Login"
+               class="sidebar-logout"
+               title="Cerrar sesión">
+
+                <i class="bi bi-box-arrow-right"></i>
+
+            </a>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         APLICACIÓN
+    ====================================================== -->
+
+    <div class="app-wrapper">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        <header class="app-topbar">
+
+
+            <div class="topbar-left">
+
+
+                <!-- BOTÓN MÓVIL -->
+
+                <button class="mobile-menu-button"
+                        id="sidebarOpen"
+                        type="button">
+
+                    <i class="bi bi-list"></i>
+
+                </button>
+
+
+
+                <!-- TÍTULO -->
+
+                <div class="topbar-page-title">
+
+                    <span>
+                        Sistema Farmacia
+                    </span>
+
+                    <strong>
+                        @ViewData["Title"]
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="topbar-right">
+
+
+                <!-- INDICADOR -->
+
+                <div class="system-status">
+
+                    <span class="status-dot"></span>
+
+                    Sistema activo
+
+                </div>
+
+
+
+                <!-- USUARIO -->
+
+                <div class="dropdown">
+
+
+                    <button class="topbar-user"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+
+                        <div class="topbar-avatar">
+
+                            <i class="bi bi-person"></i>
+
+                        </div>
+
+
+                        <div class="topbar-user-info">
+
+                            <strong>
+                                @nombre
+                            </strong>
+
+                            <span>
+                                @rol
+                            </span>
+
+                        </div>
+
+
+                        <i class="bi bi-chevron-down"></i>
+
+
+                    </button>
+
+
+
+                    <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+
+
+                        <li>
+
+                            <div class="dropdown-user-header">
+
+                                <strong>
+                                    @nombre
+                                </strong>
+
+                                <span>
+                                    @rol
+                                </span>
+
+                            </div>
+
+                        </li>
+
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+
+                        <li>
+
+                            <a class="dropdown-item logout-item"
+                               href="/Login">
+
+                                <i class="bi bi-box-arrow-right"></i>
+
+                                Cerrar sesión
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =================================================
+             CONTENIDO
+        ================================================== -->
+
+        <main class="app-content"
+              role="main">
+
+
             @RenderBody()
+
+
         </main>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="app-footer">
+
+            <span>
+
+                Sistema de Gestión Farmacéutica
+
+            </span>
+
+
+            <span>
+
+                <i class="bi bi-shield-check"></i>
+
+                Acceso seguro
+
+            </span>
+
+        </footer>
+
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 – Farmacia
-        </div>
-    </footer>
+
+
+    <!-- =====================================================
+         JS
+    ====================================================== -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+
+        const sidebar =
+            document.getElementById("appSidebar");
+
+        const sidebarOpen =
+            document.getElementById("sidebarOpen");
+
+        const sidebarClose =
+            document.getElementById("sidebarClose");
+
+        const sidebarOverlay =
+            document.getElementById("sidebarOverlay");
+
+
+        function abrirSidebar() {
+
+            sidebar.classList.add("show");
+
+            sidebarOverlay.classList.add("show");
+
+            document.body.classList.add("sidebar-open");
+
+        }
+
+
+        function cerrarSidebar() {
+
+            sidebar.classList.remove("show");
+
+            sidebarOverlay.classList.remove("show");
+
+            document.body.classList.remove("sidebar-open");
+
+        }
+
+
+        sidebarOpen?.addEventListener(
+            "click",
+            abrirSidebar
+        );
+
+
+        sidebarClose?.addEventListener(
+            "click",
+            cerrarSidebar
+        );
+
+
+        sidebarOverlay?.addEventListener(
+            "click",
+            cerrarSidebar
+        );
+
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                if (window.innerWidth > 991) {
+
+                    cerrarSidebar();
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+
 
 </body>
+
 </html>

@@ -2,196 +2,669 @@
 @model Farmacia.Pages.IndexModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Inicio";
+
+    var nombre = HttpContext.Session.GetString("Nombre");
+    var rol = HttpContext.Session.GetString("Rol");
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-<style>
+<div class="dashboard-page">
 
-    body {
-        background: #f5f6fa;
-        font-family: 'Segoe UI';
-    }
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
 
-    .dashboard-card {
-        border-radius: 12px;
-        padding: 25px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform .2s;
-    }
+    <section class="dashboard-header">
 
-    .dashboard-card:hover { transform: translateY(-5px); }
+        <div>
 
-    .card-dia { background: #28a745; }
-    .card-semana { background: #17a2b8; }
-    .card-mes { background: #007bff; }
-    .card-vencer { background: #ffc107; color:#333; }
-    .card-stock { background: #dc3545; }
+            <div class="dashboard-eyebrow">
+                <i class="bi bi-capsule-pill"></i>
+                Sistema Farmacia
+            </div>
 
-    .card-venta { background: #0d6efd; }
-    .card-costo { background: #fd7e14; }
-    .card-utilidad { background: #198754; }
+            <h1>
+                Hola, @nombre
+            </h1>
 
-    .menu-btn {
-        padding: 25px;
-        border-radius: 12px;
-        background: #fff;
-        text-align: center;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform .2s;
-    }
+            <p>
+                Este es el resumen general de tu farmacia.
+            </p>
 
-    .menu-btn:hover { transform: scale(1.05); }
-
-    .menu-btn i {
-        font-size: 40px;
-        color: #007bff;
-    }
-
-    .alert-box {
-        background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-</style>
-
-<div class="container py-4">
-
-    <!-- Bienvenida -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold">Dashboard – Sistema Farmacia</h3>
-        <div class="fw-semibold text-end">
-            <div><i class="bi bi-person-circle"></i> @HttpContext.Session.GetString("Nombre")</div>
-            <small class="text-muted">Rol: @HttpContext.Session.GetString("Rol")</small><br />
-            <a class="btn btn-danger btn-sm mt-2" href="/Login">Cerrar Sesión</a>
         </div>
+
+
+        <div class="dashboard-user">
+
+            <div class="user-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+
+            <div class="user-info">
+                <strong>@nombre</strong>
+                <span>@rol</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         VENTAS
+    ====================================================== -->
+
+    <div class="section-heading">
+
+        <div>
+            <h2>Resumen de ventas</h2>
+            <p>Comportamiento de las ventas registradas.</p>
+        </div>
+
+        <div class="section-icon">
+            <i class="bi bi-graph-up-arrow"></i>
+        </div>
+
     </div>
 
-    <!-- Tarjetas principales -->
-    <div class="row g-3">
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-dia">
-                <h5><i class="bi bi-currency-exchange"></i> Ventas del Día</h5>
-                <h2>C$ @Model.VentaDia.ToString("N2")</h2>
+    <section class="sales-grid">
+
+
+        <!-- VENTA DÍA -->
+
+        <article class="stat-card">
+
+            <div class="stat-header">
+
+                <div class="stat-icon green">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+
+                <span class="stat-badge">
+                    Hoy
+                </span>
+
             </div>
+
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Ventas del día
+                </span>
+
+                <strong>
+                    C$ @Model.VentaDia.ToString("N2")
+                </strong>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- VENTA SEMANA -->
+
+        <article class="stat-card">
+
+            <div class="stat-header">
+
+                <div class="stat-icon mint">
+                    <i class="bi bi-calendar-week"></i>
+                </div>
+
+                <span class="stat-badge">
+                    Semana
+                </span>
+
+            </div>
+
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Ventas de la semana
+                </span>
+
+                <strong>
+                    C$ @Model.VentaSemana.ToString("N2")
+                </strong>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- VENTA MES -->
+
+        <article class="stat-card">
+
+            <div class="stat-header">
+
+                <div class="stat-icon dark">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+
+                <span class="stat-badge">
+                    Mes actual
+                </span>
+
+            </div>
+
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    Ventas del mes
+                </span>
+
+                <strong>
+                    C$ @Model.VentaMes.ToString("N2")
+                </strong>
+
+            </div>
+
+        </article>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ALERTAS INVENTARIO
+    ====================================================== -->
+
+    <div class="section-heading">
+
+        <div>
+            <h2>Estado del inventario</h2>
+            <p>Situaciones que necesitan revisión.</p>
         </div>
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-semana">
-                <h5><i class="bi bi-bar-chart"></i> Ventas Semana</h5>
-                <h2>C$ @Model.VentaSemana.ToString("N2")</h2>
-            </div>
+        <div class="section-icon">
+            <i class="bi bi-box-seam"></i>
         </div>
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-mes">
-                <h5><i class="bi bi-calendar-month"></i> Ventas del Mes</h5>
-                <h2>C$ @Model.VentaMes.ToString("N2")</h2>
+    </div>
+
+
+    <section class="inventory-grid">
+
+
+        <!-- POR VENCER -->
+
+        <a href="/Productos/PorVencer"
+           class="inventory-card warning">
+
+            <div class="inventory-icon">
+                <i class="bi bi-clock-history"></i>
             </div>
-        </div>
 
-     <div class="col-md-6">
-    <div class="dashboard-card card-vencer">
-        <h5><i class="bi bi-hourglass-split"></i> Productos Próximos a Vencer</h5>
-        <h2>@Model.PorVencer Productos</h2>
+            <div class="inventory-content">
 
-        <a href="/Productos/PorVencer" class="btn btn-dark btn-sm mt-3">
-            Ver detalle <i class="bi bi-arrow-right-circle"></i>
+                <span>
+                    Próximos a vencer
+                </span>
+
+                <strong>
+                    @Model.PorVencer
+                </strong>
+
+                <small>
+                    productos requieren revisión
+                </small>
+
+            </div>
+
+            <div class="inventory-arrow">
+                <i class="bi bi-arrow-right"></i>
+            </div>
+
         </a>
-    </div>
-</div>
 
 
-        <div class="col-md-6">
-            <div class="dashboard-card card-stock">
-                <h5><i class="bi bi-exclamation-triangle"></i> Sin Existencias</h5>
-                <h2>@Model.SinStock Productos</h2>
-				
-				 <a href="/Productos/SinInventario" class="btn btn-dark btn-sm mt-3">
-            Ver detalle <i class="bi bi-arrow-right-circle"></i>
-        </a>
+
+        <!-- SIN STOCK -->
+
+        <a href="/Productos/SinInventario"
+           class="inventory-card danger">
+
+            <div class="inventory-icon">
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
+
+            <div class="inventory-content">
+
+                <span>
+                    Sin existencias
+                </span>
+
+                <strong>
+                    @Model.SinStock
+                </strong>
+
+                <small>
+                    productos sin inventario
+                </small>
+
+            </div>
+
+            <div class="inventory-arrow">
+                <i class="bi bi-arrow-right"></i>
+            </div>
+
+        </a>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACCIONES RÁPIDAS
+    ====================================================== -->
+
+    <div class="section-heading">
+
+        <div>
+            <h2>Acciones rápidas</h2>
+            <p>Accede a las operaciones más utilizadas.</p>
         </div>
 
     </div>
 
-    <!-- ✅ Acciones rápidas (restauradas) -->
-    <h4 class="fw-bold mt-5 mb-3">Acciones Rápidas</h4>
 
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="menu-btn" onclick="location.href='/Facturas/Nueva'">
+    <section class="quick-grid">
+
+
+        <a href="/Facturas/Nueva"
+           class="quick-card">
+
+            <div class="quick-icon primary">
                 <i class="bi bi-receipt-cutoff"></i>
-                <h6 class="mt-2 fw-bold">Facturar</h6>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="menu-btn" onclick="location.href='/Inventario'">
+            <div>
+
+                <strong>
+                    Nueva venta
+                </strong>
+
+                <span>
+                    Crear factura
+                </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right quick-arrow"></i>
+
+        </a>
+
+
+
+        <a href="/Inventario"
+           class="quick-card">
+
+            <div class="quick-icon soft">
                 <i class="bi bi-box-seam"></i>
-                <h6 class="mt-2 fw-bold">Inventario</h6>
             </div>
+
+            <div>
+
+                <strong>
+                    Inventario
+                </strong>
+
+                <span>
+                    Consultar existencias
+                </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right quick-arrow"></i>
+
+        </a>
+
+
+
+        <a href="/Productos/Nuevo"
+           class="quick-card">
+
+            <div class="quick-icon light">
+                <i class="bi bi-plus-lg"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    Nuevo producto
+                </strong>
+
+                <span>
+                    Registrar artículo
+                </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right quick-arrow"></i>
+
+        </a>
+
+
+
+        <a href="/Reportes"
+           class="quick-card">
+
+            <div class="quick-icon neutral">
+                <i class="bi bi-bar-chart-line"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    Reportes
+                </strong>
+
+                <span>
+                    Consultar información
+                </span>
+
+            </div>
+
+            <i class="bi bi-chevron-right quick-arrow"></i>
+
+        </a>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RESUMEN FINANCIERO
+    ====================================================== -->
+
+    <div class="section-heading">
+
+        <div>
+            <h2>Resumen financiero</h2>
+            <p>Resultados correspondientes al mes actual.</p>
         </div>
 
-        <div class="col-md-3">
-            <div class="menu-btn" onclick="location.href='/Productos/Nuevo'">
-                <i class="bi bi-plus-circle"></i>
-                <h6 class="mt-2 fw-bold">Nuevo Producto</h6>
-            </div>
-        </div>
+        <span class="month-badge">
+            <i class="bi bi-calendar3"></i>
+            Mes actual
+        </span>
 
-        <div class="col-md-3">
-            <div class="menu-btn" onclick="location.href='/Reportes'">
-                <i class="bi bi-file-earmark-bar-graph"></i>
-                <h6 class="mt-2 fw-bold">Reportes</h6>
-            </div>
-        </div>
     </div>
 
-    <!-- ✅ Resumen financiero -->
-    <h4 class="fw-bold mt-5 mb-3">Resumen Financiero del Mes</h4>
 
-    <div class="row g-3">
+    <section class="financial-card">
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-venta">
-                <h5><i class="bi bi-cash-coin"></i> Venta Total</h5>
-                <h2>C$ @Model.UtilVenta.ToString("N2")</h2>
+
+        <div class="financial-item">
+
+            <div class="financial-icon">
+                <i class="bi bi-wallet2"></i>
             </div>
+
+            <div>
+
+                <span>
+                    Venta total
+                </span>
+
+                <strong>
+                    C$ @Model.UtilVenta.ToString("N2")
+                </strong>
+
+            </div>
+
         </div>
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-costo">
-                <h5><i class="bi bi-truck"></i> Costo Total</h5>
-                <h2>C$ @Model.UtilCosto.ToString("N2")</h2>
+
+        <div class="financial-divider"></div>
+
+
+        <div class="financial-item">
+
+            <div class="financial-icon">
+                <i class="bi bi-truck"></i>
             </div>
+
+            <div>
+
+                <span>
+                    Costo total
+                </span>
+
+                <strong>
+                    C$ @Model.UtilCosto.ToString("N2")
+                </strong>
+
+            </div>
+
         </div>
 
-        <div class="col-md-4">
-            <div class="dashboard-card card-utilidad">
-                <h5><i class="bi bi-graph-up-arrow"></i> Utilidad</h5>
-                <h2>C$ @Model.UtilUtilidad.ToString("N2")</h2>
+
+        <div class="financial-divider"></div>
+
+
+        <div class="financial-item highlight">
+
+            <div class="financial-icon">
+                <i class="bi bi-graph-up-arrow"></i>
             </div>
+
+            <div>
+
+                <span>
+                    Utilidad
+                </span>
+
+                <strong>
+                    C$ @Model.UtilUtilidad.ToString("N2")
+                </strong>
+
+            </div>
+
         </div>
 
-    </div>
 
-    <!-- Alertas -->
-    <h4 class="fw-bold mt-5 mb-3">Alertas del Sistema</h4>
+    </section>
 
-    <div class="alert-box">
-        <ul class="mb-0">
-            <li>@Model.SinStock productos deben revisarse por bajo inventario.</li>
-            <li>@Model.PorVencer productos vencen pronto.</li>
-            <li>La última compra fue hace 2 días.</li>
-        </ul>
-    </div>
+
+
+    <!-- =====================================================
+         PARTE INFERIOR
+    ====================================================== -->
+
+    <section class="dashboard-bottom">
+
+
+        <!-- PRODUCTOS MÁS VENDIDOS -->
+
+        <div class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h3>Productos más vendidos</h3>
+                    <p>Movimiento destacado del período.</p>
+                </div>
+
+                <div class="panel-icon">
+                    <i class="bi bi-trophy"></i>
+                </div>
+
+            </div>
+
+
+            @if (Model.TopProductos != null &&
+                 Model.TopProductos.Any())
+            {
+
+                <div class="products-list">
+
+                    @{
+                        var posicion = 1;
+                    }
+
+                    @foreach (var producto in Model.TopProductos.Take(5))
+                    {
+
+                        <div class="product-row">
+
+                            <div class="product-position">
+                                @posicion
+                            </div>
+
+                            <div class="product-info">
+
+                                <strong>
+                                    @producto.CodBarra
+                                </strong>
+
+                                <span>
+                                    @producto.Unidades unidades vendidas
+                                </span>
+
+                            </div>
+
+                            <div class="product-total">
+                                C$ @producto.SubTotal.ToString("N2")
+                            </div>
+
+                        </div>
+
+                        posicion++;
+                    }
+
+                </div>
+
+            }
+            else
+            {
+
+                <div class="empty-state">
+
+                    <i class="bi bi-box"></i>
+
+                    <span>
+                        No hay información disponible.
+                    </span>
+
+                </div>
+
+            }
+
+        </div>
+
+
+
+        <!-- ALERTAS -->
+
+        <div class="dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h3>Alertas del sistema</h3>
+                    <p>Información que requiere tu atención.</p>
+                </div>
+
+                <div class="panel-icon alert">
+                    <i class="bi bi-bell"></i>
+                </div>
+
+            </div>
+
+
+            <div class="alerts-list">
+
+
+                <a href="/Productos/SinInventario"
+                   class="alert-item danger">
+
+                    <div class="alert-icon">
+
+                        <i class="bi bi-exclamation-lg"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Productos sin inventario
+                        </strong>
+
+                        <span>
+                            @Model.SinStock productos necesitan revisión.
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a href="/Productos/PorVencer"
+                   class="alert-item warning">
+
+                    <div class="alert-icon">
+
+                        <i class="bi bi-clock"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Productos próximos a vencer
+                        </strong>
+
+                        <span>
+                            @Model.PorVencer productos requieren seguimiento.
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <div class="alert-item success">
+
+                    <div class="alert-icon">
+
+                        <i class="bi bi-shield-check"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Sistema operativo
+                        </strong>
+
+                        <span>
+                            Información actualizada correctamente.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </section>
 
 </div>

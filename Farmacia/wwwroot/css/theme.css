@@ -1,0 +1,40 @@
+﻿/* ==========================================================
+   SISTEMA FARMACIA
+   PALETA GLOBAL
+========================================================== */
+
+:root {
+  /* Marca */
+  --primary: #079667;
+  --primary-dark: #057a55;
+  --primary-deep: #145446;
+  --primary-light: #e5f6f0;
+  --primary-soft: #f3faf7;
+  /* Fondos */
+  --background: #f6f9f8;
+  --surface: #ffffff;
+  --surface-soft: #fbfdfc;
+  /* Textos */
+  --text: #19312d;
+  --text-secondary: #6d7f7b;
+  --text-light: #94a19e;
+  /* Bordes */
+  --border: #e3ebe8;
+  --border-dark: #d3dfdb;
+  /* Estados */
+  --success: #079667;
+  --success-soft: #eaf8f3;
+  --warning: #d99719;
+  --warning-soft: #fff8e8;
+  --danger: #d6535d;
+  --danger-soft: #fff0f1;
+  /* Sombras */
+  --shadow-sm: 0 4px 14px rgba(24, 67, 56, 0.05);
+  --shadow: 0 8px 30px rgba(24, 67, 56, 0.07);
+  --shadow-lg: 0 18px 45px rgba(24, 67, 56, 0.12);
+  /* Bordes redondeados */
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+}

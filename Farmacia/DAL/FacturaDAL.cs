@@ -164,6 +164,9 @@ namespace Farmacia.DAL
             cmd.Parameters.AddWithValue("@PagoCordoba", factura.PagoCordoba);
             cmd.Parameters.AddWithValue("@PagoDolar", factura.PagoDolar);
             cmd.Parameters.AddWithValue("@Vuelto", factura.Vuelto);
+            cmd.Parameters.Add("@TasaCambio",SqlDbType.Decimal).Value = factura.TasaCambio;
+            cmd.Parameters["@TasaCambio"].Precision = 10;
+            cmd.Parameters["@TasaCambio"].Scale = 4;
 
             // Tabla tipo para detalle
             var tvp = new DataTable();

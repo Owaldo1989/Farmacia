@@ -1,0 +1,667 @@
+﻿/* ============================================================
+   LAYOUT GENERAL
+============================================================ */
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  width: 255px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+/* ============================================================
+   MARCA
+============================================================ */
+
+.sidebar-brand {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-symbol {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: white;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 8px 18px rgba(7, 150, 103, 0.2);
+}
+
+.brand-symbol i {
+  display: inline-block;
+  font-size: 23px;
+  transform: rotate(-40deg);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.brand-text strong {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.brand-text span {
+  margin-top: 2px;
+  color: var(--text-light);
+  font-size: 9px;
+  letter-spacing: 0.2px;
+}
+
+/* ============================================================
+   BOTÓN CERRAR MÓVIL
+============================================================ */
+
+.sidebar-close {
+  display: none;
+  margin-left: auto;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+/* ============================================================
+   NAVEGACIÓN
+============================================================ */
+
+.sidebar-navigation {
+  flex: 1;
+  overflow-y: auto;
+  padding: 21px 14px;
+}
+
+.sidebar-title {
+  display: block;
+  margin: 0 12px 8px;
+  color: var(--text-light);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.sidebar-group-title {
+  margin-top: 25px;
+}
+
+/* ============================================================
+   LINK
+============================================================ */
+
+.sidebar-link {
+  position: relative;
+  width: 100%;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 11px;
+  margin-bottom: 3px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.sidebar-link:hover {
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+}
+
+.sidebar-link.active {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  font-weight: 600;
+}
+
+/* LÍNEA ACTIVA */
+
+.sidebar-link.active::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  width: 3px;
+  height: 24px;
+  border-radius: 0 5px 5px 0;
+  background: var(--primary);
+}
+
+/* ============================================================
+   ICONOS
+============================================================ */
+
+.sidebar-icon {
+  width: 31px;
+  height: 31px;
+  min-width: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: 0.18s ease;
+}
+
+.sidebar-link:hover .sidebar-icon {
+  color: var(--primary);
+}
+
+.sidebar-link.active .sidebar-icon {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ============================================================
+   CATÁLOGOS
+============================================================ */
+
+.sidebar-dropdown-button {
+  padding-right: 12px;
+}
+
+.sidebar-link-text {
+  flex: 1;
+}
+
+.submenu-arrow {
+  margin-left: auto;
+  color: var(--text-light);
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-dropdown-button[aria-expanded="true"] .submenu-arrow {
+  transform: rotate(180deg);
+}
+
+/* ============================================================
+   SUBMENU
+============================================================ */
+
+.sidebar-submenu {
+  position: relative;
+  margin: 3px 0 9px 26px;
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+}
+
+.submenu-link {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 11px;
+  transition: 0.17s;
+}
+
+.submenu-link:hover {
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+}
+
+.submenu-link.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.submenu-dot {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #c9d5d2;
+}
+
+.submenu-link.active .submenu-dot {
+  background: var(--primary);
+}
+
+/* ============================================================
+   USUARIO SIDEBAR
+============================================================ */
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px;
+  padding: 11px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--primary-soft);
+}
+
+.sidebar-user-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 17px;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.sidebar-user-info strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user-info span {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.sidebar-logout {
+  width: 31px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.sidebar-logout:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* ============================================================
+   WRAPPER
+============================================================ */
+
+.app-wrapper {
+  min-height: 100vh;
+  margin-left: 255px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+/* ============================================================
+   TÍTULO
+============================================================ */
+
+.topbar-page-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar-page-title span {
+  color: var(--text-light);
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.topbar-page-title strong {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   DERECHA
+============================================================ */
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+
+/* ============================================================
+   ESTADO
+============================================================ */
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  background: var(--primary-soft);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(7, 150, 103, 0.12);
+}
+
+/* ============================================================
+   USUARIO TOPBAR
+============================================================ */
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+.topbar-user:hover {
+  background: var(--primary-soft);
+}
+
+.topbar-avatar {
+  width: 37px;
+  height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.topbar-user-info {
+  display: flex;
+  min-width: 105px;
+  flex-direction: column;
+  text-align: left;
+}
+
+.topbar-user-info strong {
+  max-width: 150px;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-user-info span {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 8px;
+}
+
+.topbar-user > i {
+  color: var(--text-light);
+  font-size: 9px;
+}
+
+/* ============================================================
+   DROPDOWN
+============================================================ */
+
+.user-dropdown {
+  min-width: 210px;
+  margin-top: 11px !important;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+.dropdown-user-header {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+}
+
+.dropdown-user-header strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.dropdown-user-header span {
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.user-dropdown .dropdown-item {
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.logout-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--danger);
+}
+
+.logout-item:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* ============================================================
+   CONTENIDO
+============================================================ */
+
+.app-content {
+  width: 100%;
+  max-width: 1550px;
+  flex: 1;
+  margin: 0 auto;
+  padding: 25px 30px 40px;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 30px;
+  border-top: 1px solid var(--border);
+  color: var(--text-light);
+  background: var(--surface);
+  font-size: 9px;
+}
+
+.app-footer span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-footer i {
+  color: var(--primary);
+}
+
+/* ============================================================
+   MENÚ MÓVIL
+============================================================ */
+
+.mobile-menu-button {
+  display: none;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  background: var(--surface);
+  font-size: 21px;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 991px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.25s ease;
+  }
+
+  .app-sidebar.show {
+    transform: translateX(0);
+  }
+
+  .app-wrapper {
+    margin-left: 0;
+  }
+
+  .sidebar-close {
+    display: flex;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(16, 35, 31, 0.32);
+    backdrop-filter: blur(2px);
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 650px) {
+  .app-topbar {
+    height: 65px;
+    padding: 0 17px;
+  }
+
+  .app-content {
+    padding: 20px 16px 35px;
+  }
+
+  .system-status {
+    display: none;
+  }
+
+  .topbar-user-info {
+    display: none;
+  }
+
+  .topbar-user > i {
+    display: none;
+  }
+
+  .app-footer {
+    padding: 14px 17px;
+  }
+
+  .app-footer span:last-child {
+    display: none;
+  }
+}
