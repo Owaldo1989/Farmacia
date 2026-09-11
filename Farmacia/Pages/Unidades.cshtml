@@ -1,168 +1,1040 @@
 ﻿@page
 @model Farmacia.Pages.UnidadesModel
+
 @{
-    ViewData["Title"] = "Unidades de Medida";
+    ViewData["Title"] = "Unidades de medida";
+
+    var totalUnidades =
+        Model.Listado?.Count ?? 0;
 }
 
+<link rel="stylesheet"
+      href="~/css/unidades.css"
+      asp-append-version="true" />
 
 
-<div class="container mt-4">
+<div class="units-page">
 
-    <div class="titulo-seccion mb-3">
-        <h3 class="fw-bold">Unidades de Medida</h3>
 
-        <button class="btn btn-primary btn-agregar" onclick="nuevaUnidad()">
-            ➕ Nueva Unidad
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <section class="units-header">
+
+        <div>
+
+            <div class="units-eyebrow">
+
+                <i class="bi bi-rulers"></i>
+
+                Catálogo
+
+            </div>
+
+
+            <h1>
+                Unidades de medida
+            </h1>
+
+
+            <p>
+                Define cómo se presentan y controlan las unidades
+                utilizadas en medicamentos y productos.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-unit"
+                onclick="nuevaUnidad()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva unidad
+
         </button>
-    </div>
 
-    <!-- TABLA RESPONSIVA -->
-    <div class="table-responsive shadow-sm">
-        <table class="table table-striped table-bordered align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width: 70px;">ID</th>
-                    <th style="width: 200px;">Unidad</th>
-                    <th>Descripción</th>
-                    <th style="width: 170px;" class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var u in Model.Listado)
-                {
-                    <tr>
-                        <td>@u.IdUnidad</td>
-                        <td>@u.NombreUnidad</td>
-                        <td>@u.Descripcion</td>
+    </section>
 
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm btn-accion" onclick="editar(@u.IdUnidad)">
-                                ✏️ Editar
-                            </button>
 
-                            <button class="btn btn-danger btn-sm btn-accion" onclick="eliminar(@u.IdUnidad)">
-                                🗑️ Borrar
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <section class="units-summary">
+
+
+        <div class="unit-summary-icon">
+
+            <i class="bi bi-rulers"></i>
+
+        </div>
+
+
+        <div class="unit-summary-data">
+
+            <span>
+                Unidades registradas
+            </span>
+
+            <strong>
+                @totalUnidades
+            </strong>
+
+        </div>
+
+
+        <div class="unit-summary-help">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+                Ejemplos: unidad, caja, frasco, tableta,
+                blíster, mililitro o paquete.
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         BUSCADOR
+    ====================================================== -->
+
+    <section class="units-toolbar">
+
+
+        <div class="unit-search">
+
+            <i class="bi bi-search"></i>
+
+
+            <input type="text"
+                   id="txtBuscarUnidad"
+                   placeholder="Buscar por unidad o descripción..."
+                   autocomplete="off" />
+
+
+            <button type="button"
+                    id="btnLimpiarUnidad"
+                    class="btn-clear-unit"
+                    title="Limpiar búsqueda"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="unit-results">
+
+            <strong id="contadorUnidades">
+                @totalUnidades
+            </strong>
+
+            <span>
+                resultados
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <section class="units-card">
+
+
+        <div class="units-card-header">
+
+            <div>
+
+                <h2>
+                    Listado de unidades
+                </h2>
+
+                <p>
+                    Unidades disponibles para asignar a los productos.
+                </p>
+
+            </div>
+
+
+            <div class="units-card-icon">
+
+                <i class="bi bi-list-ul"></i>
+
+            </div>
+
+        </div>
+
+
+
+        @if (Model.Listado != null &&
+             Model.Listado.Any())
+        {
+
+            <div class="units-table-wrapper">
+
+
+                <table class="units-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="unit-id-column">
+                                Código
+                            </th>
+
+                            <th>
+                                Unidad
+                            </th>
+
+                            <th>
+                                Descripción
+                            </th>
+
+                            <th class="unit-actions-column">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="unidadesBody">
+
+
+                        @foreach (var unidad in Model.Listado)
+                        {
+
+                            var filtro =
+                                $"{unidad.NombreUnidad} {unidad.Descripcion}"
+                                .ToLower();
+
+
+                            <tr class="unit-row"
+                                data-unidad="@filtro">
+
+
+                                <!-- ID -->
+
+                                <td>
+
+                                    <span class="unit-id">
+
+                                        #@unidad.IdUnidad
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- UNIDAD -->
+
+                                <td>
+
+                                    <div class="unit-information">
+
+
+                                        <div class="unit-avatar">
+
+                                            <i class="bi bi-rulers"></i>
+
+                                        </div>
+
+
+                                        <div class="unit-name">
+
+                                            <strong>
+
+                                                @unidad.NombreUnidad
+
+                                            </strong>
+
+
+                                            <span>
+                                                Unidad de medida
+                                            </span>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- DESCRIPCIÓN -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        unidad.Descripcion))
+                                    {
+
+                                        <div class="unit-description">
+
+                                            <i class="bi bi-card-text"></i>
+
+                                            <span>
+                                                @unidad.Descripcion
+                                            </span>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="unit-empty-value">
+
+                                            Sin descripción
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- ACCIONES -->
+
+                                <td>
+
+                                    <div class="unit-actions">
+
+
+                                        <button type="button"
+                                                class="unit-action edit"
+                                                onclick="editarUnidad(@unidad.IdUnidad)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                            <span>
+                                                Editar
+                                            </span>
+
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="unit-action delete"
+                                                title="Eliminar unidad"
+                                                onclick="eliminarUnidad(@unidad.IdUnidad)">
+
+                                            <i class="bi bi-trash3"></i>
+
+                                        </button>
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div class="units-no-results"
+                 id="sinResultadosUnidad"
+                 style="display:none;">
+
+
+                <div class="units-empty-icon">
+
+                    <i class="bi bi-search"></i>
+
+                </div>
+
+
+                <strong>
+                    No encontramos unidades
+                </strong>
+
+
+                <span>
+                    Intenta buscar utilizando otro nombre o descripción.
+                </span>
+
+
+                <button type="button"
+                        onclick="limpiarBusquedaUnidad()">
+
+                    Limpiar búsqueda
+
+                </button>
+
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="units-empty">
+
+
+                <div class="units-empty-icon">
+
+                    <i class="bi bi-rulers"></i>
+
+                </div>
+
+
+                <strong>
+                    No hay unidades registradas
+                </strong>
+
+
+                <span>
+                    Registra la primera unidad de medida
+                    para comenzar a clasificar productos.
+                </span>
+
+
+                <button type="button"
+                        onclick="nuevaUnidad()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Nueva unidad
+
+                </button>
+
+
+            </div>
+
+        }
+
+
+    </section>
+
+
 </div>
 
-<!-- MODAL FORMULARIO -->
-<div class="modal fade" id="modalUnidad" tabindex="-1">
+
+
+<!-- =========================================================
+     MODAL
+========================================================== -->
+
+<div class="modal fade"
+     id="modalUnidad"
+     tabindex="-1"
+     aria-hidden="true">
+
+
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
 
-            <form method="post">
 
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Unidad de Medida</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+        <div class="modal-content unit-modal">
 
-                <div class="modal-body">
 
-                    <!-- IMPORTANTE: ID EXPLÍCITO DEL HIDDEN -->
-                    <input type="hidden" id="Unidad_IdUnidad" name="Unidad.IdUnidad" value="@Model.Unidad?.IdUnidad" />
+            <form method="post"
+                  id="formUnidad">
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre Unidad</label>
-                        <input class="form-control" asp-for="Unidad.NombreUnidad" required />
+
+                <!-- HEADER -->
+
+                <div class="modal-header unit-modal-header">
+
+
+                    <div class="unit-modal-title">
+
+
+                        <div class="unit-modal-icon">
+
+                            <i class="bi bi-rulers"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h5 id="modalUnidadTitulo">
+
+                                Nueva unidad
+
+                            </h5>
+
+
+                            <span id="modalUnidadSubtitulo">
+
+                                Registra una nueva unidad de medida.
+
+                            </span>
+
+                        </div>
+
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea class="form-control" asp-for="Unidad.Descripcion" rows="3"></textarea>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- BODY -->
+
+                <div class="modal-body unit-modal-body">
+
+
+                    <input type="hidden"
+                           id="Unidad_IdUnidad"
+                           name="Unidad.IdUnidad"
+                           value="@Model.Unidad?.IdUnidad" />
+
+
+
+                    <!-- NOMBRE -->
+
+                    <div class="unit-field">
+
+                        <label asp-for="Unidad.NombreUnidad">
+
+                            Nombre de la unidad
+
+                            <span>*</span>
+
+                        </label>
+
+
+                        <div class="unit-input">
+
+                            <i class="bi bi-rulers"></i>
+
+
+                            <input asp-for="Unidad.NombreUnidad"
+                                   placeholder="Ej. Caja, Unidad, Frasco..."
+                                   autocomplete="off"
+                                   maxlength="100"
+                                   required />
+
+                        </div>
+
+
+                        <span asp-validation-for="Unidad.NombreUnidad"
+                              class="unit-validation">
+                        </span>
+
+
+                        <small>
+                            Nombre corto con el que identificarás
+                            la presentación del producto.
+                        </small>
+
                     </div>
 
+
+
+                    <!-- DESCRIPCIÓN -->
+
+                    <div class="unit-field">
+
+                        <label asp-for="Unidad.Descripcion">
+
+                            Descripción
+
+                        </label>
+
+
+                        <div class="unit-textarea">
+
+                            <textarea asp-for="Unidad.Descripcion"
+                                      rows="4"
+                                      placeholder="Describe cuándo o cómo utilizar esta unidad..."></textarea>
+
+                        </div>
+
+
+                        <small>
+                            Campo opcional para agregar información adicional.
+                        </small>
+
+                    </div>
+
+
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary btn-guardar">Guardar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer unit-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-unit-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-unit-save"
+                            id="btnGuardarUnidad">
+
+                        <i class="bi bi-check-lg"></i>
+
+                        <span id="textoGuardarUnidad">
+
+                            Guardar unidad
+
+                        </span>
+
+                    </button>
+
+
                 </div>
+
 
             </form>
 
+
         </div>
+
+
     </div>
+
+
 </div>
 
 
 
-<script>
-    // NUEVA UNIDAD
-    function nuevaUnidad() {
-        document.getElementById("Unidad_IdUnidad").value = 0;
-        document.getElementById("Unidad_NombreUnidad").value = "";
-        document.getElementById("Unidad_Descripcion").value = "";
-
-        new bootstrap.Modal(document.getElementById("modalUnidad")).show();
-    }
-
-    // EDITAR
-    function editar(id) {
-        window.location.href = "/Unidades?id=" + id;
-    }
-
-    // ELIMINAR CON SWEETALERT2
-    function eliminar(id) {
-        Swal.fire({
-            title: "¿Eliminar unidad?",
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar"
-        }).then((r) => {
-            if (r.isConfirmed) {
-                window.location.href = "/Unidades?eliminar=" + id;
-            }
-        });
-    }
-</script>
-
 @section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
 
-            // ✔ MENSAJE DE ÉXITO
-            @if (TempData["Ok"] != null)
-            {
-                <text>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Completado',
-                    text: '@TempData["Ok"]',
-                    timer: 1800,
-                    showConfirmButton: false
-                });
-                </text>
+
+        // =====================================================
+        // NUEVA UNIDAD
+        // =====================================================
+
+        function nuevaUnidad() {
+
+            document.getElementById(
+                "Unidad_IdUnidad"
+            ).value = 0;
+
+
+            document.getElementById(
+                "Unidad_NombreUnidad"
+            ).value = "";
+
+
+            document.getElementById(
+                "Unidad_Descripcion"
+            ).value = "";
+
+
+            document.getElementById(
+                "modalUnidadTitulo"
+            ).textContent =
+                "Nueva unidad";
+
+
+            document.getElementById(
+                "modalUnidadSubtitulo"
+            ).textContent =
+                "Registra una nueva unidad de medida.";
+
+
+            document.getElementById(
+                "textoGuardarUnidad"
+            ).textContent =
+                "Guardar unidad";
+
+
+            const modal =
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalUnidad"
+                    )
+                );
+
+
+            modal.show();
+
+
+            document
+                .getElementById(
+                    "modalUnidad"
+                )
+                .addEventListener(
+                    "shown.bs.modal",
+                    function () {
+
+                        document.getElementById(
+                            "Unidad_NombreUnidad"
+                        ).focus();
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+        }
+
+
+
+        // =====================================================
+        // EDITAR
+        // =====================================================
+
+        function editarUnidad(id) {
+
+            window.location.href =
+                "/Unidades?id=" + id;
+
+        }
+
+
+
+        // =====================================================
+        // ELIMINAR
+        // =====================================================
+
+        function eliminarUnidad(id) {
+
+            Swal.fire({
+
+                title:
+                    "¿Eliminar unidad?",
+
+                text:
+                    "Esta acción no se puede deshacer.",
+
+                icon:
+                    "warning",
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    "Sí, eliminar",
+
+                cancelButtonText:
+                    "Cancelar",
+
+                confirmButtonColor:
+                    "#d6535d"
+
+            })
+            .then((resultado) => {
+
+                if (resultado.isConfirmed) {
+
+                    window.location.href =
+                        "/Unidades?eliminar=" +
+                        id;
+
+                }
+
+            });
+
+        }
+
+
+
+        // =====================================================
+        // BUSCADOR
+        // =====================================================
+
+        const inputUnidad =
+            document.getElementById(
+                "txtBuscarUnidad"
+            );
+
+
+        const btnLimpiarUnidad =
+            document.getElementById(
+                "btnLimpiarUnidad"
+            );
+
+
+        inputUnidad?.addEventListener(
+            "input",
+            filtrarUnidades
+        );
+
+
+
+        function filtrarUnidades() {
+
+            const filtro =
+                inputUnidad.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const filas =
+                document.querySelectorAll(
+                    ".unit-row"
+                );
+
+
+            let visibles = 0;
+
+
+            filas.forEach(fila => {
+
+                const contenido =
+                    fila.dataset.unidad || "";
+
+
+                const mostrar =
+                    contenido.includes(filtro);
+
+
+                fila.style.display =
+                    mostrar
+                        ? ""
+                        : "none";
+
+
+                if (mostrar) {
+                    visibles++;
+                }
+
+            });
+
+
+
+            document.getElementById(
+                "contadorUnidades"
+            ).textContent =
+                visibles;
+
+
+
+            btnLimpiarUnidad.style.display =
+                filtro
+                    ? "flex"
+                    : "none";
+
+
+
+            const sinResultados =
+                document.getElementById(
+                    "sinResultadosUnidad"
+                );
+
+
+            if (sinResultados) {
+
+                sinResultados.style.display =
+                    visibles === 0
+                        ? "flex"
+                        : "none";
+
             }
 
-            // ❌ MENSAJE DE ERROR
-            @if (TempData["Error"] != null)
-            {
-                <text>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '@TempData["Error"]'
-                });
-                </text>
-            }
+        }
 
-            // ✏️ ABRIR MODAL AUTOMÁTICAMENTE AL EDITAR
-            @if (TempData["Editar"] != null)
-            {
-                <text>
-                new bootstrap.Modal(document.getElementById("modalUnidad")).show();
-                </text>
-            }
 
-        });
+
+        function limpiarBusquedaUnidad() {
+
+            inputUnidad.value = "";
+
+            filtrarUnidades();
+
+            inputUnidad.focus();
+
+        }
+
+
+
+        btnLimpiarUnidad?.addEventListener(
+            "click",
+            limpiarBusquedaUnidad
+        );
+
+
+
+        // =====================================================
+        // EVITAR DOBLE GUARDADO
+        // =====================================================
+
+        document
+            .getElementById(
+                "formUnidad"
+            )
+            ?.addEventListener(
+                "submit",
+                function () {
+
+                    const boton =
+                        document.getElementById(
+                            "btnGuardarUnidad"
+                        );
+
+
+                    boton.disabled = true;
+
+
+                    boton.innerHTML = `
+
+                        <span class="spinner-border spinner-border-sm"></span>
+
+                        Guardando...
+                    `;
+
+                }
+            );
+
+
+
+        // =====================================================
+        // MENSAJES
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                @if (TempData["Ok"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "success",
+
+                                title:
+                                    "Completado",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Ok"]
+                                            )
+                                    ),
+
+                                timer:
+                                    1800,
+
+                                showConfirmButton:
+                                    false
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Error"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "error",
+
+                                title:
+                                    "No se pudo completar",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Error"]
+                                            )
+                                    )
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Editar"] != null)
+                {
+                        <text>
+
+                            document.getElementById(
+                                "modalUnidadTitulo"
+                            ).textContent =
+                                "Editar unidad";
+
+
+                            document.getElementById(
+                                "modalUnidadSubtitulo"
+                            ).textContent =
+                                "Actualiza la información de la unidad seleccionada.";
+
+
+                            document.getElementById(
+                                "textoGuardarUnidad"
+                            ).textContent =
+                                "Guardar cambios";
+
+
+                            new bootstrap.Modal(
+                                document.getElementById(
+                                    "modalUnidad"
+                                )
+                            ).show();
+
+                        </text>
+                }
+
+
+            }
+        );
+
+
     </script>
+
 }

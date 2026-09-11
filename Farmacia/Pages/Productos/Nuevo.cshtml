@@ -1,354 +1,1919 @@
 ﻿@page
 @model Farmacia.Pages.Productos.NuevoModel
+
 @{
     ViewData["Title"] = "Productos";
+
+    var totalProductos = Model.Listado?.Count ?? 0;
+
+    var stockBajo = Model.Listado?
+        .Count(x => x.Inventario <= 5) ?? 0;
+
+    var porVencer = Model.Listado?
+        .Count(x =>
+            x.FechaVencimiento.HasValue &&
+            x.FechaVencimiento.Value.Date <= DateTime.Today.AddDays(30))
+        ?? 0;
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-
-<style>
-    .producto-nombre {
-        font-size: 1rem;
-        font-weight: bold;
-        color: #0d6efd;
-    }
-    .producto-secundario {
-        font-size: 0.85rem;
-    }
-    .vence-pronto {
-        color: red;
-        font-weight: bold;
-    }
-    .badge-stock { font-size: 0.8rem; padding: 3px 6px; }
-    .badge-bajo { background-color: #dc3545; }
-    .badge-normal { background-color: #0d6efd; }
-    .badge-alto { background-color: #198754; }
-    hr { opacity: 0.2; }
-</style>
+<link rel="stylesheet"
+      href="~/css/productos.css"
+      asp-append-version="true" />
 
 
-<div class="container mt-4">
+<div class="products-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold">Productos</h3>
 
-        <button class="btn btn-primary" onclick="nuevoProducto()">
-            ➕ Nuevo Producto
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <section class="products-header">
+
+        <div>
+
+            <div class="products-eyebrow">
+                <i class="bi bi-capsule-pill"></i>
+                Catálogo
+            </div>
+
+            <h1>Productos</h1>
+
+            <p>
+                Administra medicamentos, productos, precios e inventario.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-product"
+                onclick="nuevoProducto()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            <span>Nuevo producto</span>
+
         </button>
-    </div>
 
-    <!-- ================= BUSCADOR ================= -->
-    <form method="get" class="d-flex mb-3" id="formBuscar">
-        <input id="txtBuscar"
-               name="buscar"
-               class="form-control me-2"
-               placeholder="Buscar por nombre, genérico, recomendado para..."
-               value="@Model.BuscarTexto"
-               autocomplete="off" />
-
-        <button type="submit" class="btn btn-primary">
-            🔍 Filtrar
-        </button>
-    </form>
+    </section>
 
 
-    <!-- ========== TABLA ========== -->
-    <div class="table-responsive shadow-sm">
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width:90px;">ID</th>
-                    <th>Producto</th>
-                    <th style="width:170px;" class="text-center">Acciones</th>
-                </tr>
-            </thead>
 
-            <tbody>
-                @foreach (var p in Model.Listado)
+    <!-- =====================================================
+         INDICADORES
+    ====================================================== -->
+
+    <section class="product-stats">
+
+
+        <div class="product-stat">
+
+            <div class="product-stat-icon primary">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div>
+
+                <span>Productos mostrados</span>
+
+                <strong>
+                    @totalProductos
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="product-stat">
+
+            <div class="product-stat-icon warning">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+
+            <div>
+
+                <span>Stock bajo</span>
+
+                <strong>
+                    @stockBajo
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="product-stat">
+
+            <div class="product-stat-icon danger">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+
+            <div>
+
+                <span>Próximos a vencer</span>
+
+                <strong>
+                    @porVencer
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         BUSCADOR
+    ====================================================== -->
+
+    <section class="products-toolbar">
+
+
+        <form method="get"
+              id="formBuscar"
+              class="product-search-form">
+
+
+            <div class="product-search-control">
+
+                <i class="bi bi-search"></i>
+
+                <input id="txtBuscar"
+                       name="buscar"
+                       value="@Model.BuscarTexto"
+                       placeholder="Buscar por producto, genérico, código de barra o recomendado para..."
+                       autocomplete="off" />
+
+
+                @if (!string.IsNullOrWhiteSpace(Model.BuscarTexto))
                 {
-                    var bajaExistencia = p.Inventario <= 5;
-                    var fechaV = p.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "N/A";
+                    <a href="/Productos/Nuevo"
+                       class="clear-search"
+                       title="Limpiar búsqueda">
 
-                    bool porVencer = false;
-                    if (p.FechaVencimiento != null)
+                        <i class="bi bi-x-lg"></i>
+
+                    </a>
+                }
+
+            </div>
+
+
+            <button type="submit"
+                    class="btn-search-product">
+
+                <i class="bi bi-search"></i>
+
+                Buscar
+
+            </button>
+
+
+        </form>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <section class="products-card">
+
+
+        <div class="products-card-header">
+
+            <div>
+
+                <h2>
+                    Catálogo de productos
+                </h2>
+
+                <p>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.BuscarTexto))
                     {
-                        var dias = (p.FechaVencimiento.Value - DateTime.Now).Days;
-                        porVencer = dias <= 30;
+                        <text>
+                            Resultados para "<strong>@Model.BuscarTexto</strong>"
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            Productos registrados en el sistema
+                        </text>
                     }
 
-                    <tr>
-                        <td class="align-middle fw-bold">@p.IdProducto</td>
+                </p>
 
-                        <td>
-                            <div class="producto-nombre">
-                                @p.NombreProducto
-                                <span class="text-muted">(Cod: @p.CodBarra)</span>
-                            </div>
+            </div>
 
-                            <div class="producto-secundario">
-                                <b>Categoría:</b> @p.CategoriaNombre |
-                                <b>Precio:</b> C$ @p.PrecioVenta |
-                                <b>Stock:</b>
 
-                                @if (bajaExistencia)
-                                {
-                                    <span class="badge badge-stock badge-bajo">Bajo (@p.Inventario)</span>
-                                }
-                                else if (p.Inventario < 20)
-                                {
-                                    <span class="badge badge-stock badge-normal">Normal (@p.Inventario)</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-stock badge-alto">Alto (@p.Inventario)</span>
-                                }
-                            </div>
+            <span class="results-count">
 
-                            <hr />
+                @totalProductos
 
-                            <div class="producto-secundario">
-                                <b>Genérico:</b> @p.NombreGenerico <br />
-                                <b>Recomendado Para:</b> @p.RecomendadoPara <br />
-                                <b>Vence:</b>
-                                @if (porVencer)
-                                {
-                                    <span class="vence-pronto">@fechaV</span>
-                                }
-                                else
-                                {
-                                    @fechaV
-                                }
-                                <br />
+                @(totalProductos == 1
+                    ? "producto"
+                    : "productos")
 
-                                <b>Proveedor:</b> @p.ProveedorNombre |
-                                <b>Unidad:</b> @p.UnidadNombre
-                            </div>
-                        </td>
+            </span>
 
-                        <td class="text-center align-middle">
-                            <button class="btn btn-warning btn-sm mb-1"
-                                    onclick="editar(@p.IdProducto)">
-                                ✏️ Editar
-                            </button>
+        </div>
 
-                            <button class="btn btn-danger btn-sm"
-                                    onclick="eliminar(@p.IdProducto)">
-                                🗑️ Borrar
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
 
-        </table>
-    </div>
+
+        @if (Model.Listado != null &&
+             Model.Listado.Any())
+        {
+
+            <div class="products-table-wrapper">
+
+                <table class="products-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="col-product">
+                                Producto
+                            </th>
+
+                            <th>
+                                Clasificación
+                            </th>
+
+                            <th>
+                                Precio
+                            </th>
+
+                            <th>
+                                Inventario
+                            </th>
+
+                            <th>
+                                Vencimiento
+                            </th>
+
+                            <th class="col-actions">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var p in Model.Listado)
+                        {
+                            var fechaVencimiento =
+                                p.FechaVencimiento?
+                                    .ToString("dd/MM/yyyy")
+                                ?? "Sin fecha";
+
+
+                            var vencido =
+                                p.FechaVencimiento.HasValue &&
+                                p.FechaVencimiento.Value.Date <
+                                DateTime.Today;
+
+
+                            var vencePronto =
+                                p.FechaVencimiento.HasValue &&
+                                !vencido &&
+                                p.FechaVencimiento.Value.Date <=
+                                DateTime.Today.AddDays(30);
+
+
+                            var stockClass =
+                                p.Inventario <= 5
+                                    ? "stock-low"
+                                    : p.Inventario < 20
+                                        ? "stock-medium"
+                                        : "stock-good";
+
+
+                            var stockTexto =
+                                p.Inventario <= 5
+                                    ? "Bajo"
+                                    : p.Inventario < 20
+                                        ? "Normal"
+                                        : "Disponible";
+
+
+                            <tr>
+
+
+                                <!-- PRODUCTO -->
+
+                                <td>
+
+                                    <div class="product-main">
+
+
+                                        <div class="product-avatar">
+
+                                            @if (!string.IsNullOrWhiteSpace(p.Foto))
+                                            {
+                                                <img src="@p.Foto"
+                                                     alt="Foto de @p.NombreProducto"
+                                                     loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-capsule-pill"></i>
+                                            }
+
+                                        </div>
+
+
+                                        <div class="product-main-info">
+
+                                            <strong class="product-name">
+                                                @p.NombreProducto
+                                            </strong>
+
+
+                                            <div class="product-code">
+
+                                                <i class="bi bi-upc-scan"></i>
+
+                                                @p.CodBarra
+
+                                            </div>
+
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                p.NombreGenerico))
+                                            {
+
+                                                <span class="generic-name">
+
+                                                    @p.NombreGenerico
+
+                                                </span>
+
+                                            }
+
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                p.RecomendadoPara))
+                                            {
+
+                                                <span class="recommended-for">
+
+                                                    <i class="bi bi-heart-pulse"></i>
+
+                                                    @p.RecomendadoPara
+
+                                                </span>
+
+                                            }
+
+                                        </div>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- CLASIFICACIÓN -->
+
+                                <td>
+
+                                    <div class="classification-info">
+
+
+                                        <span class="classification-primary">
+
+                                            <i class="bi bi-tag"></i>
+
+                                            @(string.IsNullOrWhiteSpace(
+                                                p.CategoriaNombre)
+                                                ? "Sin categoría"
+                                                : p.CategoriaNombre)
+
+                                        </span>
+
+
+                                        <small>
+
+                                            @(string.IsNullOrWhiteSpace(
+                                                p.ProveedorNombre)
+                                                ? "Sin proveedor"
+                                                : p.ProveedorNombre)
+
+                                        </small>
+
+
+                                        <small>
+
+                                            @(string.IsNullOrWhiteSpace(
+                                                p.UnidadNombre)
+                                                ? "Sin unidad"
+                                                : p.UnidadNombre)
+
+                                        </small>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- PRECIO -->
+
+                                <td>
+
+                                    <div class="product-price">
+
+                                        <strong>
+
+                                            C$
+                                            @p.PrecioVenta.ToString("N2")
+
+                                        </strong>
+
+                                        <span>
+                                            Precio venta
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- INVENTARIO -->
+
+                                <td>
+
+                                    <div class="stock-container">
+
+
+                                        <span class="stock-badge @stockClass">
+
+                                            <span class="stock-dot"></span>
+
+                                            @stockTexto
+
+                                        </span>
+
+
+                                        <strong>
+
+                                            @p.Inventario.ToString("N2")
+
+                                        </strong>
+
+
+                                        <small>
+                                            unidades
+                                        </small>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- VENCIMIENTO -->
+
+                                <td>
+
+                                    @if (vencido)
+                                    {
+
+                                        <div class="expiration-status expired">
+
+                                            <i class="bi bi-exclamation-circle"></i>
+
+                                            <div>
+
+                                                <strong>
+                                                    Vencido
+                                                </strong>
+
+                                                <span>
+                                                    @fechaVencimiento
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    }
+                                    else if (vencePronto)
+                                    {
+
+                                        <div class="expiration-status soon">
+
+                                            <i class="bi bi-clock-history"></i>
+
+                                            <div>
+
+                                                <strong>
+                                                    Próximo
+                                                </strong>
+
+                                                <span>
+                                                    @fechaVencimiento
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <div class="expiration-status normal">
+
+                                            <i class="bi bi-calendar-check"></i>
+
+                                            <div>
+
+                                                <strong>
+                                                    Vigente
+                                                </strong>
+
+                                                <span>
+                                                    @fechaVencimiento
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- ACCIONES -->
+
+                                <td>
+
+                                    <div class="product-actions">
+
+
+                                        <button type="button"
+                                                class="btn-product-action edit"
+                                                title="Editar producto"
+                                                onclick="editar(@p.IdProducto)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="btn-product-action delete"
+                                                title="Eliminar producto"
+                                                onclick="eliminar(@p.IdProducto)">
+
+                                            <i class="bi bi-trash3"></i>
+
+                                        </button>
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="products-empty">
+
+                <div class="products-empty-icon">
+
+                    <i class="bi bi-box-seam"></i>
+
+                </div>
+
+
+                <strong>
+
+                    No encontramos productos
+
+                </strong>
+
+
+                <span>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.BuscarTexto))
+                    {
+                        <text>
+                            Intenta modificar los criterios de búsqueda.
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            Registra tu primer producto para comenzar.
+                        </text>
+                    }
+
+                </span>
+
+
+                <button type="button"
+                        onclick="nuevoProducto()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Nuevo producto
+
+                </button>
+
+            </div>
+
+        }
+
+
+    </section>
+
 
 </div>
 
 
-<!-- ============== MODAL ============== -->
-<div class="modal fade" id="modalProducto" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
 
-            <form method="post">
+<!-- =========================================================
+     MODAL PRODUCTO
+========================================================== -->
 
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Producto</h5>
-                    <button type="button" class="btn-close btn-close-white"
-                            data-bs-dismiss="modal"></button>
-                </div>
+<div class="modal fade"
+     id="modalProducto"
+     tabindex="-1"
+     aria-hidden="true">
 
-                <div class="modal-body">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
 
-                    <input type="hidden" asp-for="Producto.IdProducto" id="Producto_IdProducto" />
+        <div class="modal-content product-modal">
 
-                    <div class="row g-3">
 
-                        <div class="col-md-4">
-                            <label class="form-label">Código de Barra</label>
-                            <input class="form-control" asp-for="Producto.CodBarra" id="Producto_CodBarra" required />
+            <form method="post"
+                  enctype="multipart/form-data"
+                  id="formProducto">
+
+
+                <!-- =================================================
+                     HEADER MODAL
+                ================================================== -->
+
+                <div class="modal-header product-modal-header">
+
+
+                    <div class="product-modal-title">
+
+
+                        <div class="product-modal-icon">
+
+                            <i class="bi bi-capsule-pill"></i>
+
                         </div>
 
-                        <div class="col-md-8">
-                            <label class="form-label">Nombre Producto</label>
-                            <input class="form-control" asp-for="Producto.NombreProducto" id="Producto_NombreProducto" required />
+
+                        <div>
+
+                            <h5 id="modalTitulo">
+                                Nuevo producto
+                            </h5>
+
+                            <span id="modalSubtitulo">
+                                Registra la información del producto.
+                            </span>
+
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Nombre Genérico</label>
-                            <input class="form-control" asp-for="Producto.NombreGenerico" id="Producto_NombreGenerico" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Recomendado Para</label>
-                            <input class="form-control" asp-for="Producto.RecomendadoPara" id="Producto_RecomendadoPara" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha Vencimiento</label>
-                            <input type="date" class="form-control" asp-for="Producto.FechaVencimiento" id="Producto_FechaVencimiento" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Precio Costo</label>
-                            <input type="number" step="0.01" class="form-control"
-                                   asp-for="Producto.PrecioCosto" id="Producto_PrecioCosto" required />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Costo Promedio</label>
-                            <input type="number" step="0.01" class="form-control"
-                                   asp-for="Producto.CostoPromedio" id="Producto_CostoPromedio" required />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Precio Venta</label>
-                            <input type="number" step="0.01" class="form-control"
-                                   asp-for="Producto.PrecioVenta" id="Producto_PrecioVenta" required />
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Inventario</label>
-                            <input type="number" step="0.01" class="form-control"
-                                   asp-for="Producto.Inventario" id="Producto_Inventario" required />
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Categoría</label>
-                            <select class="form-control" asp-for="Producto.IdCategoria" id="Producto_IdCategoria" required>
-                                <option value="">Seleccione</option>
-                                @foreach (var c in Model.Categorias)
-                                {
-                                    <option value="@c.IdCategoria">@c.NombreCategoria</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Proveedor</label>
-                            <select class="form-control" asp-for="Producto.IdProveedor" id="Producto_IdProveedor" required>
-                                <option value="">Seleccione</option>
-                                @foreach (var p in Model.Proveedores)
-                                {
-                                    <option value="@p.IdProveedor">@p.NombreProveedor</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Unidad</label>
-                            <select class="form-control" asp-for="Producto.IdUnidad" id="Producto_IdUnidad" required>
-                                <option value="">Seleccione</option>
-                                @foreach (var u in Model.Unidades)
-                                {
-                                    <option value="@u.IdUnidad">@u.NombreUnidad</option>
-                                }
-                            </select>
-                        </div>
 
                     </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+
+
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary">Guardar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+
+                <!-- =================================================
+                     BODY
+                ================================================== -->
+
+                <div class="modal-body product-modal-body">
+
+
+                    <input type="hidden"
+                           asp-for="Producto.IdProducto"
+                           id="Producto_IdProducto" />
+
+                    <input type="hidden"
+                           asp-for="Producto.Foto"
+                           id="Producto_Foto" />
+
+
+
+                    <!-- =============================================
+                         INFORMACIÓN GENERAL
+                    ============================================== -->
+
+                    <section class="form-section">
+
+
+                        <div class="form-section-header">
+
+
+                            <div class="form-section-icon">
+
+                                <i class="bi bi-info-lg"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    Información general
+                                </h3>
+
+                                <p>
+                                    Datos principales para identificar el producto.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div class="product-photo-field">
+
+                            <div class="product-photo-preview" id="fotoPreview">
+                                @if (!string.IsNullOrWhiteSpace(Model.Producto.Foto))
+                                {
+                                    <img src="@Model.Producto.Foto"
+                                         alt="Vista previa de la foto"
+                                         id="fotoPreviewImg" />
+                                    <i class="bi bi-image" id="fotoPreviewIcon" hidden></i>
+                                }
+                                else
+                                {
+                                    <img src="" alt="Vista previa de la foto"
+                                         id="fotoPreviewImg" hidden />
+                                    <i class="bi bi-image" id="fotoPreviewIcon"></i>
+                                }
+                            </div>
+
+                            <div class="product-photo-content">
+                                <label for="FotoArchivo">Foto del producto</label>
+                                <p>JPG, PNG o WebP. Tamaño máximo: 5 MB.</p>
+
+                                <div class="product-photo-actions">
+                                    <label class="btn-product-photo" for="FotoArchivo">
+                                        <i class="bi bi-upload"></i>
+                                        Seleccionar foto
+                                    </label>
+
+                                    <input asp-for="FotoArchivo"
+                                           id="FotoArchivo"
+                                           type="file"
+                                           accept="image/jpeg,image/png,image/webp"
+                                           hidden />
+
+                                    <button type="button"
+                                            class="btn-product-photo-remove"
+                                            id="btnQuitarFoto"
+                                            onclick="quitarFoto()">
+                                        <i class="bi bi-trash3"></i>
+                                        Quitar
+                                    </button>
+                                </div>
+
+                                <span class="product-photo-name" id="fotoNombre">
+                                    @(string.IsNullOrWhiteSpace(Model.Producto.Foto)
+                                        ? "Sin foto seleccionada"
+                                        : "Foto actual del producto")
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="product-form-grid">
+
+
+                            <!-- CÓDIGO -->
+
+                            <div class="modern-product-field field-code">
+
+                                <label asp-for="Producto.CodBarra">
+
+                                    Código de barra
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-upc-scan"></i>
+
+                                    <input asp-for="Producto.CodBarra"
+                                           id="Producto_CodBarra"
+                                           placeholder="Ej. 7501234567890"
+                                           autocomplete="off"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- NOMBRE -->
+
+                            <div class="modern-product-field field-name">
+
+                                <label asp-for="Producto.NombreProducto">
+
+                                    Nombre del producto
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-capsule"></i>
+
+                                    <input asp-for="Producto.NombreProducto"
+                                           id="Producto_NombreProducto"
+                                           placeholder="Nombre comercial"
+                                           autocomplete="off"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- GENÉRICO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.NombreGenerico">
+
+                                    Nombre genérico
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-prescription2"></i>
+
+                                    <input asp-for="Producto.NombreGenerico"
+                                           id="Producto_NombreGenerico"
+                                           placeholder="Principio activo"
+                                           autocomplete="off" />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- RECOMENDADO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.RecomendadoPara">
+
+                                    Recomendado para
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-heart-pulse"></i>
+
+                                    <input asp-for="Producto.RecomendadoPara"
+                                           id="Producto_RecomendadoPara"
+                                           placeholder="Ej. dolor, fiebre..."
+                                           autocomplete="off" />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- VENCIMIENTO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.FechaVencimiento">
+
+                                    Fecha de vencimiento
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-calendar3"></i>
+
+                                    <input asp-for="Producto.FechaVencimiento"
+                                           id="Producto_FechaVencimiento"
+                                           type="date" />
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
+
+                    <!-- =============================================
+                         PRECIOS E INVENTARIO
+                    ============================================== -->
+
+                    <section class="form-section">
+
+
+                        <div class="form-section-header">
+
+
+                            <div class="form-section-icon">
+
+                                <i class="bi bi-cash-stack"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    Precios e inventario
+                                </h3>
+
+                                <p>
+                                    Información de costo, venta y existencias.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div class="product-price-grid">
+
+
+                            <!-- PRECIO COSTO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.PrecioCosto">
+
+                                    Precio costo
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input money">
+
+                                    <span class="money-prefix">
+                                        C$
+                                    </span>
+
+                                    <input asp-for="Producto.PrecioCosto"
+                                           id="Producto_PrecioCosto"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- COSTO PROMEDIO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.CostoPromedio">
+
+                                    Costo promedio
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input money">
+
+                                    <span class="money-prefix">
+                                        C$
+                                    </span>
+
+                                    <input asp-for="Producto.CostoPromedio"
+                                           id="Producto_CostoPromedio"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- PRECIO VENTA -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.PrecioVenta">
+
+                                    Precio venta
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input money sale-price">
+
+                                    <span class="money-prefix">
+                                        C$
+                                    </span>
+
+                                    <input asp-for="Producto.PrecioVenta"
+                                           id="Producto_PrecioVenta"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- PORCENTAJE DE UTILIDAD -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.PorcentajeUtilidad">
+
+                                    Porcentaje de utilidad
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input percentage-input">
+
+                                    <i class="bi bi-graph-up-arrow"></i>
+
+                                    <input asp-for="Producto.PorcentajeUtilidad"
+                                           id="Producto_PorcentajeUtilidad"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required />
+
+                                    <span class="percentage-suffix">%</span>
+
+                                </div>
+
+                                <small class="product-field-help">
+                                    Margen de utilidad aplicado al producto.
+                                </small>
+
+                            </div>
+
+
+
+                            <!-- TASA IVA -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.TasaIVA">
+
+                                    Tasa de IVA
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-select tax-select">
+
+                                    <i class="bi bi-percent"></i>
+
+                                    <select asp-for="Producto.TasaIVA"
+                                            id="Producto_TasaIVA"
+                                            required>
+                                        <option value="15"
+                                                selected="@(Model.Producto.TasaIVA == 15m)">
+                                            15% — Gravado
+                                        </option>
+                                        <option value="0"
+                                                selected="@(Model.Producto.TasaIVA == 0m)">
+                                            0% — Exento
+                                        </option>
+                                    </select>
+
+                                </div>
+
+                                <small class="product-field-help">
+                                    En Nicaragua la tasa general es 15%; selecciona exento cuando corresponda.
+                                </small>
+
+                            </div>
+
+
+
+                            <!-- INVENTARIO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.Inventario">
+
+                                    Inventario
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-input">
+
+                                    <i class="bi bi-box-seam"></i>
+
+                                    <input asp-for="Producto.Inventario"
+                                           id="Producto_Inventario"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0"
+                                           required />
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
+
+                    <!-- =============================================
+                         CLASIFICACIÓN
+                    ============================================== -->
+
+                    <section class="form-section last">
+
+
+                        <div class="form-section-header">
+
+
+                            <div class="form-section-icon">
+
+                                <i class="bi bi-tags"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    Clasificación
+                                </h3>
+
+                                <p>
+                                    Organiza el producto dentro del catálogo.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div class="product-classification-grid">
+
+
+                            <!-- CATEGORÍA -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.IdCategoria">
+
+                                    Categoría
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-select">
+
+                                    <i class="bi bi-tag"></i>
+
+                                    <select asp-for="Producto.IdCategoria"
+                                            id="Producto_IdCategoria"
+                                            required>
+
+                                        <option value="">
+                                            Seleccione categoría
+                                        </option>
+
+                                        @foreach (var c in Model.Categorias)
+                                        {
+                                            if (c.IdCategoria == Model.Producto.IdCategoria)
+                                            {
+                                                <option value="@c.IdCategoria"
+                                                        selected>
+                                                    @c.NombreCategoria
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@c.IdCategoria">
+                                                    @c.NombreCategoria
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- PROVEEDOR -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.IdProveedor">
+
+                                    Proveedor
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-select">
+
+                                    <i class="bi bi-truck"></i>
+
+                                    <select asp-for="Producto.IdProveedor"
+                                            id="Producto_IdProveedor"
+                                            required>
+
+                                        <option value="">
+                                            Seleccione proveedor
+                                        </option>
+
+                                        @foreach (var p in Model.Proveedores)
+                                        {
+                                            if (p.IdProveedor == Model.Producto.IdProveedor)
+                                            {
+                                                <option value="@p.IdProveedor"
+                                                        selected>
+                                                    @p.NombreProveedor
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@p.IdProveedor">
+                                                    @p.NombreProveedor
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- UNIDAD -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.IdUnidad">
+
+                                    Unidad de medida
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-select">
+
+                                    <i class="bi bi-rulers"></i>
+
+                                    <select asp-for="Producto.IdUnidad"
+                                            id="Producto_IdUnidad"
+                                            required>
+
+                                        <option value="">
+                                            Seleccione unidad
+                                        </option>
+
+                                        @foreach (var u in Model.Unidades)
+                                        {
+                                            if (u.IdUnidad == Model.Producto.IdUnidad)
+                                            {
+                                                <option value="@u.IdUnidad"
+                                                        selected>
+                                                    @u.NombreUnidad
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@u.IdUnidad">
+                                                    @u.NombreUnidad
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- LABORATORIO -->
+
+                            <div class="modern-product-field">
+
+                                <label asp-for="Producto.IdLaboratorio">
+
+                                    Laboratorio
+                                    <span>*</span>
+
+                                </label>
+
+
+                                <div class="product-select">
+
+                                    <i class="bi bi-building"></i>
+
+                                    <select asp-for="Producto.IdLaboratorio"
+                                            id="Producto_IdLaboratorio"
+                                            required>
+
+                                        <option value="">
+                                            Seleccione laboratorio
+                                        </option>
+
+                                        @foreach (var laboratorio in Model.Laboratorios)
+                                        {
+                                            if (laboratorio.IdLaboratorio == Model.Producto.IdLaboratorio)
+                                            {
+                                                <option value="@laboratorio.IdLaboratorio"
+                                                        selected>
+                                                    @laboratorio.LaboratorioNombre
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@laboratorio.IdLaboratorio">
+                                                    @laboratorio.LaboratorioNombre
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </section>
+
+
                 </div>
+
+
+
+                <!-- =================================================
+                     FOOTER
+                ================================================== -->
+
+                <div class="modal-footer product-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-product-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-product-save"
+                            id="btnGuardarProducto">
+
+                        <i class="bi bi-check-lg"></i>
+
+                        <span id="textoGuardar">
+                            Guardar producto
+                        </span>
+
+                    </button>
+
+
+                </div>
+
 
             </form>
 
+
         </div>
+
     </div>
+
 </div>
 
 
+
 @section Scripts {
+
     <script>
 
-        // ==================== NUEVO =====================
+        // =========================================================
+        // NUEVO PRODUCTO
+        // =========================================================
+
         function nuevoProducto() {
 
-            // SOLO limpiamos campos del producto, NO el token antiforgery
-            document.getElementById("Producto_IdProducto").value = 0;
-            document.getElementById("Producto_CodBarra").value = "";
-            document.getElementById("Producto_NombreProducto").value = "";
-            document.getElementById("Producto_NombreGenerico").value = "";
-            document.getElementById("Producto_RecomendadoPara").value = "";
-            document.getElementById("Producto_FechaVencimiento").value = "";
-            document.getElementById("Producto_PrecioCosto").value = "";
-            document.getElementById("Producto_CostoPromedio").value = "";
-            document.getElementById("Producto_PrecioVenta").value = "";
-            document.getElementById("Producto_Inventario").value = "";
-            document.getElementById("Producto_IdCategoria").value = "";
-            document.getElementById("Producto_IdProveedor").value = "";
-            document.getElementById("Producto_IdUnidad").value = "";
+            document.getElementById(
+                "Producto_IdProducto"
+            ).value = 0;
 
-            new bootstrap.Modal(document.getElementById("modalProducto")).show();
+
+            document.getElementById(
+                "Producto_CodBarra"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_NombreProducto"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_NombreGenerico"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_RecomendadoPara"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_FechaVencimiento"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_PrecioCosto"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_CostoPromedio"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_PrecioVenta"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_PorcentajeUtilidad"
+            ).value = "0";
+
+
+            document.getElementById(
+                "Producto_TasaIVA"
+            ).value = "15";
+
+
+            document.getElementById(
+                "Producto_Inventario"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_IdCategoria"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_IdProveedor"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_IdUnidad"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_IdLaboratorio"
+            ).value = "";
+
+
+            document.getElementById(
+                "Producto_Foto"
+            ).value = "";
+
+
+            quitarFoto();
+
+
+            document.getElementById(
+                "modalTitulo"
+            ).innerText =
+                "Nuevo producto";
+
+
+            document.getElementById(
+                "modalSubtitulo"
+            ).innerText =
+                "Registra la información del producto.";
+
+
+            document.getElementById(
+                "textoGuardar"
+            ).innerText =
+                "Guardar producto";
+
+
+            const modal =
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalProducto"
+                    )
+                );
+
+
+            modal.show();
+
+
+            document
+                .getElementById("modalProducto")
+                .addEventListener(
+                    "shown.bs.modal",
+                    function () {
+
+                        document.getElementById(
+                            "Producto_CodBarra"
+                        ).focus();
+
+                    },
+                    { once: true }
+                );
+
         }
 
-        // ==================== EDITAR =====================
+
+
+        // =========================================================
+        // FOTO DEL PRODUCTO
+        // =========================================================
+
+        const inputFoto = document.getElementById("FotoArchivo");
+
+        inputFoto.addEventListener("change", function () {
+
+            const archivo = this.files[0];
+
+            if (!archivo) {
+                return;
+            }
+
+            if (archivo.size > 5 * 1024 * 1024) {
+                this.value = "";
+                Swal.fire({
+                    icon: "warning",
+                    title: "Foto demasiado grande",
+                    text: "Selecciona una imagen de hasta 5 MB."
+                });
+                return;
+            }
+
+            const imagen = document.getElementById("fotoPreviewImg");
+            const icono = document.getElementById("fotoPreviewIcon");
+
+            imagen.src = URL.createObjectURL(archivo);
+            imagen.hidden = false;
+            icono.hidden = true;
+
+            document.getElementById("fotoNombre").innerText = archivo.name;
+        });
+
+
+        function quitarFoto() {
+
+            const imagen = document.getElementById("fotoPreviewImg");
+            const icono = document.getElementById("fotoPreviewIcon");
+
+            document.getElementById("FotoArchivo").value = "";
+            document.getElementById("Producto_Foto").value = "";
+            document.getElementById("fotoNombre").innerText =
+                "Sin foto seleccionada";
+
+            imagen.src = "";
+            imagen.hidden = true;
+            icono.hidden = false;
+        }
+
+
+
+        // =========================================================
+        // EDITAR
+        // =========================================================
+
         function editar(id) {
-            window.location.href = "/Productos/Nuevo?id=" + id;
+
+            window.location.href =
+                "/Productos/Nuevo?id=" + id;
+
         }
 
-        // ==================== ELIMINAR =====================
+
+
+        // =========================================================
+        // ELIMINAR
+        // =========================================================
+
         function eliminar(id) {
+
             Swal.fire({
-                title: "¿Eliminar producto?",
-                text: "Esta acción no se puede deshacer.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar"
-            }).then((r) => {
-                if (r.isConfirmed) {
-                    window.location.href = "/Productos/Nuevo?eliminar=" + id;
+
+                title:
+                    "¿Eliminar producto?",
+
+                text:
+                    "Esta acción no se puede deshacer.",
+
+                icon:
+                    "warning",
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    "Sí, eliminar",
+
+                cancelButtonText:
+                    "Cancelar",
+
+                confirmButtonColor:
+                    "#d6535d"
+
+            })
+            .then((resultado) => {
+
+                if (resultado.isConfirmed) {
+
+                    window.location.href =
+                        "/Productos/Nuevo?eliminar=" +
+                        id;
+
                 }
+
             });
+
         }
 
-        // ==================== MENSAJES =====================
+
+
+        // =========================================================
+        // MENSAJES
+        // =========================================================
+
         @if (TempData["Ok"] != null)
         {
-            <text>
-            Swal.fire({
-                icon: "success",
-                title: "Completado",
-                text: "@TempData["Ok"]",
-                timer: 2000,
-                showConfirmButton: false
-            });
-            </text>
+                <text>
+
+                    Swal.fire({
+
+                        icon:
+                            "success",
+
+                        title:
+                            "Completado",
+
+                        text:
+                            "@TempData["Ok"]",
+
+                        timer:
+                            1800,
+
+                        showConfirmButton:
+                            false
+
+                    });
+
+                </text>
         }
+
+
 
         @if (TempData["Error"] != null)
         {
-            <text>
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "@TempData["Error"]"
-            });
-            </text>
+                <text>
+
+                    Swal.fire({
+
+                        icon:
+                            "error",
+
+                        title:
+                            "No se pudo completar",
+
+                        text:
+                            "@TempData["Error"]"
+
+                    });
+
+                </text>
         }
 
-        // ============= ABRIR MODAL EN EDICIÓN =============
+
+
+        // =========================================================
+        // MODO EDICIÓN
+        // =========================================================
+
         @if (TempData["Editar"] != null)
         {
-            <text>
-            document.addEventListener("DOMContentLoaded", function () {
-                new bootstrap.Modal(document.getElementById("modalProducto")).show();
-            });
-            </text>
+                <text>
+
+                    document.addEventListener(
+                        "DOMContentLoaded",
+                        function () {
+
+                            document.getElementById(
+                                "modalTitulo"
+                            ).innerText =
+                                "Editar producto";
+
+
+                            document.getElementById(
+                                "modalSubtitulo"
+                            ).innerText =
+                                "Actualiza la información del producto seleccionado.";
+
+
+                            document.getElementById(
+                                "textoGuardar"
+                            ).innerText =
+                                "Guardar cambios";
+
+
+                            new bootstrap.Modal(
+                                document.getElementById(
+                                    "modalProducto"
+                                )
+                            ).show();
+
+                        }
+                    );
+
+                </text>
         }
 
-        // ============ FILTRO CON ENTER ============
-        document.getElementById("txtBuscar").addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                document.getElementById("formBuscar").submit();
-            }
-        });
+
+
+        // =========================================================
+        // ENTER EN BUSCADOR
+        // =========================================================
+
+        document
+            .getElementById("txtBuscar")
+            .addEventListener(
+                "keydown",
+                function (e) {
+
+                    if (e.key === "Enter") {
+
+                        e.preventDefault();
+
+                        document.getElementById(
+                            "formBuscar"
+                        ).submit();
+
+                    }
+
+                }
+            );
+
+
+
+        // =========================================================
+        // BLOQUEAR DOBLE GUARDADO
+        // =========================================================
+
+        document
+            .getElementById("formProducto")
+            .addEventListener(
+                "submit",
+                function () {
+
+                    const boton =
+                        document.getElementById(
+                            "btnGuardarProducto"
+                        );
+
+
+                    boton.disabled = true;
+
+
+                    boton.innerHTML = `
+
+                        <span class="spinner-border spinner-border-sm"></span>
+
+                        Guardando...
+                    `;
+
+                }
+            );
 
     </script>
+
 }

@@ -4,6 +4,13 @@
 ========================================================== */
 
 :root {
+  /* Tipografía global */
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 14px;
+  --font-lg: 16px;
+  --font-xl: 20px;
+  --font-title: 29px;
   /* Marca */
   --primary: #079667;
   --primary-dark: #057a55;

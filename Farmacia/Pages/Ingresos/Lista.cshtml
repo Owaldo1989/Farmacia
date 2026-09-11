@@ -1,0 +1,893 @@
+﻿
+@page
+@model Farmacia.Pages.Ingresos.ListaModel
+
+@{
+    ViewData["Title"] = "Ingresos de mercadería";
+
+    var totalIngresos =
+        Model.Listado.Count;
+
+    var totalComprado =
+        Model.Listado
+            .Where(x => x.Estado == 1)
+            .Sum(x => x.TotalFacturaProveedor);
+
+    var ivaCompras =
+        Model.Listado
+            .Where(x => x.Estado == 1)
+            .Sum(x => x.IVAFacturaProveedor);
+
+    var totalUnidades =
+        Model.Listado
+            .Where(x => x.Estado == 1)
+            .Sum(x => x.CantidadUnidades);
+}
+
+<link rel="stylesheet"
+      href="~/css/ingresos-lista.css"
+      asp-append-version="true" />
+
+
+<div class="receipts-page">
+
+
+    <section class="receipts-header">
+
+        <div>
+
+            <div class="receipts-eyebrow">
+
+                <i class="bi bi-box-arrow-in-down"></i>
+
+                Inventario
+
+            </div>
+
+            <h1>
+                Ingresos de mercadería
+            </h1>
+
+            <p>
+                Consulta las facturas recibidas,
+                sus costos y movimientos de inventario.
+            </p>
+
+        </div>
+
+
+        <a asp-page="/Ingresos/Nuevo"
+           class="btn-new-receipt">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nuevo ingreso
+
+        </a>
+
+    </section>
+
+
+
+    <!-- KPI -->
+
+    <section class="receipts-stats">
+
+        <div class="receipt-stat">
+
+            <div class="receipt-stat-icon">
+                <i class="bi bi-receipt"></i>
+            </div>
+
+            <div>
+                <span>Ingresos</span>
+                <strong>@totalIngresos</strong>
+                <small>En el período</small>
+            </div>
+
+        </div>
+
+
+        <div class="receipt-stat">
+
+            <div class="receipt-stat-icon">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+
+            <div>
+                <span>Total comprado</span>
+
+                <strong>
+                    C$ @totalComprado.ToString("N2")
+                </strong>
+
+                <small>Incluyendo IVA</small>
+            </div>
+
+        </div>
+
+
+        <div class="receipt-stat">
+
+            <div class="receipt-stat-icon">
+                <i class="bi bi-percent"></i>
+            </div>
+
+            <div>
+                <span>IVA pagado</span>
+
+                <strong>
+                    C$ @ivaCompras.ToString("N2")
+                </strong>
+
+                <small>IVA en compras</small>
+            </div>
+
+        </div>
+
+
+        <div class="receipt-stat">
+
+            <div class="receipt-stat-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div>
+                <span>Unidades recibidas</span>
+
+                <strong>
+                    @totalUnidades.ToString("N2")
+                </strong>
+
+                <small>Productos ingresados</small>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- FILTROS -->
+
+    <section class="receipts-filter">
+
+        <div class="receipts-filter-header">
+
+            <div>
+
+                <h2>
+                    Buscar ingresos
+                </h2>
+
+                <p>
+                    Filtra por período, proveedor o factura.
+                </p>
+
+            </div>
+
+            <i class="bi bi-funnel"></i>
+
+        </div>
+
+
+        <form method="get"
+              class="receipts-filter-grid">
+
+            <div class="receipt-field">
+
+                <label>
+                    Desde
+                </label>
+
+                <input asp-for="FechaInicio"
+                       type="date" />
+
+            </div>
+
+
+            <div class="receipt-field">
+
+                <label>
+                    Hasta
+                </label>
+
+                <input asp-for="FechaFin"
+                       type="date" />
+
+            </div>
+
+
+            <div class="receipt-field">
+
+                <label>
+                    Proveedor
+                </label>
+
+                <select asp-for="IdProveedor">
+
+                    <option value="">
+                        Todos los proveedores
+                    </option>
+
+                    @foreach (var proveedor in Model.Proveedores)
+                    {
+                        <option value="@proveedor.IdProveedor">
+
+                            @proveedor.NombreProveedor
+
+                        </option>
+                    }
+
+                </select>
+
+            </div>
+
+
+            <div class="receipt-field">
+
+                <label>
+                    Número factura
+                </label>
+
+                <input asp-for="NumeroFactura"
+                       placeholder="Ej. 0012587" />
+
+            </div>
+
+
+            <div class="receipt-filter-action">
+
+                <button type="submit">
+
+                    <i class="bi bi-search"></i>
+
+                    Consultar
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+
+    <!-- TABLA -->
+
+    <section class="receipts-card">
+
+
+        <div class="receipts-card-header">
+
+            <div>
+
+                <h2>
+                    Historial de ingresos
+                </h2>
+
+                <p>
+                    Facturas registradas en el período seleccionado.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        @if (Model.Listado.Any())
+        {
+
+            <div class="receipts-table-wrapper">
+
+                <table class="receipts-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Ingreso</th>
+                            <th>Fecha</th>
+                            <th>Proveedor</th>
+                            <th>Factura</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">IVA</th>
+                            <th class="text-end">Total</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var ingreso in Model.Listado)
+                        {
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="receipt-number">
+
+                                        <div>
+                                            <i class="bi bi-box-arrow-in-down"></i>
+                                        </div>
+
+                                        <span>
+
+                                            <strong>
+                                                #@ingreso.IdIngreso
+                                            </strong>
+
+                                            <small>
+                                                @ingreso.CantidadLineas producto(s)
+                                            </small>
+
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="receipt-date">
+
+                                        <strong>
+                                            @ingreso.FechaFactura.ToString("dd/MM/yyyy")
+                                        </strong>
+
+                                        <span>
+                                            Registrado
+                                            @ingreso.FechaIngreso.ToString("dd/MM HH:mm")
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <strong class="supplier-name">
+
+                                        @ingreso.NombreProveedor
+
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="supplier-invoice">
+
+                                        @ingreso.NumeroFactura
+
+                                    </span>
+
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    C$
+                                    @ingreso.SubtotalFacturaProveedor.ToString("N2")
+
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    C$
+                                    @ingreso.IVAFacturaProveedor.ToString("N2")
+
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    <strong class="receipt-total">
+
+                                        C$
+                                        @ingreso.TotalFacturaProveedor.ToString("N2")
+
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (ingreso.Estado == 1)
+                                    {
+                                        <span class="receipt-status confirmed">
+
+                                            <i class="bi bi-check-circle"></i>
+
+                                            Confirmado
+
+                                        </span>
+                                    }
+                                    else if (ingreso.Estado == 99)
+                                    {
+                                        <span class="receipt-status cancelled">
+
+                                            Anulado
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="receipt-status pending">
+
+                                            Pendiente
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="receipt-actions">
+
+                                        <button type="button"
+                                                class="btn-view-receipt"
+                                                title="Ver ingreso"
+                                                onclick="verIngreso(@ingreso.IdIngreso)">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="btn-print-receipt"
+                                                title="Imprimir reporte"
+                                                onclick="imprimirIngreso(@ingreso.IdIngreso)">
+
+                                            <i class="bi bi-printer"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="receipts-empty">
+
+                <i class="bi bi-box-seam"></i>
+
+                <strong>
+                    No hay ingresos
+                </strong>
+
+                <span>
+                    No encontramos ingresos para los filtros seleccionados.
+                </span>
+
+            </div>
+
+        }
+
+
+    </section>
+
+</div>
+
+
+
+<!-- MODAL DETALLE -->
+
+<div class="modal fade"
+     id="modalIngreso"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-xl
+                modal-dialog-centered
+                modal-dialog-scrollable">
+
+
+        <div class="modal-content receipt-detail-modal">
+
+
+            <div class="modal-header receipt-detail-header">
+
+                <div>
+
+                    <h5 id="detalleTitulo">
+                        Detalle de ingreso
+                    </h5>
+
+                    <span id="detalleProveedor">
+                    </span>
+
+                </div>
+
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+
+                <div class="receipt-detail-summary">
+
+                    <div>
+                        <span>Factura</span>
+                        <strong id="detFactura">-</strong>
+                    </div>
+
+                    <div>
+                        <span>Fecha</span>
+                        <strong id="detFecha">-</strong>
+                    </div>
+
+                    <div>
+                        <span>Subtotal</span>
+                        <strong id="detSubtotal">-</strong>
+                    </div>
+
+                    <div>
+                        <span>IVA</span>
+                        <strong id="detIVA">-</strong>
+                    </div>
+
+                    <div class="total">
+                        <span>Total</span>
+                        <strong id="detTotal">-</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="receipt-detail-table-wrapper">
+
+                    <table class="receipt-detail-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-end">Cant.</th>
+                                <th class="text-end">Costo anterior</th>
+                                <th class="text-end">Costo nuevo</th>
+                                <th class="text-center">IVA</th>
+                                <th class="text-end">Precio anterior</th>
+                                <th class="text-end">Precio nuevo</th>
+                                <th>Movimiento</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="detalleProductos">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="receipt-observation"
+                     id="contenedorObservacion"
+                     style="display:none;">
+
+                    <i class="bi bi-chat-left-text"></i>
+
+                    <div>
+                        <span>Observación</span>
+                        <strong id="detObservacion"></strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@section Scripts {
+
+<script>
+
+    const formatoDinero =
+        valor =>
+            "C$ " +
+            Number(valor || 0)
+                .toLocaleString(
+                    "es-NI",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                );
+
+
+    async function verIngreso(id) {
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/Ingresos/Lista?handler=Detalle&id=${id}`
+                );
+
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+                    "No fue posible cargar el ingreso."
+                );
+
+            }
+
+
+            const data =
+                await respuesta.json();
+
+
+            const ingreso =
+                data.ingreso;
+
+
+            document.getElementById(
+                "detalleTitulo"
+            ).textContent =
+                `Ingreso #${ingreso.idIngreso}`;
+
+
+            document.getElementById(
+                "detalleProveedor"
+            ).textContent =
+                ingreso.nombreProveedor || "";
+
+
+            document.getElementById(
+                "detFactura"
+            ).textContent =
+                ingreso.numeroFactura;
+
+
+            document.getElementById(
+                "detFecha"
+            ).textContent =
+                new Date(
+                    ingreso.fechaFactura
+                ).toLocaleDateString(
+                    "es-NI"
+                );
+
+
+            document.getElementById(
+                "detSubtotal"
+            ).textContent =
+                formatoDinero(
+                    ingreso.subtotalFacturaProveedor
+                );
+
+
+            document.getElementById(
+                "detIVA"
+            ).textContent =
+                formatoDinero(
+                    ingreso.ivaFacturaProveedor
+                );
+
+
+            document.getElementById(
+                "detTotal"
+            ).textContent =
+                formatoDinero(
+                    ingreso.totalFacturaProveedor
+                );
+
+
+            const observacion =
+                ingreso.observacion;
+
+
+            const contenedor =
+                document.getElementById(
+                    "contenedorObservacion"
+                );
+
+
+            if (observacion) {
+
+                contenedor.style.display =
+                    "flex";
+
+                document.getElementById(
+                    "detObservacion"
+                ).textContent =
+                    observacion;
+
+            }
+            else {
+
+                contenedor.style.display =
+                    "none";
+
+            }
+
+
+            const cuerpo =
+                document.getElementById(
+                    "detalleProductos"
+                );
+
+
+            cuerpo.innerHTML = "";
+
+
+            data.detalles.forEach(
+                item => {
+
+
+                    const tr =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    const estadoCosto =
+                        item.costoAumento
+                            ? `
+                                <span class="movement-alert">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                    Costo aumentó
+                                </span>
+                              `
+                            : `
+                                <span class="movement-ok">
+                                    <i class="bi bi-check-circle"></i>
+                                    Sin aumento
+                                </span>
+                              `;
+
+
+                    tr.innerHTML = `
+
+                        <td>
+
+                            <div class="detail-product">
+
+                                <strong>
+                                    ${escapeHtml(item.nombreProducto)}
+                                </strong>
+
+                                <span>
+                                    ${escapeHtml(item.codBarra)}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                        <td class="text-end">
+                            ${Number(item.cantidad).toFixed(2)}
+                        </td>
+
+                        <td class="text-end">
+                            ${formatoDinero(item.costoAnterior)}
+                        </td>
+
+                        <td class="text-end">
+                            <strong>
+                                ${formatoDinero(item.costoUnitarioFinal)}
+                            </strong>
+                        </td>
+
+                        <td class="text-center">
+
+                            <span class="detail-tax">
+                                ${Number(item.tasaIVA).toFixed(0)}%
+                            </span>
+
+                        </td>
+
+                        <td class="text-end">
+                            ${formatoDinero(item.precioVentaAnterior)}
+                        </td>
+
+                        <td class="text-end">
+                            <strong>
+                                ${formatoDinero(item.precioVentaNuevo)}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${estadoCosto}
+                        </td>
+
+                    `;
+
+
+                    cuerpo.appendChild(
+                        tr
+                    );
+
+                }
+            );
+
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "modalIngreso"
+                )
+            ).show();
+
+        }
+        catch (error) {
+
+            Swal.fire({
+
+                icon: "error",
+
+                title:
+                    "No se pudo cargar",
+
+                text:
+                    error.message
+
+            });
+
+        }
+
+    }
+
+            function imprimirIngreso(id) {
+
+            window.open(
+                `/Ingresos/Reporte/${id}`,
+                "_blank"
+            );
+
+        }
+    function escapeHtml(valor) {
+
+        return String(valor ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+</script>
+
+}

@@ -1,179 +1,1097 @@
 ﻿@page
 @model Farmacia.Pages.ProveedoresModel
+
 @{
     ViewData["Title"] = "Proveedores";
+
+    var totalProveedores =
+        Model.Listado?.Count ?? 0;
 }
 
-<div class="container mt-4">
+<link rel="stylesheet"
+      href="~/css/proveedores.css"
+      asp-append-version="true" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold">Proveedores</h3>
 
-        <button class="btn btn-primary" onclick="nuevoProveedor()">
-            ➕ Nuevo Proveedor
+<div class="suppliers-page">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <section class="suppliers-header">
+
+        <div>
+
+            <div class="suppliers-eyebrow">
+
+                <i class="bi bi-truck"></i>
+
+                Catálogo
+
+            </div>
+
+
+            <h1>
+                Proveedores
+            </h1>
+
+
+            <p>
+                Administra los proveedores que abastecen
+                medicamentos y productos a la farmacia.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-supplier"
+                onclick="nuevoProveedor()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nuevo proveedor
+
         </button>
-    </div>
 
-    <div class="table-responsive shadow-sm">
-        <table class="table table-striped table-bordered align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width:80px;">ID</th>
-                    <th>Nombre</th>
-                    <th>Contacto</th>
-                    <th>Teléfono</th>
-                    <th style="width:170px;" class="text-center">Acciones</th>
-                </tr>
-            </thead>
+    </section>
 
-            <tbody>
-                @foreach (var p in Model.Listado)
-                {
-                    <tr>
-                        <td>@p.IdProveedor</td>
-                        <td>@p.NombreProveedor</td>
-                        <td>@p.Contacto</td>
-                        <td>@p.Telefono</td>
 
-                        <td class="text-center">
 
-                            <button class="btn btn-warning btn-sm btn-accion"
-                                    onclick="editar(@p.IdProveedor)">
-                                ✏️ Editar
-                            </button>
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
 
-                            <button class="btn btn-danger btn-sm btn-accion"
-                                    onclick="eliminar(@p.IdProveedor)">
-                                🗑️ Borrar
-                            </button>
+    <section class="suppliers-summary">
 
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+
+        <div class="supplier-summary-icon">
+
+            <i class="bi bi-truck"></i>
+
+        </div>
+
+
+        <div class="supplier-summary-data">
+
+            <span>
+                Proveedores registrados
+            </span>
+
+            <strong>
+                @totalProveedores
+            </strong>
+
+        </div>
+
+
+        <div class="supplier-summary-help">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+                Mantén actualizados los datos de contacto
+                para facilitar compras y abastecimiento.
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         BUSCADOR
+    ====================================================== -->
+
+    <section class="suppliers-toolbar">
+
+
+        <div class="supplier-search">
+
+            <i class="bi bi-search"></i>
+
+
+            <input type="text"
+                   id="txtBuscarProveedor"
+                   placeholder="Buscar por proveedor, contacto o teléfono..."
+                   autocomplete="off" />
+
+
+            <button type="button"
+                    id="btnLimpiarProveedor"
+                    class="btn-clear-supplier"
+                    title="Limpiar búsqueda"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="supplier-results">
+
+            <strong id="contadorProveedores">
+                @totalProveedores
+            </strong>
+
+            <span>
+                resultados
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <section class="suppliers-card">
+
+
+        <div class="suppliers-card-header">
+
+            <div>
+
+                <h2>
+                    Listado de proveedores
+                </h2>
+
+                <p>
+                    Proveedores disponibles para compras y productos.
+                </p>
+
+            </div>
+
+
+            <div class="suppliers-card-icon">
+
+                <i class="bi bi-list-ul"></i>
+
+            </div>
+
+        </div>
+
+
+
+        @if (Model.Listado != null &&
+             Model.Listado.Any())
+        {
+
+            <div class="suppliers-table-wrapper">
+
+
+                <table class="suppliers-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="supplier-id-column">
+                                Código
+                            </th>
+
+                            <th>
+                                Proveedor
+                            </th>
+
+                            <th>
+                                Contacto
+                            </th>
+
+                            <th>
+                                Teléfono
+                            </th>
+
+                            <th class="supplier-actions-column">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="proveedoresBody">
+
+
+                        @foreach (var proveedor in Model.Listado)
+                        {
+
+                            var filtro =
+                                $"{proveedor.NombreProveedor} {proveedor.Contacto} {proveedor.Telefono}"
+                                .ToLower();
+
+
+                            <tr class="supplier-row"
+                                data-proveedor="@filtro">
+
+
+                                <!-- CÓDIGO -->
+
+                                <td>
+
+                                    <span class="supplier-id">
+
+                                        #@proveedor.IdProveedor
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- PROVEEDOR -->
+
+                                <td>
+
+                                    <div class="supplier-information">
+
+
+                                        <div class="supplier-avatar">
+
+                                            <i class="bi bi-building"></i>
+
+                                        </div>
+
+
+                                        <div class="supplier-name">
+
+                                            <strong>
+
+                                                @proveedor.NombreProveedor
+
+                                            </strong>
+
+                                            <span>
+                                                Proveedor
+                                            </span>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- CONTACTO -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        proveedor.Contacto))
+                                    {
+
+                                        <div class="supplier-contact">
+
+                                            <i class="bi bi-person"></i>
+
+                                            <span>
+                                                @proveedor.Contacto
+                                            </span>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="supplier-empty-value">
+                                            Sin contacto
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- TELÉFONO -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        proveedor.Telefono))
+                                    {
+
+                                        <div class="supplier-phone">
+
+                                            <i class="bi bi-telephone"></i>
+
+                                            <span>
+                                                @proveedor.Telefono
+                                            </span>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="supplier-empty-value">
+                                            Sin teléfono
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- ACCIONES -->
+
+                                <td>
+
+                                    <div class="supplier-actions">
+
+
+                                        <button type="button"
+                                                class="supplier-action edit"
+                                                onclick="editarProveedor(@proveedor.IdProveedor)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                            <span>
+                                                Editar
+                                            </span>
+
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="supplier-action delete"
+                                                title="Eliminar proveedor"
+                                                onclick="eliminarProveedor(@proveedor.IdProveedor)">
+
+                                            <i class="bi bi-trash3"></i>
+
+                                        </button>
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div class="suppliers-no-results"
+                 id="sinResultadosProveedor"
+                 style="display:none;">
+
+
+                <div class="suppliers-empty-icon">
+
+                    <i class="bi bi-search"></i>
+
+                </div>
+
+
+                <strong>
+                    No encontramos proveedores
+                </strong>
+
+
+                <span>
+                    Intenta buscar por otro nombre,
+                    contacto o número telefónico.
+                </span>
+
+
+                <button type="button"
+                        onclick="limpiarBusquedaProveedor()">
+
+                    Limpiar búsqueda
+
+                </button>
+
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="suppliers-empty">
+
+
+                <div class="suppliers-empty-icon">
+
+                    <i class="bi bi-truck"></i>
+
+                </div>
+
+
+                <strong>
+                    No hay proveedores registrados
+                </strong>
+
+
+                <span>
+                    Registra tu primer proveedor para
+                    comenzar a asociarlo con los productos.
+                </span>
+
+
+                <button type="button"
+                        onclick="nuevoProveedor()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Nuevo proveedor
+
+                </button>
+
+
+            </div>
+
+        }
+
+
+    </section>
+
 
 </div>
 
 
-<!-- MODAL -->
-<div class="modal fade" id="modalProveedor" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
 
-            <form method="post">
+<!-- =========================================================
+     MODAL PROVEEDOR
+========================================================== -->
 
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Proveedor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<div class="modal fade"
+     id="modalProveedor"
+     tabindex="-1"
+     aria-hidden="true">
+
+
+    <div class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content supplier-modal">
+
+
+            <form method="post"
+                  id="formProveedor">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header supplier-modal-header">
+
+
+                    <div class="supplier-modal-title">
+
+
+                        <div class="supplier-modal-icon">
+
+                            <i class="bi bi-truck"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h5 id="modalProveedorTitulo">
+                                Nuevo proveedor
+                            </h5>
+
+                            <span id="modalProveedorSubtitulo">
+                                Registra los datos del proveedor.
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+
+
                 </div>
 
-                <div class="modal-body">
 
-                    <input type="hidden" id="Proveedor_IdProveedor"
+
+                <!-- BODY -->
+
+                <div class="modal-body supplier-modal-body">
+
+
+                    <input type="hidden"
+                           id="Proveedor_IdProveedor"
                            name="Proveedor.IdProveedor"
                            value="@Model.Proveedor?.IdProveedor" />
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre Proveedor</label>
-                        <input class="form-control"
-                               asp-for="Proveedor.NombreProveedor"
-                               required />
+
+
+                    <!-- NOMBRE -->
+
+                    <div class="supplier-field">
+
+                        <label asp-for="Proveedor.NombreProveedor">
+
+                            Nombre del proveedor
+
+                            <span>*</span>
+
+                        </label>
+
+
+                        <div class="supplier-input">
+
+                            <i class="bi bi-building"></i>
+
+
+                            <input asp-for="Proveedor.NombreProveedor"
+                                   placeholder="Ej. Distribuidora Farmacéutica S.A."
+                                   autocomplete="off"
+                                   required />
+
+                        </div>
+
+
+                        <span asp-validation-for="Proveedor.NombreProveedor"
+                              class="supplier-validation">
+                        </span>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Contacto</label>
-                        <input class="form-control"
-                               asp-for="Proveedor.Contacto" />
+
+
+                    <!-- CONTACTO -->
+
+                    <div class="supplier-field">
+
+                        <label asp-for="Proveedor.Contacto">
+
+                            Persona de contacto
+
+                        </label>
+
+
+                        <div class="supplier-input">
+
+                            <i class="bi bi-person"></i>
+
+
+                            <input asp-for="Proveedor.Contacto"
+                                   placeholder="Nombre del ejecutivo o contacto"
+                                   autocomplete="off" />
+
+                        </div>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Teléfono</label>
-                        <input class="form-control"
-                               asp-for="Proveedor.Telefono" />
+
+
+                    <!-- TELÉFONO -->
+
+                    <div class="supplier-field">
+
+                        <label asp-for="Proveedor.Telefono">
+
+                            Teléfono
+
+                        </label>
+
+
+                        <div class="supplier-input">
+
+                            <i class="bi bi-telephone"></i>
+
+
+                            <input asp-for="Proveedor.Telefono"
+                                   type="tel"
+                                   placeholder="Ej. 8888-8888"
+                                   autocomplete="off" />
+
+                        </div>
+
+
+                        <small>
+                            Número utilizado para contactar al proveedor.
+                        </small>
+
                     </div>
+
 
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary">Guardar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer supplier-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-supplier-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-supplier-save"
+                            id="btnGuardarProveedor">
+
+                        <i class="bi bi-check-lg"></i>
+
+                        <span id="textoGuardarProveedor">
+
+                            Guardar proveedor
+
+                        </span>
+
+                    </button>
+
+
                 </div>
+
 
             </form>
 
+
         </div>
+
+
     </div>
+
+
 </div>
 
 
+
 @section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+
     <script>
 
+
+        // =====================================================
+        // NUEVO
+        // =====================================================
+
         function nuevoProveedor() {
-            document.getElementById("Proveedor_IdProveedor").value = 0;
-            document.getElementById("Proveedor_NombreProveedor").value = "";
-            document.getElementById("Proveedor_Contacto").value = "";
-            document.getElementById("Proveedor_Telefono").value = "";
 
-            new bootstrap.Modal(document.getElementById("modalProveedor")).show();
+            document.getElementById(
+                "Proveedor_IdProveedor"
+            ).value = 0;
+
+
+            document.getElementById(
+                "Proveedor_NombreProveedor"
+            ).value = "";
+
+
+            document.getElementById(
+                "Proveedor_Contacto"
+            ).value = "";
+
+
+            document.getElementById(
+                "Proveedor_Telefono"
+            ).value = "";
+
+
+            document.getElementById(
+                "modalProveedorTitulo"
+            ).textContent =
+                "Nuevo proveedor";
+
+
+            document.getElementById(
+                "modalProveedorSubtitulo"
+            ).textContent =
+                "Registra los datos del proveedor.";
+
+
+            document.getElementById(
+                "textoGuardarProveedor"
+            ).textContent =
+                "Guardar proveedor";
+
+
+            const modal =
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalProveedor"
+                    )
+                );
+
+
+            modal.show();
+
+
+            document
+                .getElementById(
+                    "modalProveedor"
+                )
+                .addEventListener(
+                    "shown.bs.modal",
+                    function () {
+
+                        document.getElementById(
+                            "Proveedor_NombreProveedor"
+                        ).focus();
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
         }
 
-        function editar(id) {
-            window.location.href = "/Proveedores?id=" + id;
+
+
+        // =====================================================
+        // EDITAR
+        // =====================================================
+
+        function editarProveedor(id) {
+
+            window.location.href =
+                "/Proveedores?id=" + id;
+
         }
 
-        function eliminar(id) {
+
+
+        // =====================================================
+        // ELIMINAR
+        // =====================================================
+
+        function eliminarProveedor(id) {
+
             Swal.fire({
-                title: "¿Eliminar proveedor?",
-                text: "Esta acción no se puede deshacer.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar"
-            }).then((r) => {
-                if (r.isConfirmed) {
-                    window.location.href = "/Proveedores?eliminar=" + id;
+
+                title:
+                    "¿Eliminar proveedor?",
+
+                text:
+                    "Esta acción no se puede deshacer.",
+
+                icon:
+                    "warning",
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    "Sí, eliminar",
+
+                cancelButtonText:
+                    "Cancelar",
+
+                confirmButtonColor:
+                    "#d6535d"
+
+            })
+            .then((resultado) => {
+
+                if (resultado.isConfirmed) {
+
+                    window.location.href =
+                        "/Proveedores?eliminar=" +
+                        id;
+
                 }
+
             });
+
         }
 
-        // MENSAJE OK
-        @if (TempData["Ok"] != null)
-        {
-            <text>
-            Swal.fire({
-                icon: "success",
-                title: "Completado",
-                text: "@TempData["Ok"]",
-                timer: 1800,
-                showConfirmButton: false
+
+
+        // =====================================================
+        // BUSCADOR
+        // =====================================================
+
+        const inputProveedor =
+            document.getElementById(
+                "txtBuscarProveedor"
+            );
+
+
+        const btnLimpiarProveedor =
+            document.getElementById(
+                "btnLimpiarProveedor"
+            );
+
+
+        inputProveedor?.addEventListener(
+            "input",
+            filtrarProveedores
+        );
+
+
+
+        function filtrarProveedores() {
+
+            const filtro =
+                inputProveedor.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const filas =
+                document.querySelectorAll(
+                    ".supplier-row"
+                );
+
+
+            let visibles = 0;
+
+
+            filas.forEach(fila => {
+
+                const contenido =
+                    fila.dataset.proveedor || "";
+
+
+                const mostrar =
+                    contenido.includes(filtro);
+
+
+                fila.style.display =
+                    mostrar
+                        ? ""
+                        : "none";
+
+
+                if (mostrar) {
+                    visibles++;
+                }
+
             });
-            </text>
+
+
+
+            document.getElementById(
+                "contadorProveedores"
+            ).textContent =
+                visibles;
+
+
+
+            btnLimpiarProveedor.style.display =
+                filtro
+                    ? "flex"
+                    : "none";
+
+
+
+            const sinResultados =
+                document.getElementById(
+                    "sinResultadosProveedor"
+                );
+
+
+            if (sinResultados) {
+
+                sinResultados.style.display =
+                    visibles === 0
+                        ? "flex"
+                        : "none";
+
+            }
+
         }
 
-        // MENSAJE ERROR
-        @if (TempData["Error"] != null)
-        {
-            <text>
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "@TempData["Error"]"
-            });
-            </text>
+
+
+        function limpiarBusquedaProveedor() {
+
+            inputProveedor.value = "";
+
+            filtrarProveedores();
+
+            inputProveedor.focus();
+
         }
 
-        // ABRIR MODAL SI ES EDICIÓN
-        @if (TempData["Editar"] != null)
-        {
-            <text>
-            document.addEventListener("DOMContentLoaded", function() {
-                new bootstrap.Modal(document.getElementById("modalProveedor")).show();
-            });
-            </text>
-        }
+
+
+        btnLimpiarProveedor?.addEventListener(
+            "click",
+            limpiarBusquedaProveedor
+        );
+
+
+
+        // =====================================================
+        // EVITAR DOBLE GUARDADO
+        // =====================================================
+
+        document
+            .getElementById(
+                "formProveedor"
+            )
+            ?.addEventListener(
+                "submit",
+                function () {
+
+                    const boton =
+                        document.getElementById(
+                            "btnGuardarProveedor"
+                        );
+
+
+                    boton.disabled = true;
+
+
+                    boton.innerHTML = `
+
+                        <span class="spinner-border spinner-border-sm"></span>
+
+                        Guardando...
+                    `;
+
+                }
+            );
+
+
+
+        // =====================================================
+        // MENSAJES / EDICIÓN
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                @if (TempData["Ok"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "success",
+
+                                title:
+                                    "Completado",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Ok"]
+                                            )
+                                    ),
+
+                                timer:
+                                    1800,
+
+                                showConfirmButton:
+                                    false
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Error"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "error",
+
+                                title:
+                                    "No se pudo completar",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Error"]
+                                            )
+                                    )
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Editar"] != null)
+                {
+                        <text>
+
+                            document.getElementById(
+                                "modalProveedorTitulo"
+                            ).textContent =
+                                "Editar proveedor";
+
+
+                            document.getElementById(
+                                "modalProveedorSubtitulo"
+                            ).textContent =
+                                "Actualiza los datos del proveedor seleccionado.";
+
+
+                            document.getElementById(
+                                "textoGuardarProveedor"
+                            ).textContent =
+                                "Guardar cambios";
+
+
+                            new bootstrap.Modal(
+                                document.getElementById(
+                                    "modalProveedor"
+                                )
+                            ).show();
+
+                        </text>
+                }
+
+
+            }
+        );
+
 
     </script>
+
 }

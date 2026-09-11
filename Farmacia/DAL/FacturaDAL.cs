@@ -62,7 +62,7 @@ namespace Farmacia.DAL
 
             using var cn = new SqlConnection(_cn);
             using var cmd = new SqlCommand(@"
-        SELECT IdFactura, IdFacturaCliente, Fecha, Paciente, Total, PagoCordoba, PagoDolar, Vuelto
+        SELECT IdFactura, IdFacturaCliente, Fecha, Paciente, Total, PagoCordoba, PagoDolar, Vuelto,TasaCambio
         FROM tbFactura
         WHERE CONVERT(date, Fecha) BETWEEN @F1 AND @F2
         ORDER BY Fecha DESC", cn);
@@ -83,7 +83,8 @@ namespace Farmacia.DAL
                     Total = dr.GetDecimal(4),
                     PagoCordoba = dr.GetDecimal(5),
                     PagoDolar = dr.GetDecimal(6),
-                    Vuelto = dr.GetDecimal(7)
+                    Vuelto = dr.GetDecimal(7),
+                    TasaCambio = dr.GetDecimal(8)
                 });
             }
 
@@ -117,8 +118,9 @@ namespace Farmacia.DAL
                 factura.Telefono = dr["Telefono"].ToString();
                 factura.IdFactura = dr.GetInt32(dr.GetOrdinal("IdFactura"));
                 factura.Fecha = dr.GetDateTime(dr.GetOrdinal("Fecha"));
+                factura.TasaCambio = dr.GetDecimal(dr.GetOrdinal("TasaCambio"));
                 factura.Paciente = dr["Paciente"].ToString();
-                factura.Total = dr.GetDecimal(dr.GetOrdinal("Total"));
+                factura.Total = dr.GetDecimal(dr.GetOrdinal("Total"));             
                 factura.PagoCordoba = dr.GetDecimal(dr.GetOrdinal("PagoCordoba"));
                 factura.PagoDolar = dr.GetDecimal(dr.GetOrdinal("PagoDolar"));
                 factura.Vuelto = dr.GetDecimal(dr.GetOrdinal("Vuelto"));

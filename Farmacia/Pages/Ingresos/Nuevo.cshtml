@@ -1,0 +1,2281 @@
+﻿@page
+@model Farmacia.Pages.Ingresos.NuevoModel
+@{
+    ViewData["Title"] = "Ingreso de mercadería";
+}
+
+<link rel="stylesheet"
+      href="~/css/ingreso-mercaderia.css"
+      asp-append-version="true" />
+
+
+<div class="entry-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="entry-header">
+
+        <div>
+
+            <div class="entry-eyebrow">
+
+                <i class="bi bi-box-arrow-in-down"></i>
+
+                Inventario
+
+            </div>
+
+
+            <h1>
+                Ingreso de mercadería
+            </h1>
+
+
+            <p>
+                Registra la factura del proveedor,
+                valida costos, IVA, precios e inventario.
+            </p>
+
+        </div>
+
+
+        <div class="entry-status pending"
+             id="estadoFactura">
+
+            <span class="entry-status-dot"></span>
+
+            Pendiente de validación
+
+        </div>
+
+    </section>
+
+
+
+    <form method="post"
+          asp-page-handler="Confirmar"
+          id="formIngreso">
+
+
+        <input type="hidden"
+               asp-for="DetalleJson"
+               id="DetalleJson" />
+
+
+        <!-- =================================================
+             ERRORES
+        ================================================== -->
+
+        <div asp-validation-summary="ModelOnly"
+             class="entry-validation">
+        </div>
+
+
+
+        <!-- =================================================
+             FACTURA
+        ================================================== -->
+
+        <section class="entry-card">
+
+
+            <div class="entry-card-header">
+
+
+                <div class="entry-card-title">
+
+                    <div class="entry-card-icon">
+
+                        <i class="bi bi-receipt"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2>
+                            Factura del proveedor
+                        </h2>
+
+                        <p>
+                            Digita exactamente los valores
+                            mostrados en la factura física.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="invoice-entry-grid">
+
+
+                <div class="entry-field provider-field">
+
+                    <label asp-for="Ingreso.IdProveedor">
+
+                        Proveedor
+                        <span>*</span>
+
+                    </label>
+
+
+                    <div class="entry-control">
+
+                        <i class="bi bi-truck"></i>
+
+
+                        <select asp-for="Ingreso.IdProveedor">
+
+                            <option value="0">
+                                Seleccione proveedor
+                            </option>
+
+                            @foreach (var proveedor in Model.Proveedores)
+                            {
+                                <option value="@proveedor.IdProveedor">
+
+                                    @proveedor.NombreProveedor
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <span asp-validation-for="Ingreso.IdProveedor"
+                          class="entry-field-error">
+                    </span>
+
+                </div>
+
+
+
+                <div class="entry-field">
+
+                    <label asp-for="Ingreso.NumeroFactura">
+
+                        Número de factura
+                        <span>*</span>
+
+                    </label>
+
+
+                    <div class="entry-control">
+
+                        <i class="bi bi-receipt-cutoff"></i>
+
+                        <input asp-for="Ingreso.NumeroFactura"
+                               placeholder="Ej. 001-002-45878"
+                               autocomplete="off" />
+
+                    </div>
+
+
+                    <span asp-validation-for="Ingreso.NumeroFactura"
+                          class="entry-field-error">
+                    </span>
+
+                </div>
+
+
+
+                <div class="entry-field">
+
+                    <label asp-for="Ingreso.FechaFactura">
+
+                        Fecha factura
+                        <span>*</span>
+
+                    </label>
+
+
+                    <div class="entry-control">
+
+                        <i class="bi bi-calendar3"></i>
+
+                        <input asp-for="Ingreso.FechaFactura"
+                               type="date" />
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUCTOS
+        ================================================== -->
+
+        <section class="entry-card product-entry-card">
+
+
+            <div class="entry-card-header">
+
+
+                <div class="entry-card-title">
+
+                    <div class="entry-card-icon">
+
+                        <i class="bi bi-box-seam"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2>
+                            Productos recibidos
+                        </h2>
+
+                        <p>
+                            Agrega los artículos contenidos
+                            en la factura del proveedor.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <button type="button"
+                        class="btn-add-entry-product"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalBuscarProducto">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Agregar producto
+
+                </button>
+
+
+            </div>
+
+
+
+            <div class="entry-products-wrapper">
+
+
+                <table class="entry-products-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Producto
+                            </th>
+
+                            <th class="text-end">
+                                Cantidad
+                            </th>
+
+                            <th class="text-end">
+                                Costo base
+                            </th>
+
+                            <th class="text-center">
+                                IVA
+                            </th>
+
+                            <th class="text-end">
+                                Costo real
+                            </th>
+
+                            <th class="text-end">
+                                Precio venta
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="detalleIngreso">
+                    </tbody>
+
+
+                </table>
+
+
+
+                <div class="entry-empty"
+                     id="detalleVacio">
+
+
+                    <div>
+
+                        <i class="bi bi-box-seam"></i>
+
+                    </div>
+
+
+                    <strong>
+                        Sin productos
+                    </strong>
+
+
+                    <span>
+                        Agrega los productos de la factura
+                        para comenzar la validación.
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             VALIDACIÓN
+        ================================================== -->
+
+        <section class="entry-totals-layout">
+
+
+            <!-- FACTURA FÍSICA -->
+
+            <div class="entry-card physical-invoice">
+
+
+                <div class="entry-card-header">
+
+                    <div class="entry-card-title">
+
+                        <div class="entry-card-icon">
+
+                            <i class="bi bi-file-earmark-text"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h2>
+                                Factura física
+                            </h2>
+
+                            <p>
+                                Totales impresos por el proveedor.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="physical-values">
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Subtotal
+                        </label>
+
+
+                        <div class="money-control">
+
+                            <span>C$</span>
+
+                            <input asp-for="Ingreso.SubtotalFacturaProveedor"
+                                   type="number"
+                                   min="0"
+                                   step="0.01"
+                                   class="physical-value" />
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            IVA
+                        </label>
+
+
+                        <div class="money-control">
+
+                            <span>C$</span>
+
+                            <input asp-for="Ingreso.IVAFacturaProveedor"
+                                   type="number"
+                                   min="0"
+                                   step="0.01"
+                                   class="physical-value" />
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Total factura
+                        </label>
+
+
+                        <div class="money-control total">
+
+                            <span>C$</span>
+
+                            <input asp-for="Ingreso.TotalFacturaProveedor"
+                                   type="number"
+                                   min="0"
+                                   step="0.01"
+                                   class="physical-value" />
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- SISTEMA -->
+
+            <div class="entry-card system-validation">
+
+
+                <div class="validation-title">
+
+                    <div>
+
+                        <span>
+                            VALIDACIÓN DEL SISTEMA
+                        </span>
+
+                        <h2>
+                            Comparación de factura
+                        </h2>
+
+                    </div>
+
+
+                    <i class="bi bi-calculator"></i>
+
+                </div>
+
+
+
+                <div class="system-total-row">
+
+                    <span>
+                        Subtotal sistema
+                    </span>
+
+                    <strong id="lblSubtotalSistema">
+                        C$ 0.00
+                    </strong>
+
+                </div>
+
+
+
+                <div class="system-total-row">
+
+                    <span>
+                        IVA sistema
+                    </span>
+
+                    <strong id="lblIVASistema">
+                        C$ 0.00
+                    </strong>
+
+                </div>
+
+
+
+                <div class="system-total-row total">
+
+                    <span>
+                        Total sistema
+                    </span>
+
+                    <strong id="lblTotalSistema">
+                        C$ 0.00
+                    </strong>
+
+                </div>
+
+
+
+                <div class="invoice-match pending"
+                     id="resultadoValidacion">
+
+                    <i class="bi bi-info-circle"></i>
+
+                    <div>
+
+                        <strong>
+                            Pendiente
+                        </strong>
+
+                        <span>
+                            Ingresa los productos y los valores
+                            de la factura física.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             OBSERVACIÓN
+        ================================================== -->
+
+        <section class="entry-card entry-observation">
+
+
+            <div class="entry-field">
+
+                <label asp-for="Ingreso.Observacion">
+                    Observación
+                </label>
+
+
+                <textarea asp-for="Ingreso.Observacion"
+                          rows="3"
+                          placeholder="Información adicional del ingreso...">
+                </textarea>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <div class="entry-footer">
+
+
+            <div class="entry-footer-info">
+
+                <i class="bi bi-shield-check"></i>
+
+                <span>
+                    El inventario se actualizará únicamente
+                    cuando confirmes el ingreso.
+                </span>
+
+            </div>
+
+
+            <button type="submit"
+                    class="btn-confirm-entry"
+                    id="btnConfirmarIngreso"
+                    disabled>
+
+                <i class="bi bi-check2-circle"></i>
+
+                Confirmar ingreso
+
+            </button>
+
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     BUSCAR PRODUCTO
+========================================================== -->
+
+<div class="modal fade"
+     id="modalBuscarProducto"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content entry-modal">
+
+
+            <div class="modal-header entry-modal-header">
+
+
+                <div>
+
+                    <h5>
+                        Buscar producto
+                    </h5>
+
+                    <span>
+                        Busca por nombre o código de barra.
+                    </span>
+
+                </div>
+
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+
+            </div>
+
+
+            <div class="modal-body">
+
+
+                <div class="entry-product-search">
+
+                    <i class="bi bi-search"></i>
+
+
+                    <input type="text"
+                           id="txtBuscarProducto"
+                           placeholder="Nombre o código..."
+                           autocomplete="off" />
+
+
+                    <button type="button"
+                            onclick="buscarProductos()">
+
+                        Buscar
+
+                    </button>
+
+                </div>
+
+
+
+                <div class="product-search-results">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Producto
+                                </th>
+
+                                <th>
+                                    Existencia
+                                </th>
+
+                                <th>
+                                    Costo actual
+                                </th>
+
+                                <th>
+                                    Venta
+                                </th>
+
+                                <th></th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="productosEncontrados">
+                        </tbody>
+
+                    </table>
+
+
+                    <div class="search-products-empty"
+                         id="buscarProductoMensaje">
+
+                        Escribe un producto para buscar.
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     DETALLE DEL PRODUCTO
+========================================================== -->
+
+<div class="modal fade"
+     id="modalDetalleProducto"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered
+                modal-dialog-scrollable">
+
+
+        <div class="modal-content entry-modal">
+
+
+            <div class="modal-header entry-modal-header">
+
+
+                <div>
+
+                    <h5 id="lineaProductoNombre">
+                        Producto
+                    </h5>
+
+                    <span id="lineaProductoCodigo">
+                    </span>
+
+                </div>
+
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+
+            </div>
+
+
+
+            <div class="modal-body">
+
+
+                <input type="hidden"
+                       id="lineaIdProducto" />
+
+
+                <div class="current-product-info">
+
+
+                    <div>
+
+                        <span>
+                            Existencia actual
+                        </span>
+
+                        <strong id="lineaInventarioActual">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Costo actual
+                        </span>
+
+                        <strong id="lineaCostoAnterior">
+                            C$ 0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Costo promedio
+                        </span>
+
+                        <strong id="lineaCostoPromedio">
+                            C$ 0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Precio venta
+                        </span>
+
+                        <strong id="lineaPrecioAnterior">
+                            C$ 0.00
+                        </strong>
+
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Utilidad configurada
+                        </span>
+
+                        <strong id="lineaPorcentajeUtilidad">
+                            0.00%
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="line-entry-grid">
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Cantidad
+                        </label>
+
+                        <input type="number"
+                               id="lineaCantidad"
+                               min="0.01"
+                               step="0.01"
+                               value="1" />
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Costo antes de IVA
+                        </label>
+
+                        <input type="number"
+                               id="lineaCostoBase"
+                               min="0"
+                               step="0.01"
+                               placeholder="0.00" />
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            IVA
+                        </label>
+
+                        <select id="lineaIVA">
+
+                            <option value="0">
+                                Exento 0%
+                            </option>
+
+                            <option value="15">
+                                Gravado 15%
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="entry-field calculated">
+
+                        <label>
+                            Costo real
+                        </label>
+
+                        <strong id="lineaCostoFinal">
+                            C$ 0.00
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Precio sugerido
+                        </label>
+
+                        <input type="number"
+                               id="lineaPrecioSugerido"
+                               min="0"
+                               step="0.01" />
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Precio de venta que quedará
+                        </label>
+
+                        <input type="number"
+                               id="lineaPrecioNuevo"
+                               min="0.01"
+                               step="0.01" />
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Número de lote
+                        </label>
+
+                        <input type="text"
+                               id="lineaLote"
+                               maxlength="50" />
+
+                    </div>
+
+
+
+                    <div class="entry-field">
+
+                        <label>
+                            Fecha de vencimiento
+                        </label>
+
+                        <input type="date"
+                               id="lineaVencimiento" />
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="cost-warning"
+                     id="alertaCosto"
+                     style="display:none;">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+
+                    <div>
+
+                        <strong>
+                            El costo aumentó
+                        </strong>
+
+                        <span id="textoAumentoCosto">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="modal-footer entry-modal-footer">
+
+
+                <button type="button"
+                        class="btn-entry-cancel"
+                        data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+
+                <button type="button"
+                        class="btn-entry-save"
+                        onclick="guardarLinea()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Agregar producto
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+@section Scripts {
+
+    <script>
+
+        let detalleIngreso = [];
+
+        let productoSeleccionado = null;
+        let precioVentaModificado = false;
+
+
+        // =========================================================
+        // FORMATOS
+        // =========================================================
+
+        const dinero = valor =>
+            "C$ " +
+            Number(valor || 0)
+                .toLocaleString(
+                    "es-NI",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                );
+
+
+        const redondear = valor =>
+            Math.round(
+                (Number(valor) + Number.EPSILON) * 100
+            ) / 100;
+
+
+
+        // =========================================================
+        // BUSCAR
+        // =========================================================
+
+        document
+            .getElementById("txtBuscarProducto")
+            .addEventListener(
+                "keydown",
+                function (e) {
+
+                    if (e.key === "Enter") {
+
+                        e.preventDefault();
+
+                        buscarProductos();
+
+                    }
+
+                }
+            );
+
+
+        async function buscarProductos() {
+
+            const filtro =
+                document.getElementById(
+                    "txtBuscarProducto"
+                ).value.trim();
+
+
+            if (!filtro) {
+                return;
+            }
+
+
+            const respuesta =
+                await fetch(
+                    `?handler=BuscarProductos&filtro=${encodeURIComponent(filtro)}`
+                );
+
+
+            const datos =
+                await respuesta.json();
+
+
+            const cuerpo =
+                document.getElementById(
+                    "productosEncontrados"
+                );
+
+
+            cuerpo.innerHTML = "";
+
+
+            const mensaje =
+                document.getElementById(
+                    "buscarProductoMensaje"
+                );
+
+
+            if (!datos.length) {
+
+                mensaje.style.display =
+                    "block";
+
+                mensaje.textContent =
+                    "No encontramos productos.";
+
+                return;
+            }
+
+
+            mensaje.style.display =
+                "none";
+
+
+            datos.forEach(
+                producto => {
+
+
+                    const tr =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    tr.innerHTML = `
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(producto.nombreProducto)}
+                            </strong>
+
+                            <small>
+                                ${escapeHtml(producto.codBarra)}
+                            </small>
+                        </td>
+
+                        <td>
+                            ${Number(producto.inventario).toFixed(2)}
+                        </td>
+
+                        <td>
+                            ${dinero(producto.precioCosto)}
+                        </td>
+
+                        <td>
+                            ${dinero(producto.precioVenta)}
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="btn-select-product">
+                                Agregar
+                            </button>
+                        </td>
+
+                    `;
+
+
+                    tr.querySelector(
+                        "button"
+                    ).addEventListener(
+                        "click",
+                        function () {
+
+                            seleccionarProducto(
+                                producto
+                            );
+
+                        }
+                    );
+
+
+                    cuerpo.appendChild(
+                        tr
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        // =========================================================
+        // SELECCIONAR
+        // =========================================================
+
+        function seleccionarProducto(
+            producto)
+        {
+
+            if (
+                detalleIngreso.some(
+                    x =>
+                        x.IdProducto ===
+                        producto.idProducto
+                )
+            ) {
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Producto agregado",
+                    text: "Este producto ya está incluido en el ingreso."
+                });
+
+                return;
+            }
+
+
+            productoSeleccionado =
+                producto;
+
+
+            document.getElementById(
+                "lineaIdProducto"
+            ).value =
+                producto.idProducto;
+
+
+            document.getElementById(
+                "lineaProductoNombre"
+            ).textContent =
+                producto.nombreProducto;
+
+
+            document.getElementById(
+                "lineaProductoCodigo"
+            ).textContent =
+                producto.codBarra;
+
+
+            document.getElementById(
+                "lineaInventarioActual"
+            ).textContent =
+                Number(
+                    producto.inventario
+                ).toFixed(2);
+
+
+            document.getElementById(
+                "lineaCostoAnterior"
+            ).textContent =
+                dinero(
+                    producto.precioCosto
+                );
+
+
+            document.getElementById(
+                "lineaCostoPromedio"
+            ).textContent =
+                dinero(
+                    producto.costoPromedio
+                );
+
+
+       
+
+                        document.getElementById(
+            "lineaPorcentajeUtilidad"
+        ).textContent =
+            Number(
+                producto.porcentajeUtilidad || 0
+            ).toFixed(2) + "%";
+
+
+            precioVentaModificado = false;
+
+            document.getElementById(
+                "lineaCantidad"
+            ).value = 1;
+
+
+                  const costoActual =
+            Number(
+                producto.precioCosto
+            ) || 0;
+
+
+        const tasaIVA =
+            Number(
+                producto.tasaIVA
+            ) || 0;
+
+
+        /*
+            PrecioCosto del catálogo representa
+            el COSTO REAL vigente.
+
+            Si tiene IVA, calculamos hacia atrás
+            el costo base antes de IVA.
+        */
+        const costoBaseActual =
+            tasaIVA > 0
+                ? costoActual / (1 + tasaIVA / 100)
+                : costoActual;
+
+
+        document.getElementById(
+            "lineaCostoBase"
+        ).value =
+            costoBaseActual.toFixed(2);
+
+            document.getElementById(
+                "lineaIVA"
+            ).value =
+                Number(producto.tasaIVA) === 15
+                    ? "15"
+                    : "0";
+
+
+            document.getElementById(
+                "lineaPrecioSugerido"
+            ).value =
+                Number(
+                    producto.precioVenta
+                ).toFixed(2);
+
+
+            document.getElementById(
+                "lineaPrecioNuevo"
+            ).value =
+                Number(
+                    producto.precioVenta
+                ).toFixed(2);
+
+
+            document.getElementById(
+                "lineaLote"
+            ).value = "";
+
+
+            document.getElementById(
+                "lineaVencimiento"
+            ).value = "";
+
+
+            actualizarVistaLinea();
+
+
+            bootstrap.Modal.getInstance(
+                document.getElementById(
+                    "modalBuscarProducto"
+                )
+            )?.hide();
+
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "modalDetalleProducto"
+                )
+            ).show();
+
+        }
+
+
+
+        // =========================================================
+        // CALCULAR LÍNEA
+        // =========================================================
+
+        [
+            "lineaCantidad",
+            "lineaCostoBase",
+            "lineaIVA"
+        ]
+        .forEach(
+            id => {
+
+                document
+                    .getElementById(id)
+                    .addEventListener(
+                        "input",
+                        actualizarVistaLinea
+                    );
+
+            }
+        );
+
+
+               function actualizarVistaLinea() {
+
+            if (!productoSeleccionado) {
+                return;
+            }
+
+
+            const costoBase =
+                Number(
+                    document.getElementById(
+                        "lineaCostoBase"
+                    ).value
+                ) || 0;
+
+
+            const iva =
+                Number(
+                    document.getElementById(
+                        "lineaIVA"
+                    ).value
+                ) || 0;
+
+
+            const costoFinal =
+                redondear(
+                    costoBase *
+                    (
+                        1 +
+                        iva / 100
+                    )
+                );
+
+
+            const porcentajeUtilidad =
+                Number(
+                    productoSeleccionado
+                        .porcentajeUtilidad
+                ) || 0;
+
+
+            const precioSugerido =
+                redondear(
+                    costoFinal *
+                    (
+                        1 +
+                        porcentajeUtilidad / 100
+                    )
+                );
+
+
+            document.getElementById(
+                "lineaCostoFinal"
+            ).textContent =
+                dinero(
+                    costoFinal
+                );
+
+
+            document.getElementById(
+                "lineaPrecioSugerido"
+            ).value =
+                precioSugerido.toFixed(2);
+
+
+            if (!precioVentaModificado) {
+
+                document.getElementById(
+                    "lineaPrecioNuevo"
+                ).value =
+                    precioSugerido.toFixed(2);
+
+            }
+
+
+            // =============================================
+            // VALIDAR AUMENTO DE COSTO
+            // =============================================
+
+            const anterior =
+                Number(
+                    productoSeleccionado
+                        .precioCosto
+                ) || 0;
+
+
+            const alerta =
+                document.getElementById(
+                    "alertaCosto"
+                );
+
+
+            if (
+                anterior > 0 &&
+                costoFinal > anterior
+            ) {
+
+                const aumento =
+                    costoFinal -
+                    anterior;
+
+
+                const porcentaje =
+                    (
+                        aumento /
+                        anterior
+                    ) * 100;
+
+
+                alerta.style.display =
+                    "flex";
+
+
+                document.getElementById(
+                    "textoAumentoCosto"
+                ).textContent =
+                    `${dinero(anterior)} → ${dinero(costoFinal)} · +${porcentaje.toFixed(2)}%`;
+
+            }
+            else {
+
+                alerta.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+
+        // =========================================================
+        // GUARDAR LÍNEA
+        // =========================================================
+
+        function guardarLinea() {
+
+            if (!productoSeleccionado) {
+                return;
+            }
+
+
+            const cantidad =
+                Number(
+                    document.getElementById(
+                        "lineaCantidad"
+                    ).value
+                );
+
+
+            const costoBase =
+                Number(
+                    document.getElementById(
+                        "lineaCostoBase"
+                    ).value
+                );
+
+
+            const tasaIVA =
+                Number(
+                    document.getElementById(
+                        "lineaIVA"
+                    ).value
+                );
+
+
+            const precioSugerido =
+                Number(
+                    document.getElementById(
+                        "lineaPrecioSugerido"
+                    ).value
+                );
+
+
+            const precioNuevo =
+                Number(
+                    document.getElementById(
+                        "lineaPrecioNuevo"
+                    ).value
+                );
+
+
+            if (
+                cantidad <= 0 ||
+                costoBase < 0 ||
+                precioNuevo <= 0
+            ) {
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Revisa los valores",
+                    text: "Cantidad, costo y precio de venta deben ser válidos."
+                });
+
+                return;
+            }
+
+
+            const costoFinal =
+                redondear(
+                    costoBase *
+                    (
+                        1 +
+                        tasaIVA / 100
+                    )
+                );
+
+
+            detalleIngreso.push({
+
+                IdProducto:
+                    productoSeleccionado.idProducto,
+
+                CodBarra:
+                    productoSeleccionado.codBarra,
+
+                NombreProducto:
+                    productoSeleccionado.nombreProducto,
+
+                Cantidad:
+                    cantidad,
+
+                CostoAnterior:
+                    Number(
+                        productoSeleccionado.precioCosto
+                    ),
+
+                CostoPromedioAnterior:
+                    Number(
+                        productoSeleccionado.costoPromedio
+                    ),
+
+                InventarioAnterior:
+                    Number(
+                        productoSeleccionado.inventario
+                    ),
+
+                CostoUnitarioBase:
+                    costoBase,
+
+                TasaIVA:
+                    tasaIVA,
+
+                CostoUnitarioFinal:
+                    costoFinal,
+
+                PrecioVentaAnterior:
+                    Number(
+                        productoSeleccionado.precioVenta
+                    ),
+
+                PrecioVentaSugerido:
+                    precioSugerido || null,
+
+                PrecioVentaNuevo:
+                    precioNuevo,
+
+                NumeroLote:
+                    document.getElementById(
+                        "lineaLote"
+                    ).value.trim(),
+
+                FechaVencimiento:
+                    document.getElementById(
+                        "lineaVencimiento"
+                    ).value || null
+
+            });
+
+
+            renderDetalle();
+
+
+            bootstrap.Modal.getInstance(
+                document.getElementById(
+                    "modalDetalleProducto"
+                )
+            )?.hide();
+
+
+            productoSeleccionado =
+                null;
+
+        }
+
+
+
+        // =========================================================
+        // RENDER
+        // =========================================================
+
+        function renderDetalle() {
+
+            const cuerpo =
+                document.getElementById(
+                    "detalleIngreso"
+                );
+
+
+            cuerpo.innerHTML = "";
+
+
+            detalleIngreso.forEach(
+                (item, indice) => {
+
+
+                    const subeCosto =
+                        item.CostoUnitarioFinal >
+                        item.CostoAnterior;
+
+
+                    const precioDistinto =
+                        item.PrecioVentaSugerido &&
+                        item.PrecioVentaSugerido !==
+                        item.PrecioVentaAnterior;
+
+
+                    const tr =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    tr.innerHTML = `
+
+                        <td>
+
+                            <div class="entry-product-name">
+
+                                <strong>
+                                    ${escapeHtml(item.NombreProducto)}
+                                </strong>
+
+                                <span>
+                                    ${escapeHtml(item.CodBarra)}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                        <td class="text-end">
+                            ${Number(item.Cantidad).toFixed(2)}
+                        </td>
+
+                        <td class="text-end">
+                            ${dinero(item.CostoUnitarioBase)}
+                        </td>
+
+                        <td class="text-center">
+
+                            <span class="tax-badge ${item.TasaIVA > 0 ? "taxed" : "exempt"}">
+
+                                ${Number(item.TasaIVA).toFixed(0)}%
+
+                            </span>
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <strong>
+                                ${dinero(item.CostoUnitarioFinal)}
+                            </strong>
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <strong>
+                                ${dinero(item.PrecioVentaNuevo)}
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            ${
+                                subeCosto
+                                ? `
+                                    <span class="entry-alert cost">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                        Costo aumentó
+                                    </span>
+                                  `
+                                : ""
+                            }
+
+                            ${
+                                precioDistinto
+                                ? `
+                                    <span class="entry-alert price">
+                                        <i class="bi bi-tag"></i>
+                                        Precio sugerido
+                                    </span>
+                                  `
+                                : ""
+                            }
+
+                            ${
+                                !subeCosto &&
+                                !precioDistinto
+                                ? `
+                                    <span class="entry-ok">
+                                        <i class="bi bi-check-circle"></i>
+                                        Sin cambios
+                                    </span>
+                                  `
+                                : ""
+                            }
+
+                        </td>
+
+                        <td>
+
+                            <button type="button"
+                                    class="btn-remove-entry"
+                                    onclick="eliminarLinea(${indice})">
+
+                                <i class="bi bi-trash3"></i>
+
+                            </button>
+
+                        </td>
+
+                    `;
+
+
+                    cuerpo.appendChild(
+                        tr
+                    );
+
+                }
+            );
+
+
+            document.getElementById(
+                "detalleVacio"
+            ).style.display =
+                detalleIngreso.length
+                    ? "none"
+                    : "flex";
+
+
+            document.getElementById(
+                "DetalleJson"
+            ).value =
+                JSON.stringify(
+                    detalleIngreso
+                );
+
+
+            calcularTotales();
+
+        }
+
+
+
+        // =========================================================
+        // ELIMINAR
+        // =========================================================
+
+        function eliminarLinea(indice) {
+
+            detalleIngreso.splice(
+                indice,
+                1
+            );
+
+
+            renderDetalle();
+
+        }
+
+
+
+        // =========================================================
+        // TOTALES
+        // =========================================================
+
+        document
+            .querySelectorAll(
+                ".physical-value"
+            )
+            .forEach(
+                input => {
+
+                    input.addEventListener(
+                        "input",
+                        calcularTotales
+                    );
+
+                }
+            );
+
+
+        function calcularTotales() {
+
+            let subtotalSistema = 0;
+
+            let ivaSistema = 0;
+
+
+            detalleIngreso.forEach(
+                item => {
+
+
+                    const subtotalLinea =
+                        redondear(
+                            item.Cantidad *
+                            item.CostoUnitarioBase
+                        );
+
+
+                    const ivaLinea =
+                        redondear(
+                            subtotalLinea *
+                            (
+                                item.TasaIVA /
+                                100
+                            )
+                        );
+
+
+                    subtotalSistema +=
+                        subtotalLinea;
+
+
+                    ivaSistema +=
+                        ivaLinea;
+
+                }
+            );
+
+
+            subtotalSistema =
+                redondear(
+                    subtotalSistema
+                );
+
+
+            ivaSistema =
+                redondear(
+                    ivaSistema
+                );
+
+
+            const totalSistema =
+                redondear(
+                    subtotalSistema +
+                    ivaSistema
+                );
+
+
+            document.getElementById(
+                "lblSubtotalSistema"
+            ).textContent =
+                dinero(
+                    subtotalSistema
+                );
+
+
+            document.getElementById(
+                "lblIVASistema"
+            ).textContent =
+                dinero(
+                    ivaSistema
+                );
+
+
+            document.getElementById(
+                "lblTotalSistema"
+            ).textContent =
+                dinero(
+                    totalSistema
+                );
+
+
+            validarFactura(
+                subtotalSistema,
+                ivaSistema,
+                totalSistema
+            );
+
+        }
+
+
+
+        // =========================================================
+        // VALIDAR FACTURA
+        // =========================================================
+
+        function validarFactura(
+            subtotalSistema,
+            ivaSistema,
+            totalSistema)
+        {
+
+            const subtotalFisico =
+                Number(
+                    document.getElementById(
+                        "Ingreso_SubtotalFacturaProveedor"
+                    ).value
+                ) || 0;
+
+
+            const ivaFisico =
+                Number(
+                    document.getElementById(
+                        "Ingreso_IVAFacturaProveedor"
+                    ).value
+                ) || 0;
+
+
+            const totalFisico =
+                Number(
+                    document.getElementById(
+                        "Ingreso_TotalFacturaProveedor"
+                    ).value
+                ) || 0;
+
+
+            const coincideSubtotal =
+                Math.abs(
+                    subtotalSistema -
+                    subtotalFisico
+                ) <= 0.01;
+
+
+            const coincideIVA =
+                Math.abs(
+                    ivaSistema -
+                    ivaFisico
+                ) <= 0.01;
+
+
+            const coincideTotal =
+                Math.abs(
+                    totalSistema -
+                    totalFisico
+                ) <= 0.01;
+
+
+            const valido =
+                detalleIngreso.length > 0 &&
+                coincideSubtotal &&
+                coincideIVA &&
+                coincideTotal;
+
+
+            const resultado =
+                document.getElementById(
+                    "resultadoValidacion"
+                );
+
+
+            const estado =
+                document.getElementById(
+                    "estadoFactura"
+                );
+
+
+            const boton =
+                document.getElementById(
+                    "btnConfirmarIngreso"
+                );
+
+
+            if (valido) {
+
+                resultado.className =
+                    "invoice-match success";
+
+
+                resultado.innerHTML = `
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                    <div>
+
+                        <strong>
+                            Factura verificada
+                        </strong>
+
+                        <span>
+                            Los valores físicos coinciden con el sistema.
+                        </span>
+
+                    </div>
+                `;
+
+
+                estado.className =
+                    "entry-status success";
+
+
+                estado.innerHTML = `
+
+                    <span class="entry-status-dot"></span>
+
+                    Factura verificada
+                `;
+
+
+                boton.disabled =
+                    false;
+
+            }
+            else {
+
+                resultado.className =
+                    "invoice-match warning";
+
+
+                resultado.innerHTML = `
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                    <div>
+
+                        <strong>
+                            Factura no coincide
+                        </strong>
+
+                        <span>
+                            Revisa subtotal, IVA y total.
+                        </span>
+
+                    </div>
+                `;
+
+
+                estado.className =
+                    "entry-status pending";
+
+
+                estado.innerHTML = `
+
+                    <span class="entry-status-dot"></span>
+
+                    Pendiente de validación
+                `;
+
+
+                boton.disabled =
+                    true;
+
+            }
+
+        }
+
+
+
+        // =========================================================
+        // ESCAPE
+        // =========================================================
+
+        function escapeHtml(valor) {
+
+            return String(valor ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+
+        }
+
+
+
+        // =========================================================
+        // RESTAURAR DETALLE AL FALLAR POST
+        // =========================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                const json =
+                    document.getElementById(
+                        "DetalleJson"
+                    ).value;
+
+
+                if (json) {
+
+                    try {
+
+                        detalleIngreso =
+                            JSON.parse(json);
+
+                        renderDetalle();
+
+                    }
+                    catch {
+                    }
+
+                }
+
+
+                @if (TempData["Ok"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon: "success",
+
+                                title: "Ingreso confirmado",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Ok"]
+                                            )
+                                    ),
+
+                                timer: 2200,
+
+                                showConfirmButton: false
+
+                            });
+
+                        </text>
+                }
+
+            }
+        );
+
+    </script>
+
+}

@@ -40,10 +40,18 @@ namespace Farmacia.DAL
                         PrecioCosto = Convert.ToDecimal(dr["PrecioCosto"]),
                         CostoPromedio = Convert.ToDecimal(dr["CostoPromedio"]),
                         PrecioVenta = Convert.ToDecimal(dr["PrecioVenta"]),
+                        PorcentajeUtilidad = Convert.ToDecimal(dr["PorcentajeUtilidad"]),
+                        TasaIVA = Convert.ToDecimal(dr["TasaIVA"]),
                         Inventario = Convert.ToDecimal(dr["Inventario"]),
                         IdProveedor = Convert.ToInt32(dr["IdProveedor"]),
                         IdCategoria = Convert.ToInt32(dr["IdCategoria"]),
                         IdUnidad = Convert.ToInt32(dr["IdUnidad"]),
+                        IdLaboratorio = dr["IdLaboratorio"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt32(dr["IdLaboratorio"]),
+                        Foto = dr["Foto"] == DBNull.Value
+                            ? null
+                            : dr["Foto"].ToString(),
                         CategoriaNombre = dr["NombreCategoria"].ToString(),
                         ProveedorNombre = dr["NombreProveedor"].ToString(),
                         UnidadNombre = dr["NombreUnidad"].ToString()
@@ -73,7 +81,31 @@ namespace Farmacia.DAL
                     CodBarra = dr["CodBarra"].ToString(),
                     NombreProducto = dr["NombreProducto"].ToString(),
                     PrecioVenta = Convert.ToDecimal(dr["PrecioVenta"]),
-                    Inventario = Convert.ToDecimal(dr["Inventario"])
+                    Inventario = Convert.ToDecimal(dr["Inventario"]),
+                    Foto = dr["Foto"] == DBNull.Value
+                        ? null
+                        : dr["Foto"].ToString(),
+                    NombreGenerico = dr["NombreGenerico"] == DBNull.Value
+                        ? null
+                        : dr["NombreGenerico"].ToString(),
+                    RecomendadoPara = dr["RecomendadoPara"] == DBNull.Value
+                        ? null
+                        : dr["RecomendadoPara"].ToString(),
+                    FechaVencimiento = dr["FechaVencimiento"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(dr["FechaVencimiento"]),
+                    CategoriaNombre = dr["CategoriaNombre"] == DBNull.Value
+                        ? null
+                        : dr["CategoriaNombre"].ToString(),
+                    ProveedorNombre = dr["ProveedorNombre"] == DBNull.Value
+                        ? null
+                        : dr["ProveedorNombre"].ToString(),
+                    UnidadNombre = dr["UnidadNombre"] == DBNull.Value
+                        ? null
+                        : dr["UnidadNombre"].ToString(),
+                    LaboratorioNombre = dr["LaboratorioNombre"] == DBNull.Value
+                        ? null
+                        : dr["LaboratorioNombre"].ToString()
                 });
             }
 
@@ -104,6 +136,9 @@ namespace Farmacia.DAL
                         RecomendadoPara = dr["RecomendadoPara"].ToString(),
                         PrecioVenta = Convert.ToDecimal(dr["PrecioVenta"]),
                         Inventario = Convert.ToDecimal(dr["Inventario"]),
+                        Foto = dr["Foto"] == DBNull.Value
+                            ? null
+                            : dr["Foto"].ToString(),
                         CategoriaNombre = dr["CategoriaNombre"].ToString(),
                         ProveedorNombre = dr["ProveedorNombre"].ToString(),
                         UnidadNombre = dr["UnidadNombre"].ToString()
@@ -142,10 +177,18 @@ namespace Farmacia.DAL
                         PrecioCosto = Convert.ToDecimal(dr["PrecioCosto"]),
                         CostoPromedio = Convert.ToDecimal(dr["CostoPromedio"]),
                         PrecioVenta = Convert.ToDecimal(dr["PrecioVenta"]),
+                        PorcentajeUtilidad = Convert.ToDecimal(dr["PorcentajeUtilidad"]),
+                        TasaIVA = Convert.ToDecimal(dr["TasaIVA"]),
                         Inventario = Convert.ToDecimal(dr["Inventario"]),
                         IdProveedor = Convert.ToInt32(dr["IdProveedor"]),
                         IdCategoria = Convert.ToInt32(dr["IdCategoria"]),
-                        IdUnidad = Convert.ToInt32(dr["IdUnidad"])
+                        IdUnidad = Convert.ToInt32(dr["IdUnidad"]),
+                        IdLaboratorio = dr["IdLaboratorio"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt32(dr["IdLaboratorio"]),
+                        Foto = dr["Foto"] == DBNull.Value
+                            ? null
+                            : dr["Foto"].ToString()
                     };
                 }
             }
@@ -170,10 +213,18 @@ namespace Farmacia.DAL
                 cmd.Parameters.AddWithValue("@PrecioCosto", p.PrecioCosto);
                 cmd.Parameters.AddWithValue("@CostoPromedio", p.CostoPromedio);
                 cmd.Parameters.AddWithValue("@PrecioVenta", p.PrecioVenta);
+                cmd.Parameters.AddWithValue("@PorcentajeUtilidad", p.PorcentajeUtilidad);
+                cmd.Parameters.AddWithValue("@TasaIVA", p.TasaIVA);
                 cmd.Parameters.AddWithValue("@Inventario", p.Inventario);
                 cmd.Parameters.AddWithValue("@IdProveedor", p.IdProveedor);
                 cmd.Parameters.AddWithValue("@IdCategoria", p.IdCategoria);
                 cmd.Parameters.AddWithValue("@IdUnidad", p.IdUnidad);
+                cmd.Parameters.AddWithValue(
+                    "@IdLaboratorio",
+                    (object?)p.IdLaboratorio ?? DBNull.Value);
+                cmd.Parameters.AddWithValue(
+                    "@Foto",
+                    (object?)p.Foto ?? DBNull.Value);
 
                 cn.Open();
                 cmd.ExecuteNonQuery();

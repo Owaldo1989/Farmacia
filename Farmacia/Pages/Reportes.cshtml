@@ -1,4 +1,117 @@
-﻿@page
+@page
 @model Farmacia.Pages.ReportesModel
 @{
+    ViewData["Title"] = "Reportes";
 }
+
+<link rel="stylesheet" href="~/css/reportes.css" asp-append-version="true" />
+
+<main class="reports-page">
+    <header class="reports-header">
+        <div>
+            <div class="reports-eyebrow"><i class="bi bi-bar-chart-line"></i> Análisis de ventas</div>
+            <h1>Reportes</h1>
+            <p>Consulta el desempeño de las ventas y la rotación del inventario.</p>
+        </div>
+        <a asp-page="/Facturas/Nueva" class="reports-new-sale"><i class="bi bi-plus-lg"></i> Nueva venta</a>
+    </header>
+
+    <form method="get" class="report-filter-card">
+        <div class="report-filter-heading">
+            <div class="report-filter-icon"><i class="bi bi-funnel"></i></div>
+            <div>
+                <h2>Período de consulta</h2>
+                <p>Las facturas anuladas no se incluyen en los resultados.</p>
+            </div>
+        </div>
+
+        <div class="report-filter-fields">
+            <label>Desde<input asp-for="FechaInicio" type="date" /></label>
+            <label>Hasta<input asp-for="FechaFin" type="date" /></label>
+            <label>Límite de poca rotación
+                <div class="rotation-input">
+                    <input asp-for="LimiteRotacion" type="number" min="0" step="0.01" />
+                    <span>unid.</span>
+                </div>
+            </label>
+        </div>
+
+        <div class="report-options" aria-label="Tipo de reporte">
+            <button type="submit" name="tipo" value="ventas-dia" class="report-option @(Model.TipoReporte == "ventas-dia" ? "active" : "")"><i class="bi bi-calendar-day"></i><span>Ventas por día</span></button>
+            <button type="submit" name="tipo" value="ventas-mes" class="report-option @(Model.TipoReporte == "ventas-mes" ? "active" : "")"><i class="bi bi-calendar-month"></i><span>Ventas por mes</span></button>
+            <button type="submit" name="tipo" value="producto" class="report-option @(Model.TipoReporte == "producto" ? "active" : "")"><i class="bi bi-capsule-pill"></i><span>Por producto</span></button>
+            <button type="submit" name="tipo" value="categoria" class="report-option @(Model.TipoReporte == "categoria" ? "active" : "")"><i class="bi bi-tags"></i><span>Por categoría</span></button>
+            <button type="submit" name="tipo" value="proveedor" class="report-option @(Model.TipoReporte == "proveedor" ? "active" : "")"><i class="bi bi-truck"></i><span>Por proveedor</span></button>
+            <button type="submit" name="tipo" value="laboratorio" class="report-option @(Model.TipoReporte == "laboratorio" ? "active" : "")"><i class="bi bi-building"></i><span>Por laboratorio</span></button>
+            <button type="submit" name="tipo" value="mas-vendidos" class="report-option @(Model.TipoReporte == "mas-vendidos" ? "active" : "")"><i class="bi bi-trophy"></i><span>Más vendidos</span></button>
+            <button type="submit" name="tipo" value="poca-rotacion" class="report-option @(Model.TipoReporte == "poca-rotacion" ? "active" : "")"><i class="bi bi-arrow-repeat"></i><span>Poca rotación</span></button>
+        </div>
+    </form>
+
+    <section class="report-summary-grid">
+        <article class="report-summary-card"><i class="bi bi-receipt"></i><span>Facturas</span><strong>@Model.Resumen.Facturas</strong><small>En el período</small></article>
+        <article class="report-summary-card revenue"><i class="bi bi-cash-stack"></i><span>Ventas totales</span><strong>C$ @Model.Resumen.TotalVentas.ToString("N2")</strong><small>Facturación registrada</small></article>
+        <article class="report-summary-card"><i class="bi bi-box-seam"></i><span>Unidades vendidas</span><strong>@Model.Resumen.UnidadesVendidas.ToString("N2")</strong><small>Productos despachados</small></article>
+        <article class="report-summary-card"><i class="bi bi-grid-3x3-gap"></i><span>Productos vendidos</span><strong>@Model.Resumen.ProductosVendidos</strong><small>Referencias distintas</small></article>
+    </section>
+
+    <section class="report-results-card">
+        <div class="report-results-heading">
+            <div>
+                <div class="reports-eyebrow"><i class="bi bi-table"></i> Resultado seleccionado</div>
+                <h2>@Model.TituloReporte</h2>
+                <p>@Model.DescripcionReporte</p>
+            </div>
+            <span class="report-period">@Model.FechaInicio.ToString("dd/MM/yyyy") - @Model.FechaFin.ToString("dd/MM/yyyy")</span>
+        </div>
+
+        @if (Model.Filas.Count == 0)
+        {
+            <div class="report-empty"><i class="bi bi-bar-chart"></i><strong>No hay datos para este reporte</strong><span>Cambia el período o selecciona otra opción de análisis.</span></div>
+        }
+        else
+        {
+            <div class="report-table-wrapper">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            @if (Model.EsReporteTemporal)
+                            {
+                                <th>Período</th><th>Facturas</th><th>Unidades</th><th>Venta total</th>
+                            }
+                            else if (Model.EsReporteProducto)
+                            {
+                                <th>Producto</th><th>Unidades</th><th>Facturas</th><th>Venta total</th><th>Inventario</th><th>Última venta</th>
+                            }
+                            else
+                            {
+                                <th>Grupo</th><th>Facturas</th><th>Unidades</th><th>Venta total</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fila in Model.Filas)
+                        {
+                            <tr>
+                                @if (Model.EsReporteTemporal)
+                                {
+                                    <td><strong>@fila.Etiqueta</strong></td><td>@fila.Facturas</td><td>@fila.Unidades.ToString("N2")</td><td class="report-money">C$ @fila.TotalVenta.ToString("N2")</td>
+                                }
+                                else if (Model.EsReporteProducto)
+                                {
+                                    <td><div class="report-product-name"><strong>@fila.Etiqueta</strong><small>@(string.IsNullOrWhiteSpace(fila.Codigo) ? "Sin código" : fila.Codigo)</small></div></td>
+                                    <td>@fila.Unidades.ToString("N2")</td><td>@fila.Facturas</td><td class="report-money">C$ @fila.TotalVenta.ToString("N2")</td>
+                                    <td><span class="inventory-chip @(fila.Inventario <= 5 ? "low" : "")">@fila.Inventario.ToString("N2")</span></td><td>@(fila.UltimaVenta?.ToString("dd/MM/yyyy") ?? "Sin ventas")</td>
+                                }
+                                else
+                                {
+                                    <td><strong>@fila.Etiqueta</strong></td><td>@fila.Facturas</td><td>@fila.Unidades.ToString("N2")</td><td class="report-money">C$ @fila.TotalVenta.ToString("N2")</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</main>

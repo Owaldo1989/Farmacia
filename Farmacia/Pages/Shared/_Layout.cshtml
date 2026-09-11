@@ -11,6 +11,9 @@
     var esInventario =
         ruta.StartsWith("/inventario");
 
+        var esIngresos =
+    ruta.StartsWith("/ingresos");
+
     var esProductos =
         ruta.StartsWith("/productos");
 
@@ -26,6 +29,8 @@
     var esLaboratorios =
         ruta.StartsWith("/laboratorio") ||
         ruta.StartsWith("/laboratorios");
+
+
 
     var esReportes =
         ruta.StartsWith("/reportes");
@@ -258,7 +263,34 @@
                 </span>
 
             </a>
+            <!-- INGRESOS DE MERCADERÍA -->
 
+<a href="/Ingresos/Nuevo"
+   class="sidebar-link @(ruta == "/ingresos/nuevo" ? "active" : "")">
+
+    <span class="sidebar-icon">
+        <i class="bi bi-box-arrow-in-down"></i>
+    </span>
+
+    <span>
+        Nuevo ingreso
+    </span>
+
+</a>
+
+
+<a href="/Ingresos/Lista"
+   class="sidebar-link @(ruta == "/ingresos/lista" ? "active" : "")">
+
+    <span class="sidebar-icon">
+        <i class="bi bi-clock-history"></i>
+    </span>
+
+    <span>
+        Ingresos
+    </span>
+
+</a>
 
 
             <!-- INVENTARIO -->

@@ -503,6 +503,241 @@
 
 
 <!-- =========================================================
+     MODAL FOTO DEL PRODUCTO
+========================================================== -->
+
+<div class="modal fade"
+     id="modalFotoProducto"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content pharmacy-modal product-photo-modal">
+
+            <div class="modal-header pharmacy-modal-header">
+
+                <div class="modal-title-container">
+
+                    <div class="modal-title-icon">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </div>
+
+                    <div>
+                        <h5 id="fotoProductoNombre">Fotografía del producto</h5>
+                        <span>Vista ampliada</span>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+
+            </div>
+
+            <div class="modal-body product-photo-body">
+
+                <img id="fotoProductoGrande"
+                     alt="Fotografía ampliada del producto" />
+
+                <div id="fotoProductoVacia"
+                     class="product-photo-empty d-none">
+                    <i class="bi bi-image"></i>
+                    <strong>Este producto no tiene fotografía</strong>
+                </div>
+
+            </div>
+
+            <div class="modal-footer pharmacy-modal-footer product-view-footer">
+
+                <button type="button"
+                        class="btn-secondary-modern"
+                        data-bs-dismiss="modal">
+                    Volver
+                </button>
+
+                <button type="button"
+                        class="btn-primary-modern"
+                        onclick="abrirFichaDesdeFoto()">
+                    <i class="bi bi-card-heading"></i>
+                    Ver ficha completa
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL FICHA DEL PRODUCTO
+========================================================== -->
+
+<div class="modal fade"
+     id="modalDetalleProducto"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+
+        <div class="modal-content pharmacy-modal product-card-modal">
+
+            <div class="modal-header pharmacy-modal-header">
+
+                <div class="modal-title-container">
+
+                    <div class="modal-title-icon">
+                        <i class="bi bi-card-heading"></i>
+                    </div>
+
+                    <div>
+                        <h5>Ficha del producto</h5>
+                        <span>Información completa para la venta</span>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+
+            </div>
+
+            <div class="modal-body product-card-body">
+
+                <article class="product-showcase-card">
+
+                    <section class="product-showcase-gallery">
+
+                        <div class="product-showcase-image">
+
+                            <img id="detalleProductoFoto"
+                                 alt="Fotografía del producto" />
+
+                            <div id="detalleProductoFotoVacia"
+                                 class="product-photo-empty d-none">
+                                <i class="bi bi-image"></i>
+                                <strong>Sin fotografía</strong>
+                            </div>
+
+                            <button type="button"
+                                    id="btnAmpliarDesdeFicha"
+                                    class="product-image-expand"
+                                    onclick="abrirFotoDesdeFicha()">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                                Ampliar imagen
+                            </button>
+
+                        </div>
+
+                        <span class="product-gallery-hint">
+                            <i class="bi bi-zoom-in"></i>
+                            Usa “Ampliar imagen” para verla a tamaño grande.
+                        </span>
+
+                    </section>
+
+                    <section class="product-showcase-info">
+
+                        <span id="detalleProductoCategoria"
+                              class="product-detail-eyebrow">
+                            Producto
+                        </span>
+
+                        <h2 id="detalleProductoNombre">Producto</h2>
+
+                        <p id="detalleProductoGenerico"
+                           class="product-generic-name">
+                        </p>
+
+                        <div class="product-detail-price">
+                            <span>Precio de venta</span>
+                            <strong id="detalleProductoPrecio">C$ 0.00</strong>
+                            <small>Precio unitario</small>
+                        </div>
+
+                        <div id="detalleProductoStock"
+                             class="product-detail-stock">
+                        </div>
+
+                        <div class="product-detail-grid">
+
+                            <div class="product-detail-item">
+                                <span>Código de barra</span>
+                                <strong id="detalleProductoCodigo">—</strong>
+                            </div>
+
+                            <div class="product-detail-item">
+                                <span>Laboratorio</span>
+                                <strong id="detalleProductoLaboratorio">—</strong>
+                            </div>
+
+                            <div class="product-detail-item">
+                                <span>Proveedor</span>
+                                <strong id="detalleProductoProveedor">—</strong>
+                            </div>
+
+                            <div class="product-detail-item">
+                                <span>Unidad</span>
+                                <strong id="detalleProductoUnidad">—</strong>
+                            </div>
+
+                            <div class="product-detail-item product-detail-wide">
+                                <span>Fecha de vencimiento</span>
+                                <strong id="detalleProductoVence">No registrada</strong>
+                            </div>
+
+                        </div>
+
+                        <div class="product-recommendation">
+                            <span>
+                                <i class="bi bi-info-circle"></i>
+                                Recomendado para
+                            </span>
+                            <p id="detalleProductoRecomendado">Sin información registrada.</p>
+                        </div>
+
+                    </section>
+
+                </article>
+
+            </div>
+
+            <div class="modal-footer pharmacy-modal-footer product-view-footer">
+
+                <button type="button"
+                        class="btn-secondary-modern"
+                        data-bs-dismiss="modal">
+                    Volver
+                </button>
+
+                <button type="button"
+                        class="btn-primary-modern"
+                        onclick="agregarProductoDesdeFicha()">
+                    <i class="bi bi-cart-plus"></i>
+                    Agregar a la factura
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
      MODAL CANTIDAD
 ========================================================== -->
 
@@ -907,6 +1142,112 @@
                 System.Globalization.CultureInfo.InvariantCulture
         );
 
+        let productosEncontrados = [];
+        let productoVistaActual = null;
+
+
+        function escaparHtml(valor) {
+
+            const elemento = document.createElement("div");
+            elemento.textContent = valor ?? "";
+            return elemento.innerHTML;
+
+        }
+
+
+        function formatearFechaProducto(fecha) {
+
+            if (!fecha)
+                return "No registrada";
+
+            const valor = new Date(fecha);
+
+            if (Number.isNaN(valor.getTime()))
+                return "No registrada";
+
+            return valor.toLocaleDateString("es-NI");
+
+        }
+
+
+        function obtenerRutaFoto(producto) {
+
+            const ruta = producto?.foto
+                ? String(producto.foto)
+                : "";
+
+            return /^\/uploads\/productos\/[a-zA-Z0-9._-]+$/.test(ruta)
+                ? ruta
+                : "";
+
+        }
+
+
+        function cambiarModal(idOrigen, idDestino) {
+
+            const origen = document.getElementById(idOrigen);
+            const destino = document.getElementById(idDestino);
+
+            if (!destino)
+                return;
+
+            const mostrarDestino = () =>
+                bootstrap.Modal.getOrCreateInstance(destino).show();
+
+            if (origen?.classList.contains("show")) {
+
+                origen.addEventListener(
+                    "hidden.bs.modal",
+                    mostrarDestino,
+                    { once: true }
+                );
+
+                bootstrap.Modal.getOrCreateInstance(origen).hide();
+                return;
+
+            }
+
+            mostrarDestino();
+
+        }
+
+
+        function prepararRegresoAlBuscador(idModal) {
+
+            const modal = document.getElementById(idModal);
+
+            if (modal)
+                modal.dataset.volverBuscador = "true";
+
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            ["modalFotoProducto", "modalDetalleProducto"]
+                .forEach(id => {
+
+                    const modal = document.getElementById(id);
+
+                    modal?.addEventListener("hidden.bs.modal", () => {
+
+                        if (modal.dataset.volverBuscador !== "true")
+                            return;
+
+                        modal.dataset.volverBuscador = "false";
+
+                        bootstrap.Modal
+                            .getOrCreateInstance(
+                                document.getElementById("modalBuscarProducto")
+                            )
+                            .show();
+
+                    });
+
+                });
+
+        });
+
         // =========================================================
         // BUSCADOR
         // =========================================================
@@ -917,6 +1258,8 @@
                 document.getElementById("txtBuscarProd");
 
             input.value = "";
+            productosEncontrados = [];
+            productoVistaActual = null;
 
             document.getElementById(
                 "resultadosProductos"
@@ -1008,8 +1351,12 @@
             })
             .then(data => {
 
+                productosEncontrados = Array.isArray(data)
+                    ? data
+                    : [];
 
-                if (!data || data.length === 0) {
+
+                if (productosEncontrados.length === 0) {
 
                     contenedor.innerHTML = `
 
@@ -1062,21 +1409,32 @@
                 `;
 
 
-                data.forEach(p => {
+                productosEncontrados.forEach(p => {
 
 
                     const vence =
-                        p.fechaVencimiento
-                            ? new Date(
-                                p.fechaVencimiento
-                            ).toLocaleDateString()
-                            : "N/A";
+                        formatearFechaProducto(
+                            p.fechaVencimiento
+                        );
 
 
-                    const nombreSeguro =
-                        String(p.nombreProducto)
-                            .replace(/\\/g, "\\\\")
-                            .replace(/'/g, "\\'");
+                    const rutaFoto =
+                        obtenerRutaFoto(p);
+
+
+                    const codigoHtml =
+                        escaparHtml(p.codBarra);
+
+
+                    const nombreHtml =
+                        escaparHtml(p.nombreProducto);
+
+
+                    const fotoProducto = rutaFoto
+                        ? `<img src="${rutaFoto}"
+                                alt="Foto del producto"
+                                loading="lazy" />`
+                        : `<i class="bi bi-capsule-pill"></i>`;
 
 
                     let stockClass =
@@ -1097,7 +1455,7 @@
                             <td>
 
                                 <span class="product-code">
-                                    ${p.codBarra}
+                                    ${codigoHtml}
                                 </span>
 
                             </td>
@@ -1107,12 +1465,24 @@
 
                                 <div class="result-product">
 
-                                    <div class="result-product-icon">
-                                        <i class="bi bi-capsule-pill"></i>
-                                    </div>
+                                    <button type="button"
+                                            class="result-product-icon"
+                                            onclick="${rutaFoto
+                                                ? `abrirFotoProducto(${p.idProducto})`
+                                                : `abrirFichaProducto(${p.idProducto})`}"
+                                            aria-label="${rutaFoto
+                                                ? "Ampliar fotografía"
+                                                : "Ver ficha del producto"}">
+                                        ${fotoProducto}
+                                        <span class="result-photo-overlay">
+                                            <i class="bi ${rutaFoto
+                                                ? "bi-zoom-in"
+                                                : "bi-card-heading"}"></i>
+                                        </span>
+                                    </button>
 
                                     <strong>
-                                        ${p.nombreProducto}
+                                        ${nombreHtml}
                                     </strong>
 
                                 </div>
@@ -1145,19 +1515,36 @@
 
                             <td>
 
-                                <button type="button"
-                                        class="btn-add-result"
-                                        onclick="abrirModalCantidad(
-                                            ${p.idProducto},
-                                            '${p.codBarra}',
-                                            '${nombreSeguro}',
-                                            '${vence}',
-                                            ${p.precioVenta}
-                                        )">
+                                <div class="result-actions">
 
-                                    <i class="bi bi-plus-lg"></i>
+                                    <button type="button"
+                                            class="btn-result-action btn-photo-result"
+                                            onclick="abrirFotoProducto(${p.idProducto})"
+                                            title="Mostrar fotografía en grande"
+                                            aria-label="Mostrar fotografía en grande"
+                                            ${rutaFoto ? "" : "disabled"}>
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </button>
 
-                                </button>
+                                    <button type="button"
+                                            class="btn-result-action btn-card-result"
+                                            onclick="abrirFichaProducto(${p.idProducto})"
+                                            title="Mostrar ficha del producto"
+                                            aria-label="Mostrar ficha del producto">
+                                        <i class="bi bi-card-heading"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn-add-result"
+                                            onclick="abrirCantidadDesdeResultado(${p.idProducto})"
+                                            title="Agregar a la factura"
+                                            aria-label="Agregar a la factura">
+
+                                        <i class="bi bi-plus-lg"></i>
+
+                                    </button>
+
+                                </div>
 
                             </td>
 
@@ -1207,6 +1594,279 @@
 
 
         // =========================================================
+        // VISTAS DEL PRODUCTO
+        // =========================================================
+
+        function buscarProductoEnResultados(id) {
+
+            return productosEncontrados.find(
+                producto => Number(producto.idProducto) === Number(id)
+            ) ?? null;
+
+        }
+
+
+        function abrirCantidadDesdeResultado(id) {
+
+            const producto = buscarProductoEnResultados(id);
+
+            if (!producto)
+                return;
+
+            abrirModalCantidad(
+                producto.idProducto,
+                producto.codBarra,
+                producto.nombreProducto,
+                formatearFechaProducto(producto.fechaVencimiento),
+                producto.precioVenta
+            );
+
+        }
+
+
+        function asignarTexto(id, valor, alternativo = "—") {
+
+            const elemento = document.getElementById(id);
+
+            if (elemento)
+                elemento.textContent = valor || alternativo;
+
+        }
+
+
+        function configurarImagen(imgId, vacioId, producto) {
+
+            const imagen = document.getElementById(imgId);
+            const vacio = document.getElementById(vacioId);
+            const ruta = obtenerRutaFoto(producto);
+
+            if (!imagen || !vacio)
+                return false;
+
+            imagen.onerror = () => {
+                imagen.classList.add("d-none");
+                vacio.classList.remove("d-none");
+            };
+
+            if (ruta) {
+                imagen.src = ruta;
+                imagen.classList.remove("d-none");
+                vacio.classList.add("d-none");
+                return true;
+            }
+
+            imagen.removeAttribute("src");
+            imagen.classList.add("d-none");
+            vacio.classList.remove("d-none");
+            return false;
+
+        }
+
+
+        function llenarFichaProducto(producto) {
+
+            productoVistaActual = producto;
+
+            const tieneFoto = configurarImagen(
+                "detalleProductoFoto",
+                "detalleProductoFotoVacia",
+                producto
+            );
+
+            asignarTexto(
+                "detalleProductoCategoria",
+                producto.categoriaNombre,
+                "Producto"
+            );
+
+            asignarTexto(
+                "detalleProductoNombre",
+                producto.nombreProducto,
+                "Producto sin nombre"
+            );
+
+            asignarTexto(
+                "detalleProductoGenerico",
+                producto.nombreGenerico,
+                "Nombre genérico no registrado"
+            );
+
+            asignarTexto(
+                "detalleProductoPrecio",
+                `C$ ${Number(producto.precioVenta || 0).toFixed(2)}`
+            );
+
+            asignarTexto(
+                "detalleProductoCodigo",
+                producto.codBarra
+            );
+
+            asignarTexto(
+                "detalleProductoLaboratorio",
+                producto.laboratorioNombre,
+                "No registrado"
+            );
+
+            asignarTexto(
+                "detalleProductoProveedor",
+                producto.proveedorNombre,
+                "No registrado"
+            );
+
+            asignarTexto(
+                "detalleProductoUnidad",
+                producto.unidadNombre,
+                "No registrada"
+            );
+
+            asignarTexto(
+                "detalleProductoVence",
+                formatearFechaProducto(producto.fechaVencimiento)
+            );
+
+            asignarTexto(
+                "detalleProductoRecomendado",
+                producto.recomendadoPara,
+                "Sin información registrada."
+            );
+
+            const stock = document.getElementById("detalleProductoStock");
+            const inventario = Number(producto.inventario || 0);
+
+            stock.className = "product-detail-stock";
+            stock.classList.add(
+                inventario <= 0
+                    ? "out"
+                    : inventario <= 5
+                        ? "low"
+                        : "available"
+            );
+
+            stock.innerHTML = inventario <= 0
+                ? `<i class="bi bi-x-circle"></i> Sin existencias`
+                : `<i class="bi bi-check-circle"></i> En existencia: ${inventario}`;
+
+            const botonAmpliar =
+                document.getElementById("btnAmpliarDesdeFicha");
+
+            if (botonAmpliar)
+                botonAmpliar.disabled = !tieneFoto;
+
+        }
+
+
+        function abrirFotoProducto(id) {
+
+            const producto = buscarProductoEnResultados(id);
+
+            if (!producto)
+                return;
+
+            productoVistaActual = producto;
+
+            asignarTexto(
+                "fotoProductoNombre",
+                producto.nombreProducto,
+                "Fotografía del producto"
+            );
+
+            configurarImagen(
+                "fotoProductoGrande",
+                "fotoProductoVacia",
+                producto
+            );
+
+            prepararRegresoAlBuscador("modalFotoProducto");
+            cambiarModal("modalBuscarProducto", "modalFotoProducto");
+
+        }
+
+
+        function abrirFichaProducto(id) {
+
+            const producto = buscarProductoEnResultados(id);
+
+            if (!producto)
+                return;
+
+            llenarFichaProducto(producto);
+            prepararRegresoAlBuscador("modalDetalleProducto");
+            cambiarModal("modalBuscarProducto", "modalDetalleProducto");
+
+        }
+
+
+        function abrirFichaDesdeFoto() {
+
+            if (!productoVistaActual)
+                return;
+
+            llenarFichaProducto(productoVistaActual);
+
+            const fotoModal = document.getElementById("modalFotoProducto");
+            fotoModal.dataset.volverBuscador = "false";
+
+            prepararRegresoAlBuscador("modalDetalleProducto");
+            cambiarModal("modalFotoProducto", "modalDetalleProducto");
+
+        }
+
+
+        function abrirFotoDesdeFicha() {
+
+            if (!productoVistaActual || !obtenerRutaFoto(productoVistaActual))
+                return;
+
+            asignarTexto(
+                "fotoProductoNombre",
+                productoVistaActual.nombreProducto,
+                "Fotografía del producto"
+            );
+
+            configurarImagen(
+                "fotoProductoGrande",
+                "fotoProductoVacia",
+                productoVistaActual
+            );
+
+            const fichaModal = document.getElementById("modalDetalleProducto");
+            fichaModal.dataset.volverBuscador = "false";
+
+            prepararRegresoAlBuscador("modalFotoProducto");
+            cambiarModal("modalDetalleProducto", "modalFotoProducto");
+
+        }
+
+
+        function agregarProductoDesdeFicha() {
+
+            if (!productoVistaActual)
+                return;
+
+            const producto = productoVistaActual;
+            const fichaModal = document.getElementById("modalDetalleProducto");
+
+            fichaModal.dataset.volverBuscador = "false";
+
+            fichaModal.addEventListener(
+                "hidden.bs.modal",
+                () => abrirModalCantidad(
+                    producto.idProducto,
+                    producto.codBarra,
+                    producto.nombreProducto,
+                    formatearFechaProducto(producto.fechaVencimiento),
+                    producto.precioVenta
+                ),
+                { once: true }
+            );
+
+            bootstrap.Modal.getOrCreateInstance(fichaModal).hide();
+
+        }
+
+
+
+        // =========================================================
         // MODAL CANTIDAD
         // =========================================================
 
@@ -1249,11 +1909,10 @@
             ).value = 1;
 
 
-            new bootstrap.Modal(
-                document.getElementById(
-                    "modalCantidad"
-                )
-            ).show();
+            cambiarModal(
+                "modalBuscarProducto",
+                "modalCantidad"
+            );
 
         }
 

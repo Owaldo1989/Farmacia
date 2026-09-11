@@ -16,6 +16,7 @@
         public decimal PagoCordoba { get; set; }
         public decimal PagoDolar { get; set; }
         public decimal Vuelto { get; set; }
+        public decimal TasaCambio { get; set; }
 
         public List<FacturaDetalleDTO> Detalles { get; set; } = new();
     }

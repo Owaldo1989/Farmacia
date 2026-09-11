@@ -1,144 +1,967 @@
 ﻿@page
 @model Farmacia.Pages.CategoriasModel
+
 @{
     ViewData["Title"] = "Categorías";
+
+    var totalCategorias =
+        Model.Listado?.Count ?? 0;
 }
 
-<div class="container mt-4">
+<link rel="stylesheet"
+      href="~/css/categorias.css"
+      asp-append-version="true" />
 
-    <div class="titulo-seccion mb-3 d-flex justify-content-between align-items-center">
-        <h3 class="fw-bold">Categorías</h3>
 
-        <button class="btn btn-primary" onclick="nuevaCategoria()">
-            ➕ Nueva Categoría
+<div class="categories-page">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <section class="categories-header">
+
+        <div>
+
+            <div class="categories-eyebrow">
+
+                <i class="bi bi-tags"></i>
+
+                Catálogo
+
+            </div>
+
+
+            <h1>
+                Categorías
+            </h1>
+
+
+            <p>
+                Organiza los productos de la farmacia
+                mediante categorías para facilitar su clasificación.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-category"
+                onclick="nuevaCategoria()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva categoría
+
         </button>
-    </div>
 
-    <div class="table-responsive shadow-sm">
-        <table class="table table-striped table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width:80px">ID</th>
-                    <th>Nombre</th>
-                    <th style="width:170px" class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
+    </section>
 
-                @foreach (var c in Model.Listado)
-                {
-                    <tr>
-                        <td>@c.IdCategoria</td>
-                        <td>@c.NombreCategoria</td>
 
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm btn-accion" onclick="editar(@c.IdCategoria)">
-                                ✏️ Editar
-                            </button>
 
-                            <button class="btn btn-danger btn-sm btn-accion" onclick="eliminar(@c.IdCategoria)">
-                                🗑️ Borrar
-                            </button>
-                        </td>
-                    </tr>
-                }
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
 
-            </tbody>
-        </table>
-    </div>
+    <section class="categories-summary">
+
+
+        <div class="category-summary-icon">
+
+            <i class="bi bi-tags"></i>
+
+        </div>
+
+
+        <div class="category-summary-data">
+
+            <span>
+                Categorías registradas
+            </span>
+
+            <strong>
+                @totalCategorias
+            </strong>
+
+        </div>
+
+
+        <div class="category-summary-help">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+                Las categorías permiten agrupar productos
+                similares dentro del catálogo.
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         BUSCADOR
+    ====================================================== -->
+
+    <section class="categories-toolbar">
+
+
+        <div class="category-search">
+
+            <i class="bi bi-search"></i>
+
+
+            <input type="text"
+                   id="txtBuscarCategoria"
+                   placeholder="Buscar categoría..."
+                   autocomplete="off" />
+
+
+            <button type="button"
+                    id="btnLimpiarCategoria"
+                    class="btn-clear-category"
+                    title="Limpiar búsqueda"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="category-results">
+
+            <strong id="contadorCategorias">
+                @totalCategorias
+            </strong>
+
+            <span>
+                resultados
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <section class="categories-card">
+
+
+        <div class="categories-card-header">
+
+
+            <div>
+
+                <h2>
+                    Listado de categorías
+                </h2>
+
+                <p>
+                    Categorías disponibles para clasificar productos.
+                </p>
+
+            </div>
+
+
+            <div class="categories-card-icon">
+
+                <i class="bi bi-list-ul"></i>
+
+            </div>
+
+
+        </div>
+
+
+
+        @if (Model.Listado != null &&
+             Model.Listado.Any())
+        {
+
+            <div class="categories-table-wrapper">
+
+
+                <table class="categories-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="category-id-column">
+                                Código
+                            </th>
+
+                            <th>
+                                Categoría
+                            </th>
+
+                            <th class="category-actions-column">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="categoriasBody">
+
+
+                        @foreach (var categoria in Model.Listado)
+                        {
+
+                            <tr class="category-row"
+                                data-categoria="@categoria.NombreCategoria?.ToLower()">
+
+
+                                <!-- ID -->
+
+                                <td>
+
+                                    <span class="category-id">
+
+                                        #@categoria.IdCategoria
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- NOMBRE -->
+
+                                <td>
+
+                                    <div class="category-information">
+
+
+                                        <div class="category-avatar">
+
+                                            <i class="bi bi-tag"></i>
+
+                                        </div>
+
+
+                                        <div class="category-name">
+
+                                            <strong>
+
+                                                @categoria.NombreCategoria
+
+                                            </strong>
+
+
+                                            <span>
+
+                                                Categoría de productos
+
+                                            </span>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- ACCIONES -->
+
+                                <td>
+
+                                    <div class="category-actions">
+
+
+                                        <button type="button"
+                                                class="category-action edit"
+                                                onclick="editarCategoria(@categoria.IdCategoria)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                            <span>
+                                                Editar
+                                            </span>
+
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="category-action delete"
+                                                onclick="eliminarCategoria(@categoria.IdCategoria)"
+                                                title="Eliminar categoría">
+
+                                            <i class="bi bi-trash3"></i>
+
+                                        </button>
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div class="categories-no-results"
+                 id="sinResultadosCategoria"
+                 style="display:none;">
+
+
+                <div class="categories-empty-icon">
+
+                    <i class="bi bi-search"></i>
+
+                </div>
+
+
+                <strong>
+                    No encontramos categorías
+                </strong>
+
+
+                <span>
+                    Intenta buscar utilizando otro nombre.
+                </span>
+
+
+                <button type="button"
+                        onclick="limpiarBusquedaCategoria()">
+
+                    Limpiar búsqueda
+
+                </button>
+
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="categories-empty">
+
+
+                <div class="categories-empty-icon">
+
+                    <i class="bi bi-tags"></i>
+
+                </div>
+
+
+                <strong>
+                    No hay categorías registradas
+                </strong>
+
+
+                <span>
+                    Crea la primera categoría para comenzar
+                    a clasificar los productos.
+                </span>
+
+
+                <button type="button"
+                        onclick="nuevaCategoria()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Nueva categoría
+
+                </button>
+
+
+            </div>
+
+        }
+
+
+    </section>
+
+
 </div>
 
-<!-- MODAL -->
-<div class="modal fade" id="modalCategoria" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
 
-            <form method="post">
 
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Categoría</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+<!-- =========================================================
+     MODAL
+========================================================== -->
 
-                <div class="modal-body">
+<div class="modal fade"
+     id="modalCategoria"
+     tabindex="-1"
+     aria-hidden="true">
 
-                    <input type="hidden" id="Categoria_IdCategoria" name="Categoria.IdCategoria" value="@Model.Categoria?.IdCategoria" />
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre Categoría</label>
-                        <input class="form-control" asp-for="Categoria.NombreCategoria" required />
+    <div class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content category-modal">
+
+
+            <form method="post"
+                  id="formCategoria">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header category-modal-header">
+
+
+                    <div class="category-modal-title">
+
+
+                        <div class="category-modal-icon">
+
+                            <i class="bi bi-tag"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h5 id="modalCategoriaTitulo">
+
+                                Nueva categoría
+
+                            </h5>
+
+
+                            <span id="modalCategoriaSubtitulo">
+
+                                Registra una nueva categoría de productos.
+
+                            </span>
+
+                        </div>
+
+
                     </div>
 
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+
+
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary">Guardar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+
+                <!-- BODY -->
+
+                <div class="modal-body category-modal-body">
+
+
+                    <input type="hidden"
+                           id="Categoria_IdCategoria"
+                           name="Categoria.IdCategoria"
+                           value="@Model.Categoria?.IdCategoria" />
+
+
+                    <div class="category-field">
+
+
+                        <label asp-for="Categoria.NombreCategoria">
+
+                            Nombre de la categoría
+
+                            <span>*</span>
+
+                        </label>
+
+
+                        <div class="category-input">
+
+                            <i class="bi bi-tag"></i>
+
+
+                            <input asp-for="Categoria.NombreCategoria"
+                                   maxlength="150"
+                                   autocomplete="off"
+                                   placeholder="Ej. Analgésicos"
+                                   required />
+
+                        </div>
+
+
+                        <span asp-validation-for="Categoria.NombreCategoria"
+                              class="category-validation">
+                        </span>
+
+
+                        <small>
+                            Utiliza un nombre corto y fácil de identificar.
+                        </small>
+
+
+                    </div>
+
+
                 </div>
+
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer category-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-category-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-category-save"
+                            id="btnGuardarCategoria">
+
+                        <i class="bi bi-check-lg"></i>
+
+                        <span id="textoGuardarCategoria">
+
+                            Guardar categoría
+
+                        </span>
+
+                    </button>
+
+
+                </div>
+
 
             </form>
 
+
         </div>
+
+
     </div>
+
+
 </div>
 
+
+
 @section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+
     <script>
+
+
+        // =====================================================
+        // NUEVA CATEGORÍA
+        // =====================================================
+
         function nuevaCategoria() {
-            document.getElementById("Categoria_IdCategoria").value = 0;
-            document.getElementById("Categoria_NombreCategoria").value = "";
 
-            new bootstrap.Modal(document.getElementById("modalCategoria")).show();
+            document.getElementById(
+                "Categoria_IdCategoria"
+            ).value = 0;
+
+
+            document.getElementById(
+                "Categoria_NombreCategoria"
+            ).value = "";
+
+
+            document.getElementById(
+                "modalCategoriaTitulo"
+            ).textContent =
+                "Nueva categoría";
+
+
+            document.getElementById(
+                "modalCategoriaSubtitulo"
+            ).textContent =
+                "Registra una nueva categoría de productos.";
+
+
+            document.getElementById(
+                "textoGuardarCategoria"
+            ).textContent =
+                "Guardar categoría";
+
+
+            const modal =
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalCategoria"
+                    )
+                );
+
+
+            modal.show();
+
+
+            document
+                .getElementById(
+                    "modalCategoria"
+                )
+                .addEventListener(
+                    "shown.bs.modal",
+                    function () {
+
+                        document.getElementById(
+                            "Categoria_NombreCategoria"
+                        ).focus();
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
         }
 
-        function editar(id) {
-            window.location.href = "/Categorias?id=" + id;
+
+
+        // =====================================================
+        // EDITAR
+        // =====================================================
+
+        function editarCategoria(id) {
+
+            window.location.href =
+                "/Categorias?id=" + id;
+
         }
 
-        function eliminar(id) {
+
+
+        // =====================================================
+        // ELIMINAR
+        // =====================================================
+
+        function eliminarCategoria(id) {
+
             Swal.fire({
-                title: "¿Eliminar categoría?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar"
-            }).then((r) => {
-                if (r.isConfirmed) {
-                    window.location.href = "/Categorias?eliminar=" + id;
+
+                title:
+                    "¿Eliminar categoría?",
+
+                text:
+                    "Esta acción no se puede deshacer.",
+
+                icon:
+                    "warning",
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    "Sí, eliminar",
+
+                cancelButtonText:
+                    "Cancelar",
+
+                confirmButtonColor:
+                    "#d6535d"
+
+            })
+            .then((resultado) => {
+
+                if (resultado.isConfirmed) {
+
+                    window.location.href =
+                        "/Categorias?eliminar=" +
+                        id;
+
                 }
+
             });
+
         }
 
-        // SWEETALERT MENSAJES
-        @if (TempData["Ok"] != null)
-        {
-            <text>
-            Swal.fire({
-                icon: "success",
-                title: "Completado",
-                text: "@TempData["Ok"]",
-                timer: 1800,
-                showConfirmButton: false
+
+
+        // =====================================================
+        // BUSCADOR
+        // =====================================================
+
+        const inputCategoria =
+            document.getElementById(
+                "txtBuscarCategoria"
+            );
+
+
+        const btnLimpiarCategoria =
+            document.getElementById(
+                "btnLimpiarCategoria"
+            );
+
+
+
+        inputCategoria?.addEventListener(
+            "input",
+            filtrarCategorias
+        );
+
+
+
+        function filtrarCategorias() {
+
+            const filtro =
+                inputCategoria.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const filas =
+                document.querySelectorAll(
+                    ".category-row"
+                );
+
+
+            let visibles = 0;
+
+
+            filas.forEach(fila => {
+
+                const nombre =
+                    fila.dataset.categoria || "";
+
+
+                const mostrar =
+                    nombre.includes(filtro);
+
+
+                fila.style.display =
+                    mostrar
+                        ? ""
+                        : "none";
+
+
+                if (mostrar) {
+                    visibles++;
+                }
+
             });
-            </text>
+
+
+
+            document.getElementById(
+                "contadorCategorias"
+            ).textContent =
+                visibles;
+
+
+
+            btnLimpiarCategoria.style.display =
+                filtro
+                    ? "flex"
+                    : "none";
+
+
+
+            const sinResultados =
+                document.getElementById(
+                    "sinResultadosCategoria"
+                );
+
+
+            if (sinResultados) {
+
+                sinResultados.style.display =
+                    visibles === 0
+                        ? "flex"
+                        : "none";
+
+            }
+
         }
 
-        @if (TempData["Error"] != null)
-        {
-            <text>
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "@TempData["Error"]"
-            });
-            </text>
+
+
+        function limpiarBusquedaCategoria() {
+
+            inputCategoria.value = "";
+
+            filtrarCategorias();
+
+            inputCategoria.focus();
+
         }
 
-        @if (TempData["Editar"] != null)
-        {
-            <text>
-            new bootstrap.Modal(document.getElementById("modalCategoria")).show();
-            </text>
-        }
+
+
+        btnLimpiarCategoria?.addEventListener(
+            "click",
+            limpiarBusquedaCategoria
+        );
+
+
+
+        // =====================================================
+        // EVITAR DOBLE GUARDADO
+        // =====================================================
+
+        document
+            .getElementById(
+                "formCategoria"
+            )
+            ?.addEventListener(
+                "submit",
+                function () {
+
+                    const boton =
+                        document.getElementById(
+                            "btnGuardarCategoria"
+                        );
+
+
+                    boton.disabled = true;
+
+
+                    boton.innerHTML = `
+
+                        <span class="spinner-border spinner-border-sm"></span>
+
+                        Guardando...
+                    `;
+
+                }
+            );
+
+
+
+        // =====================================================
+        // MENSAJES
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                @if (TempData["Ok"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "success",
+
+                                title:
+                                    "Completado",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Ok"]
+                                            )
+                                    ),
+
+                                timer:
+                                    1800,
+
+                                showConfirmButton:
+                                    false
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Error"] != null)
+                {
+                        <text>
+
+                            Swal.fire({
+
+                                icon:
+                                    "error",
+
+                                title:
+                                    "No se pudo completar",
+
+                                text:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    TempData["Error"]
+                                            )
+                                    )
+
+                            });
+
+                        </text>
+                }
+
+
+
+                @if (TempData["Editar"] != null)
+                {
+                        <text>
+
+                            document.getElementById(
+                                "modalCategoriaTitulo"
+                            ).textContent =
+                                "Editar categoría";
+
+
+                            document.getElementById(
+                                "modalCategoriaSubtitulo"
+                            ).textContent =
+                                "Actualiza la información de la categoría.";
+
+
+                            document.getElementById(
+                                "textoGuardarCategoria"
+                            ).textContent =
+                                "Guardar cambios";
+
+
+                            new bootstrap.Modal(
+                                document.getElementById(
+                                    "modalCategoria"
+                                )
+                            ).show();
+
+                        </text>
+                }
+
+
+            }
+        );
+
+
     </script>
+
 }
