@@ -1,0 +1,1280 @@
+﻿
+@page
+@model Farmacia.Pages.SucursalesModel
+
+@{
+    ViewData["Title"] = "Sucursales";
+
+    var totalSucursales =
+        Model.Listado?.Count ?? 0;
+
+    var activas =
+        Model.Listado?
+            .Count(x => x.Activo) ?? 0;
+
+    var inactivas =
+        totalSucursales - activas;
+}
+
+
+<link rel="stylesheet"
+      href="~/css/sucursales.css"
+      asp-append-version="true" />
+
+
+<div class="branches-page">
+
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <section class="branches-header">
+
+        <div>
+
+            <div class="branches-eyebrow">
+
+                <i class="bi bi-buildings"></i>
+
+                Administración
+
+            </div>
+
+
+            <h1>
+                Sucursales
+            </h1>
+
+
+            <p>
+                Administra las sucursales que forman parte
+                de la operación de la farmacia.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-branch"
+                onclick="nuevaSucursal()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva sucursal
+
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <section class="branches-summary">
+
+
+        <div class="branch-stat">
+
+            <div class="branch-stat-icon total">
+
+                <i class="bi bi-buildings"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Sucursales
+                </span>
+
+                <strong>
+                    @totalSucursales
+                </strong>
+
+                <small>
+                    Registradas
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="branch-stat">
+
+            <div class="branch-stat-icon active">
+
+                <i class="bi bi-check-circle"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Activas
+                </span>
+
+                <strong>
+                    @activas
+                </strong>
+
+                <small>
+                    En operación
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="branch-stat">
+
+            <div class="branch-stat-icon inactive">
+
+                <i class="bi bi-pause-circle"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Inactivas
+                </span>
+
+                <strong>
+                    @inactivas
+                </strong>
+
+                <small>
+                    Fuera de operación
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="branch-summary-message">
+
+            <i class="bi bi-info-circle"></i>
+
+            <div>
+
+                <strong>
+                    Estructura operativa
+                </strong>
+
+                <span>
+                    Cada sucursal podrá tener sus propias
+                    bodegas y cajas.
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         BUSCADOR
+    ====================================================== -->
+
+    <section class="branches-toolbar">
+
+
+        <div class="branch-search">
+
+            <i class="bi bi-search"></i>
+
+
+            <input type="text"
+                   id="txtBuscarSucursal"
+                   placeholder="Buscar por código, sucursal, teléfono o dirección..."
+                   autocomplete="off" />
+
+
+            <button type="button"
+                    id="btnLimpiarSucursal"
+                    class="btn-clear-branch"
+                    title="Limpiar"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="branch-results">
+
+            <strong id="contadorSucursales">
+                @totalSucursales
+            </strong>
+
+            <span>
+                resultados
+            </span>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LISTADO
+    ====================================================== -->
+
+    <section class="branches-card">
+
+
+        <div class="branches-card-header">
+
+            <div>
+
+                <h2>
+                    Sucursales registradas
+                </h2>
+
+                <p>
+                    Estructura física disponible para
+                    bodegas, cajas e inventarios.
+                </p>
+
+            </div>
+
+
+            <div class="branches-card-icon">
+
+                <i class="bi bi-list-ul"></i>
+
+            </div>
+
+        </div>
+
+
+
+        @if (Model.Listado != null &&
+             Model.Listado.Any())
+        {
+
+            <div class="branches-table-wrapper">
+
+
+                <table class="branches-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Código
+                            </th>
+
+                            <th>
+                                Sucursal
+                            </th>
+
+                            <th>
+                                Teléfono
+                            </th>
+
+                            <th>
+                                Dirección
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th class="branch-actions-column">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="sucursalesBody">
+
+
+                        @foreach (var sucursal in Model.Listado)
+                        {
+
+                            var filtro =
+                                $"{sucursal.CodigoSucursal} " +
+                                $"{sucursal.NombreSucursal} " +
+                                $"{sucursal.Telefono} " +
+                                $"{sucursal.Direccion}"
+                                .ToLower();
+
+
+                            <tr class="branch-row"
+                                data-sucursal="@filtro.ToLower()">
+
+
+                                <!-- CÓDIGO -->
+
+                                <td>
+
+                                    <span class="branch-code">
+
+                                        @sucursal.CodigoSucursal
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- SUCURSAL -->
+
+                                <td>
+
+                                    <div class="branch-information">
+
+
+                                        <div class="branch-avatar">
+
+                                            <i class="bi bi-shop"></i>
+
+                                        </div>
+
+
+                                        <div class="branch-name">
+
+                                            <strong>
+
+                                                @sucursal.NombreSucursal
+
+                                            </strong>
+
+                                            <span>
+
+                                                Sucursal
+                                                #@sucursal.IdSucursal
+
+                                            </span>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- TELÉFONO -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        sucursal.Telefono))
+                                    {
+
+                                        <div class="branch-contact">
+
+                                            <i class="bi bi-telephone"></i>
+
+                                            <span>
+                                                @sucursal.Telefono
+                                            </span>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="branch-empty-value">
+
+                                            Sin teléfono
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- DIRECCIÓN -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        sucursal.Direccion))
+                                    {
+
+                                        <div class="branch-address">
+
+                                            <i class="bi bi-geo-alt"></i>
+
+                                            <span>
+                                                @sucursal.Direccion
+                                            </span>
+
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="branch-empty-value">
+
+                                            Sin dirección
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- ESTADO -->
+
+                                <td>
+
+                                    @if (sucursal.Activo)
+                                    {
+
+                                        <span class="branch-status active">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            Activa
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="branch-status inactive">
+
+                                            <i class="bi bi-pause-circle"></i>
+
+                                            Inactiva
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <!-- ACCIONES -->
+
+                                <td>
+
+                                    <div class="branch-actions">
+
+
+                                        <button type="button"
+                                                class="branch-action edit"
+                                                onclick="editarSucursal(@sucursal.IdSucursal)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                            <span>
+                                                Editar
+                                            </span>
+
+                                        </button>
+
+
+                                        @if (sucursal.Activo)
+                                        {
+
+                                            <button type="button"
+                                                    class="branch-action disable"
+                                                    title="Desactivar"
+                                                    onclick="desactivarSucursal(@sucursal.IdSucursal, '@sucursal.NombreSucursal')">
+
+                                                <i class="bi bi-power"></i>
+
+                                            </button>
+
+                                        }
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div class="branches-no-results"
+                 id="sinResultadosSucursal"
+                 style="display:none;">
+
+
+                <div class="branches-empty-icon">
+
+                    <i class="bi bi-search"></i>
+
+                </div>
+
+
+                <strong>
+                    No encontramos sucursales
+                </strong>
+
+
+                <span>
+                    Prueba con otro término de búsqueda.
+                </span>
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="branches-empty">
+
+
+                <div class="branches-empty-icon">
+
+                    <i class="bi bi-buildings"></i>
+
+                </div>
+
+
+                <strong>
+                    No hay sucursales registradas
+                </strong>
+
+
+                <span>
+                    Registra la primera sucursal
+                    para comenzar.
+                </span>
+
+
+                <button type="button"
+                        onclick="nuevaSucursal()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Registrar sucursal
+
+                </button>
+
+
+            </div>
+
+        }
+
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL SUCURSAL
+========================================================== -->
+
+<div class="modal fade"
+     id="modalSucursal"
+     tabindex="-1"
+     aria-hidden="true">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content branch-modal">
+
+
+            <form method="post">
+
+
+                <input type="hidden"
+                       asp-for="Sucursal.IdSucursal" />
+
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header branch-modal-header">
+
+
+                    <div>
+
+                        <div class="branch-modal-eyebrow">
+
+                            <i class="bi bi-buildings"></i>
+
+                            Sucursal
+
+                        </div>
+
+
+                        <h5 id="tituloModalSucursal">
+
+                            Nueva sucursal
+
+                        </h5>
+
+
+                        <span>
+
+                            Configura la información principal
+                            de la sucursal.
+
+                        </span>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- BODY -->
+
+                <div class="modal-body branch-modal-body">
+
+
+                    <div class="branch-form-grid">
+
+
+                        <!-- CÓDIGO -->
+
+                        <div class="branch-field">
+
+                            <label asp-for="Sucursal.CodigoSucursal">
+
+                                Código
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div class="branch-control">
+
+                                <i class="bi bi-hash"></i>
+
+
+                                <input asp-for="Sucursal.CodigoSucursal"
+                                       placeholder="Ej. CENTRAL"
+                                       maxlength="20"
+                                       autocomplete="off" />
+
+                            </div>
+
+
+                            <small>
+                                Código único de la sucursal.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- NOMBRE -->
+
+                        <div class="branch-field">
+
+                            <label asp-for="Sucursal.NombreSucursal">
+
+                                Nombre de sucursal
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div class="branch-control">
+
+                                <i class="bi bi-shop"></i>
+
+
+                                <input asp-for="Sucursal.NombreSucursal"
+                                       placeholder="Ej. Farmacia Central"
+                                       maxlength="100"
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- TELÉFONO -->
+
+                        <div class="branch-field">
+
+                            <label asp-for="Sucursal.Telefono">
+
+                                Teléfono
+
+                            </label>
+
+
+                            <div class="branch-control">
+
+                                <i class="bi bi-telephone"></i>
+
+
+                                <input asp-for="Sucursal.Telefono"
+                                       placeholder="Ej. 2255-0000"
+                                       maxlength="30"
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ESTADO -->
+
+                        <div class="branch-field">
+
+                            <label>
+                                Estado
+                            </label>
+
+
+                            <label class="branch-switch">
+
+                                <input asp-for="Sucursal.Activo"
+                                       type="checkbox" />
+
+
+                                <span class="branch-switch-control">
+                                </span>
+
+
+                                <span class="branch-switch-text">
+
+                                    Sucursal activa
+
+                                </span>
+
+                            </label>
+
+
+                            <small>
+                                Las sucursales inactivas no estarán
+                                disponibles para nuevas operaciones.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- DIRECCIÓN -->
+
+                        <div class="branch-field full">
+
+                            <label asp-for="Sucursal.Direccion">
+
+                                Dirección
+
+                            </label>
+
+
+                            <div class="branch-control textarea">
+
+                                <i class="bi bi-geo-alt"></i>
+
+
+                                <textarea asp-for="Sucursal.Direccion"
+                                          rows="3"
+                                          maxlength="250"
+                                          placeholder="Dirección física de la sucursal...">
+                                </textarea>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="branch-form-notice">
+
+                        <i class="bi bi-info-circle"></i>
+
+                        <span>
+
+                            Después de crear la sucursal
+                            podrás asignarle una o varias bodegas.
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer branch-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-branch-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-branch-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Guardar sucursal
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+@section Scripts {
+
+<script>
+
+    // =========================================================
+    // MODAL
+    // =========================================================
+
+    function nuevaSucursal() {
+
+        window.location.href =
+            "/Sucursales?nuevo=1";
+
+    }
+
+
+    function editarSucursal(id) {
+
+        window.location.href =
+            `/Sucursales?id=${id}`;
+
+    }
+
+
+
+    // =========================================================
+    // DESACTIVAR
+    // =========================================================
+
+    function desactivarSucursal(
+        id,
+        nombre)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desactivar sucursal",
+
+            html:
+                `La sucursal <strong>${escapeHtml(nombre)}</strong> dejará de estar disponible para nuevas operaciones.`,
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Sí, desactivar",
+
+            cancelButtonText:
+                "Cancelar",
+
+            confirmButtonColor:
+                "#d6535d"
+
+        }).then(
+            resultado => {
+
+                if (resultado.isConfirmed) {
+
+                    window.location.href =
+                        `/Sucursales?eliminar=${id}`;
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // BUSCADOR
+    // =========================================================
+
+    const txtBuscarSucursal =
+        document.getElementById(
+            "txtBuscarSucursal"
+        );
+
+
+    const btnLimpiarSucursal =
+        document.getElementById(
+            "btnLimpiarSucursal"
+        );
+
+
+    txtBuscarSucursal?.addEventListener(
+        "input",
+        filtrarSucursales
+    );
+
+
+    btnLimpiarSucursal?.addEventListener(
+        "click",
+        function () {
+
+            txtBuscarSucursal.value =
+                "";
+
+            filtrarSucursales();
+
+            txtBuscarSucursal.focus();
+
+        }
+    );
+
+
+    function filtrarSucursales() {
+
+        const texto =
+            (
+                txtBuscarSucursal?.value
+                ?? ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const filas =
+            document.querySelectorAll(
+                ".branch-row"
+            );
+
+
+        let visibles =
+            0;
+
+
+        filas.forEach(
+            fila => {
+
+                const contenido =
+                    fila.dataset.sucursal
+                    ?? "";
+
+
+                const mostrar =
+                    !texto ||
+                    contenido.includes(
+                        texto
+                    );
+
+
+                fila.style.display =
+                    mostrar
+                        ? ""
+                        : "none";
+
+
+                if (mostrar) {
+                    visibles++;
+                }
+
+            }
+        );
+
+
+        document.getElementById(
+            "contadorSucursales"
+        ).textContent =
+            visibles;
+
+
+        btnLimpiarSucursal.style.display =
+            texto
+                ? "flex"
+                : "none";
+
+
+        const sinResultados =
+            document.getElementById(
+                "sinResultadosSucursal"
+            );
+
+
+        if (sinResultados) {
+
+            sinResultados.style.display =
+                visibles === 0
+                    ? "flex"
+                    : "none";
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // ESCAPE
+    // =========================================================
+
+    function escapeHtml(valor) {
+
+        return String(
+            valor ?? ""
+        )
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+
+    // =========================================================
+    // CARGA
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            // =============================================
+            // NUEVA
+            // =============================================
+
+            const parametros =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            if (
+                parametros.has("nuevo")
+            ) {
+
+                document.getElementById(
+                    "Sucursal_IdSucursal"
+                ).value =
+                    "0";
+
+
+                document.getElementById(
+                    "Sucursal_CodigoSucursal"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Sucursal_NombreSucursal"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Sucursal_Telefono"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Sucursal_Direccion"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Sucursal_Activo"
+                ).checked =
+                    true;
+
+
+                document.getElementById(
+                    "tituloModalSucursal"
+                ).textContent =
+                    "Nueva sucursal";
+
+
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalSucursal"
+                    )
+                ).show();
+
+            }
+
+
+
+            // =============================================
+            // EDITAR
+            // =============================================
+
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+
+                document.getElementById(
+                    "tituloModalSucursal"
+                ).textContent =
+                    "Editar sucursal";
+
+
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalSucursal"
+                    )
+                ).show();
+
+                </text>
+            }
+
+
+
+            // =============================================
+            // OK
+            // =============================================
+
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "success",
+
+                    title:
+                        "Proceso completado",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Ok"]
+                            )
+                        ),
+
+                    timer:
+                        2000,
+
+                    showConfirmButton:
+                        false
+
+                });
+
+                </text>
+            }
+
+
+
+            // =============================================
+            // ERROR
+            // =============================================
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "error",
+
+                    title:
+                        "No se pudo completar",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Error"]
+                            )
+                        )
+
+                });
+
+                </text>
+            }
+
+
+        }
+    );
+
+</script>
+
+}

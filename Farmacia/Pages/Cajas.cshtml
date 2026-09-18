@@ -1,0 +1,1409 @@
+﻿
+@page
+@model Farmacia.Pages.CajasModel
+
+@{
+    ViewData["Title"] = "Cajas";
+
+    var total =
+        Model.Listado?.Count ?? 0;
+
+    var activas =
+        Model.Listado?
+            .Count(x => x.Activo) ?? 0;
+
+    var matriculadas =
+        Model.Listado?
+            .Count(x => x.IdCajaEquipo.HasValue)
+        ?? 0;
+}
+
+
+<link rel="stylesheet"
+      href="~/css/cajas.css"
+      asp-append-version="true" />
+
+
+<div class="cashboxes-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="cashboxes-header">
+
+        <div>
+
+            <div class="cashboxes-eyebrow">
+
+                <i class="bi bi-cash-register"></i>
+
+                Operación
+
+            </div>
+
+
+            <h1>
+                Cajas
+            </h1>
+
+
+            <p>
+                Configura las cajas, su fondo fijo,
+                bodega de inventario y equipos autorizados.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-cashbox"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCaja"
+                onclick="prepararNuevaCaja()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva caja
+
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         PC ACTUAL
+    ====================================================== -->
+
+    @if (Model.EquipoActual != null)
+    {
+
+        <section class="current-device registered">
+
+            <div class="current-device-icon">
+
+                <i class="bi bi-pc-display-horizontal"></i>
+
+            </div>
+
+
+            <div class="current-device-info">
+
+                <span>
+                    Este equipo está matriculado
+                </span>
+
+                <strong>
+                    @Model.EquipoActual.NombreCaja
+                </strong>
+
+                <small>
+
+                    @Model.EquipoActual.NombreSucursal
+
+                    ·
+
+                    @Model.EquipoActual.NombreBodega
+
+                </small>
+
+            </div>
+
+
+            <div class="current-device-status">
+
+                <i class="bi bi-shield-check"></i>
+
+                Autorizado
+
+            </div>
+
+        </section>
+
+    }
+    else
+    {
+
+        <section class="current-device pending">
+
+            <div class="current-device-icon">
+
+                <i class="bi bi-pc-display-horizontal"></i>
+
+            </div>
+
+
+            <div class="current-device-info">
+
+                <span>
+                    Equipo actual
+                </span>
+
+                <strong>
+                    No matriculado
+                </strong>
+
+                <small>
+                    Identificador:
+                    @Model.TokenEquipoActual
+                        .ToString()
+                        .Substring(0, 8)
+                        .ToUpper()
+                </small>
+
+            </div>
+
+
+            <div class="current-device-status">
+
+                <i class="bi bi-exclamation-circle"></i>
+
+                Sin autorización
+
+            </div>
+
+        </section>
+
+    }
+
+
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <section class="cashboxes-summary">
+
+
+        <div class="cashbox-stat">
+
+            <i class="bi bi-cash-register"></i>
+
+            <div>
+
+                <span>
+                    Cajas
+                </span>
+
+                <strong>
+                    @total
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="cashbox-stat success">
+
+            <i class="bi bi-check-circle"></i>
+
+            <div>
+
+                <span>
+                    Activas
+                </span>
+
+                <strong>
+                    @activas
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="cashbox-stat">
+
+            <i class="bi bi-pc-display"></i>
+
+            <div>
+
+                <span>
+                    Matriculadas
+                </span>
+
+                <strong>
+                    @matriculadas
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TABLA
+    ====================================================== -->
+
+    <section class="cashboxes-card">
+
+
+        <div class="cashboxes-card-header">
+
+            <div>
+
+                <h2>
+                    Cajas registradas
+                </h2>
+
+                <p>
+                    Configuración operativa por
+                    sucursal y bodega.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="cashboxes-table-wrapper">
+
+            <table class="cashboxes-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Caja
+                        </th>
+
+                        <th>
+                            Sucursal / Bodega
+                        </th>
+
+                        <th>
+                            Fondo fijo
+                        </th>
+
+                        <th>
+                            Equipo
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th>
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    @foreach (
+                        var caja in Model.Listado
+                    )
+                    {
+
+                        <tr>
+
+
+                            <td>
+
+                                <div class="cashbox-main">
+
+                                    <div class="cashbox-icon">
+
+                                        <i class="bi bi-cash-register"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>
+                                            @caja.NombreCaja
+                                        </strong>
+
+                                        <span>
+                                            @caja.CodigoCaja
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <td>
+
+                                <div class="cashbox-location">
+
+                                    <strong>
+                                        @caja.NombreSucursal
+                                    </strong>
+
+                                    <span>
+
+                                        <i class="bi bi-box-seam"></i>
+
+                                        @caja.NombreBodega
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <td>
+
+                                <strong class="cashbox-fund">
+
+                                    C$ @caja.FondoFijo.ToString("N2")
+
+                                </strong>
+
+                            </td>
+
+
+
+                            <td>
+
+                                @if (
+                                    caja.IdCajaEquipo.HasValue
+                                )
+                                {
+
+                                    <div class="device-assigned">
+
+                                        <i class="bi bi-pc-display"></i>
+
+                                        <div>
+
+                                            <strong>
+                                                @caja.NombreEquipo
+                                            </strong>
+
+                                            @if (
+                                                caja.UltimoAcceso.HasValue
+                                            )
+                                            {
+                                                <span>
+
+                                                    Último acceso:
+                                                    @caja.UltimoAcceso.Value
+                                                        .ToString(
+                                                            "dd/MM/yyyy HH:mm"
+                                                        )
+
+                                                </span>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                }
+                                else
+                                {
+
+                                    <span class="device-empty">
+
+                                        <i class="bi bi-pc-display"></i>
+
+                                        Sin equipo
+
+                                    </span>
+
+                                }
+
+                            </td>
+
+
+
+                            <td>
+
+                                @if (caja.Activo)
+                                {
+
+                                    <span class="cashbox-status active">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                        Activa
+
+                                    </span>
+
+                                }
+                                else
+                                {
+
+                                    <span class="cashbox-status inactive">
+
+                                        Inactiva
+
+                                    </span>
+
+                                }
+
+                            </td>
+
+
+
+                            <td>
+
+                                <div class="cashbox-actions">
+
+
+                                    <button type="button"
+                                            class="cashbox-action edit"
+                                            onclick="editarCaja(@caja.IdCaja)"
+                                            title="Editar">
+
+                                        <i class="bi bi-pencil"></i>
+
+                                    </button>
+
+
+                                    @if (caja.Activo)
+                                    {
+
+                                        <button type="button"
+                                                class="cashbox-action pc"
+                                                data-id="@caja.IdCaja"
+                                                data-name="@caja.NombreCaja"
+                                                onclick="abrirMatricula(this)"
+                                                title="Matricular esta PC">
+
+                                            <i class="bi bi-pc-display-horizontal"></i>
+
+                                        </button>
+
+                                    }
+
+
+                                    @if (
+                                        caja.IdCajaEquipo.HasValue
+                                    )
+                                    {
+
+                                        <button type="button"
+                                                class="cashbox-action remove-pc"
+                                                onclick="desmatricularEquipo(
+                                                    @caja.IdCajaEquipo.Value
+                                                )"
+                                                title="Desmatricular equipo">
+
+                                            <i class="bi bi-pc-display-horizontal"></i>
+
+                                            <i class="bi bi-x"></i>
+
+                                        </button>
+
+                                    }
+
+
+                                    @if (caja.Activo)
+                                    {
+
+                                        <button type="button"
+                                                class="cashbox-action disable"
+                                                onclick="desactivarCaja(
+                                                    @caja.IdCaja
+                                                )"
+                                                title="Desactivar">
+
+                                            <i class="bi bi-power"></i>
+
+                                        </button>
+
+                                    }
+
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+                    }
+
+
+                </tbody>
+
+
+            </table>
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL CAJA
+========================================================== -->
+
+<div class="modal fade"
+     id="modalCaja"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content cashbox-modal">
+
+
+            <form method="post">
+
+
+                <input type="hidden"
+                       asp-for="Caja.IdCaja" />
+
+
+                <div class="modal-header">
+
+                    <div>
+
+                        <span class="modal-eyebrow">
+                            Configuración
+                        </span>
+
+                        <h5 id="tituloModalCaja">
+                            Nueva caja
+                        </h5>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+
+                <div class="modal-body">
+
+
+                    <div class="cashbox-form-grid">
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Código *
+                            </label>
+
+                            <input asp-for="Caja.CodigoCaja"
+                                   maxlength="20"
+                                   placeholder="Ej. CAJA01" />
+
+                        </div>
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Nombre *
+                            </label>
+
+                            <input asp-for="Caja.NombreCaja"
+                                   maxlength="100"
+                                   placeholder="Ej. Caja principal" />
+
+                        </div>
+
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Sucursal *
+                            </label>
+
+                            <select asp-for="Caja.IdSucursal"
+                                    id="selectSucursal">
+
+                                <option value="0">
+                                    Seleccione sucursal
+                                </option>
+
+                                @foreach (
+                                    var sucursal
+                                    in Model.Sucursales
+                                )
+                                {
+
+                                    <option value="@sucursal.IdSucursal">
+
+                                        @sucursal.NombreSucursal
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Bodega *
+                            </label>
+
+                            <select asp-for="Caja.CodBodega"
+                                    id="selectBodega">
+
+                                <option value="0">
+                                    Seleccione bodega
+                                </option>
+
+
+                                @foreach (
+                                    var bodega
+                                    in Model.Bodegas
+                                )
+                                {
+
+                                    <option value="@bodega.CodBodega">
+
+                                        @bodega.NombreBodega
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                            <small>
+                                Inventario que descontarán
+                                las ventas de esta caja.
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Fondo fijo
+                            </label>
+
+                            <div class="money-control">
+
+                                <span>
+                                    C$
+                                </span>
+
+                                <input asp-for="Caja.FondoFijo"
+                                       type="number"
+                                       step="0.01"
+                                       min="0" />
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="cashbox-field">
+
+                            <label>
+                                Estado
+                            </label>
+
+                            <label class="cashbox-switch">
+
+                                <input asp-for="Caja.Activo"
+                                       type="checkbox" />
+
+                                <span></span>
+
+                                Caja activa
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Guardar caja
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL MATRICULAR PC
+========================================================== -->
+
+<div class="modal fade"
+     id="modalMatricula"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-dialog-centered">
+
+
+        <div class="modal-content cashbox-modal">
+
+
+            <form method="post"
+                  asp-page-handler="Matricular">
+
+
+                <input type="hidden"
+                       asp-for="MatriculaIdCaja" />
+
+
+                <div class="modal-header">
+
+                    <div>
+
+                        <span class="modal-eyebrow">
+                            Seguridad
+                        </span>
+
+                        <h5>
+                            Matricular equipo
+                        </h5>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+
+                <div class="modal-body">
+
+
+                    <div class="device-register-banner">
+
+                        <i class="bi bi-pc-display-horizontal"></i>
+
+                        <div>
+
+                            <span>
+                                Esta computadora será autorizada para
+                            </span>
+
+                            <strong id="nombreCajaMatricula">
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="cashbox-field">
+
+                        <label>
+                            Nombre del equipo *
+                        </label>
+
+                        <input asp-for="NombreEquipo"
+                               placeholder="Ej. PC CAJA PRINCIPAL"
+                               maxlength="100" />
+
+                        <small>
+                            Nombre que te permita identificar
+                            físicamente la computadora.
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="cashbox-field mt-3">
+
+                        <label>
+                            Observación
+                        </label>
+
+                        <textarea asp-for="ObservacionEquipo"
+                                  rows="3"
+                                  maxlength="250"
+                                  placeholder="Opcional">
+                        </textarea>
+
+                    </div>
+
+
+
+                    <div class="device-token">
+
+                        <span>
+                            Identificador de este equipo
+                        </span>
+
+                        <code>
+                            @Model.TokenEquipoActual
+                        </code>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-save">
+
+                        <i class="bi bi-shield-check"></i>
+
+                        Matricular equipo
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@section Scripts {
+
+<script>
+
+    // =========================================================
+    // NUEVA
+    // =========================================================
+
+           function prepararNuevaCaja() {
+
+            document.getElementById(
+                "Caja_IdCaja"
+            ).value = "0";
+
+
+            document.getElementById(
+                "Caja_CodigoCaja"
+            ).value = "";
+
+
+            document.getElementById(
+                "Caja_NombreCaja"
+            ).value = "";
+
+
+            document.getElementById(
+                "Caja_IdSucursal"
+            ).value = "0";
+
+
+            const selectBodega =
+                document.getElementById(
+                    "Caja_CodBodega"
+                );
+
+
+            selectBodega.innerHTML =
+                `<option value="0">
+                    Seleccione bodega
+                 </option>`;
+
+
+            document.getElementById(
+                "Caja_FondoFijo"
+            ).value = "0.00";
+
+
+            document.getElementById(
+                "Caja_Activo"
+            ).checked = true;
+
+
+            document.getElementById(
+                "tituloModalCaja"
+            ).textContent =
+                "Nueva caja";
+        }
+
+
+
+    function editarCaja(id) {
+
+        window.location.href =
+            `/Cajas?id=${id}`;
+
+    }
+
+
+
+    // =========================================================
+    // BODEGAS POR SUCURSAL
+    // =========================================================
+
+    const selectSucursal =
+        document.getElementById(
+            "selectSucursal"
+        );
+
+
+    const selectBodega =
+        document.getElementById(
+            "selectBodega"
+        );
+
+
+    selectSucursal?.addEventListener(
+        "change",
+        async function () {
+
+            const idSucursal =
+                Number(
+                    this.value
+                );
+
+
+            selectBodega.innerHTML =
+                `<option value="0">
+                    Seleccione bodega
+                 </option>`;
+
+
+            if (!idSucursal) {
+                return;
+            }
+
+
+            const respuesta =
+                await fetch(
+                    `/Cajas?handler=Bodegas&idSucursal=${idSucursal}`
+                );
+
+
+            if (!respuesta.ok) {
+
+                Swal.fire(
+                    "Error",
+                    "No fue posible cargar las bodegas.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const bodegas =
+                await respuesta.json();
+
+
+            bodegas.forEach(
+                b => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        b.codBodega;
+
+
+                    option.textContent =
+                        `${b.codigoBodega} - ${b.nombreBodega}`;
+
+
+                    selectBodega.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+
+    // =========================================================
+    // MATRICULAR
+    // =========================================================
+
+    function abrirMatricula(
+        boton)
+    {
+
+        const id =
+            boton.dataset.id;
+
+
+        const nombre =
+            boton.dataset.name;
+
+
+        document.getElementById(
+            "MatriculaIdCaja"
+        ).value =
+            id;
+
+
+        document.getElementById(
+            "nombreCajaMatricula"
+        ).textContent =
+            nombre;
+
+
+        document.getElementById(
+            "NombreEquipo"
+        ).value =
+            "";
+
+
+        document.getElementById(
+            "ObservacionEquipo"
+        ).value =
+            "";
+
+
+        new bootstrap.Modal(
+            document.getElementById(
+                "modalMatricula"
+            )
+        ).show();
+
+    }
+
+
+
+    // =========================================================
+    // DESMATRICULAR
+    // =========================================================
+
+    function desmatricularEquipo(
+        id)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desmatricular equipo",
+
+            text:
+                "Esta computadora dejará de estar autorizada para esta caja.",
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Desmatricular",
+
+            cancelButtonText:
+                "Cancelar"
+
+        }).then(
+            r => {
+
+                if (r.isConfirmed) {
+
+                    window.location.href =
+                        `/Cajas?desmatricular=${id}`;
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // DESACTIVAR CAJA
+    // =========================================================
+
+    function desactivarCaja(
+        id)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desactivar caja",
+
+            text:
+                "La caja dejará de estar disponible para nuevas operaciones.",
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Desactivar",
+
+            cancelButtonText:
+                "Cancelar"
+
+        }).then(
+            r => {
+
+                if (r.isConfirmed) {
+
+                    window.location.href =
+                        `/Cajas?desactivar=${id}`;
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // CARGAR
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+                   const parametros =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        if (
+            parametros.has("nuevo")
+        )
+        {
+
+            document.getElementById(
+                "Caja_IdCaja"
+            ).value =
+                "0";
+
+
+            document.getElementById(
+                "Caja_CodigoCaja"
+            ).value =
+                "";
+
+
+            document.getElementById(
+                "Caja_NombreCaja"
+            ).value =
+                "";
+
+
+            document.getElementById(
+                "Caja_IdSucursal"
+            ).value =
+                "0";
+
+
+            document.getElementById(
+                "Caja_CodBodega"
+            ).innerHTML =
+                `<option value="0">
+                    Seleccione bodega
+                 </option>`;
+
+
+            document.getElementById(
+                "Caja_FondoFijo"
+            ).value =
+                "0";
+
+
+            document.getElementById(
+                "Caja_Activo"
+            ).checked =
+                true;
+
+
+            document.getElementById(
+                "tituloModalCaja"
+            ).textContent =
+                "Nueva caja";
+
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "modalCaja"
+                )
+            ).show();
+
+        }
+
+
+
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+
+                document.getElementById(
+                    "tituloModalCaja"
+                ).textContent =
+                    "Editar caja";
+
+
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalCaja"
+                    )
+                ).show();
+
+                </text>
+            }
+
+
+
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "success",
+
+                    title:
+                        "Proceso completado",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Ok"]
+                            )
+                        ),
+
+                    timer:
+                        2000,
+
+                    showConfirmButton:
+                        false
+
+                });
+
+                </text>
+            }
+
+
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "error",
+
+                    title:
+                        "No se pudo completar",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Error"]
+                            )
+                        )
+
+                });
+
+                </text>
+            }
+
+
+        }
+    );
+
+</script>
+
+}

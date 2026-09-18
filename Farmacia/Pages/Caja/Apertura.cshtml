@@ -1,0 +1,722 @@
+﻿@page
+@model Farmacia.Pages.Caja.AperturaModel
+
+@{
+    ViewData["Title"] = "Apertura de caja";
+}
+
+
+<style>
+
+    .opening-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .opening-header {
+        margin-bottom: 20px;
+    }
+
+    .opening-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        margin-bottom: 5px;
+
+        color: var(--primary);
+
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .opening-header h1 {
+        margin: 0;
+
+        color: var(--text);
+
+        font-size: 29px;
+        font-weight: 700;
+    }
+
+    .opening-header p {
+        margin: 5px 0 0;
+
+        color: var(--text-secondary);
+
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+       SIN MATRÍCULA
+    ====================================================== */
+
+    .device-warning {
+        padding: 30px;
+
+        border: 1px solid var(--border);
+        border-radius: 18px;
+
+        background: white;
+
+        text-align: center;
+
+        box-shadow: var(--shadow);
+    }
+
+    .device-warning-icon {
+        width: 60px;
+        height: 60px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin: 0 auto 14px;
+
+        border-radius: 16px;
+
+        background: var(--warning-soft);
+        color: var(--warning);
+
+        font-size: 25px;
+    }
+
+    .device-warning h2 {
+        color: var(--text);
+
+        font-size: 18px;
+    }
+
+    .device-warning p {
+        color: var(--text-secondary);
+
+        font-size: 12px;
+    }
+
+    .device-warning code {
+        display: inline-block;
+
+        margin-top: 8px;
+
+        padding: 8px 12px;
+
+        border-radius: 8px;
+
+        background: #f5f7f6;
+
+        color: var(--primary-dark);
+
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       CARD
+    ====================================================== */
+
+    .opening-card {
+        overflow: hidden;
+
+        border: 1px solid var(--border);
+        border-radius: 18px;
+
+        background: white;
+
+        box-shadow: var(--shadow);
+    }
+
+    .opening-card-header {
+        padding: 18px 20px;
+
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        border-bottom: 1px solid var(--border);
+
+        background: var(--primary-soft);
+    }
+
+    .opening-card-icon {
+        width: 45px;
+        height: 45px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px;
+
+        background: white;
+
+        color: var(--primary);
+
+        font-size: 19px;
+    }
+
+    .opening-card-header div:last-child {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .opening-card-header span {
+        color: var(--text-secondary);
+
+        font-size: 11px;
+    }
+
+    .opening-card-header strong {
+        color: var(--text);
+
+        font-size: 16px;
+    }
+
+    .opening-body {
+        padding: 20px;
+    }
+
+
+    /* =====================================================
+       INFO
+    ====================================================== */
+
+    .opening-info {
+        display: grid;
+        grid-template-columns:
+            repeat(3, 1fr);
+
+        gap: 12px;
+
+        margin-bottom: 20px;
+    }
+
+    .opening-info-item {
+        padding: 13px;
+
+        border: 1px solid var(--border);
+        border-radius: 11px;
+
+        background: #fbfdfc;
+    }
+
+    .opening-info-item span {
+        display: block;
+
+        margin-bottom: 3px;
+
+        color: var(--text-light);
+
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+
+    .opening-info-item strong {
+        color: var(--text);
+
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       FORM
+    ====================================================== */
+
+    .opening-field {
+        margin-bottom: 17px;
+    }
+
+    .opening-field label {
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: var(--text);
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .opening-field small {
+        display: block;
+
+        margin-top: 5px;
+
+        color: var(--text-light);
+
+        font-size: 10px;
+    }
+
+    .opening-money {
+        display: flex;
+
+        max-width: 310px;
+
+        overflow: hidden;
+
+        border: 1px solid var(--border-dark);
+        border-radius: 10px;
+    }
+
+    .opening-money span {
+        width: 48px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: var(--primary-soft);
+
+        color: var(--primary-dark);
+
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .opening-money input {
+        flex: 1;
+
+        height: 46px;
+
+        padding: 0 12px;
+
+        border: 0;
+        outline: none;
+
+        color: var(--text);
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .opening-field textarea {
+        width: 100%;
+
+        min-height: 80px;
+
+        padding: 10px;
+
+        border: 1px solid var(--border-dark);
+        border-radius: 10px;
+
+        outline: none;
+
+        font-size: 12px;
+    }
+
+    .opening-field textarea:focus,
+    .opening-money:focus-within {
+        border-color: var(--primary);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(7,150,103,.07);
+    }
+
+
+    /* =====================================================
+       ACTION
+    ====================================================== */
+
+    .opening-footer {
+        display: flex;
+        justify-content: flex-end;
+
+        padding-top: 5px;
+    }
+
+    .btn-open-cash {
+        height: 44px;
+
+        padding: 0 18px;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        border: 0;
+        border-radius: 10px;
+
+        background: var(--primary);
+        color: white;
+
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+
+    /* =====================================================
+       ABIERTA
+    ====================================================== */
+
+    .open-status {
+        padding: 20px;
+
+        border: 1px solid #cbeade;
+        border-radius: 16px;
+
+        background: var(--success-soft);
+    }
+
+    .open-status-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        margin-bottom: 15px;
+
+        color: var(--success);
+    }
+
+    .open-status-title i {
+        font-size: 20px;
+    }
+
+    .open-status-title strong {
+        font-size: 15px;
+    }
+
+
+    @@media(max-width:700px) {
+
+        .opening-info {
+            grid-template-columns: 1fr;
+        }
+
+        .opening-money {
+            max-width: none;
+        }
+
+    }
+
+</style>
+
+
+<div class="opening-page">
+
+
+    <section class="opening-header">
+
+        <div class="opening-eyebrow">
+
+            <i class="bi bi-cash-register"></i>
+
+            Caja
+
+        </div>
+
+        <h1>
+            Apertura de caja
+        </h1>
+
+        <p>
+            Confirma el fondo inicial
+            para comenzar las operaciones del turno.
+        </p>
+
+    </section>
+
+
+
+    @if (Model.Equipo == null)
+    {
+
+        <div class="device-warning">
+
+            <div class="device-warning-icon">
+
+                <i class="bi bi-pc-display-horizontal"></i>
+
+            </div>
+
+            <h2>
+                Equipo no matriculado
+            </h2>
+
+            <p>
+                Esta computadora no está autorizada
+                para operar una caja.
+            </p>
+
+            <code>
+                @Model.TokenEquipo
+            </code>
+
+        </div>
+
+    }
+    else if (Model.Turno != null)
+    {
+
+        <div class="open-status">
+
+            <div class="open-status-title">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                <strong>
+                    Caja abierta
+                </strong>
+
+            </div>
+
+
+            <div class="opening-info">
+
+                <div class="opening-info-item">
+
+                    <span>
+                        Caja
+                    </span>
+
+                    <strong>
+                        @Model.Turno.NombreCaja
+                    </strong>
+
+                </div>
+
+
+                <div class="opening-info-item">
+
+                    <span>
+                        Apertura
+                    </span>
+
+                    <strong>
+                        @Model.Turno.FechaApertura
+                            .ToString("dd/MM/yyyy HH:mm")
+                    </strong>
+
+                </div>
+
+
+                <div class="opening-info-item">
+
+                    <span>
+                        Fondo inicial
+                    </span>
+
+                    <strong>
+                        C$ @Model.Turno.FondoInicial
+                            .ToString("N2")
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    }
+    else
+    {
+
+        <section class="opening-card">
+
+
+            <div class="opening-card-header">
+
+                <div class="opening-card-icon">
+
+                    <i class="bi bi-cash-stack"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Caja asignada
+                    </span>
+
+                    <strong>
+                        @Model.Equipo.NombreCaja
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="opening-body">
+
+
+                <div class="opening-info">
+
+                    <div class="opening-info-item">
+
+                        <span>
+                            Sucursal
+                        </span>
+
+                        <strong>
+                            @Model.Equipo.NombreSucursal
+                        </strong>
+
+                    </div>
+
+
+                    <div class="opening-info-item">
+
+                        <span>
+                            Bodega
+                        </span>
+
+                        <strong>
+                            @Model.Equipo.NombreBodega
+                        </strong>
+
+                    </div>
+
+
+                    <div class="opening-info-item">
+
+                        <span>
+                            Fondo configurado
+                        </span>
+
+                        <strong>
+                            C$ @Model.Equipo.FondoFijo
+                                .ToString("N2")
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <form method="post"
+                      asp-page-handler="Abrir">
+
+
+                    <div class="opening-field">
+
+                        <label>
+                            Fondo inicial
+                        </label>
+
+                        <div class="opening-money">
+
+                            <span>
+                                C$
+                            </span>
+
+                            <input asp-for="FondoInicial"
+                                   type="number"
+                                   step="0.01"
+                                   min="0" />
+
+                        </div>
+
+                        <small>
+                            Se propone automáticamente
+                            el fondo fijo configurado para la caja.
+                        </small>
+
+                    </div>
+
+
+                    <div class="opening-field">
+
+                        <label>
+                            Observación
+                        </label>
+
+                        <textarea asp-for="Observacion"
+                                  placeholder="Opcional">
+                        </textarea>
+
+                    </div>
+
+
+                    <div class="opening-footer">
+
+                        <button type="submit"
+                                class="btn-open-cash">
+
+                            <i class="bi bi-unlock"></i>
+
+                            Abrir caja
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </section>
+
+    }
+
+
+</div>
+
+
+@section Scripts {
+
+<script>
+
+    @if (TempData["Ok"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "success",
+
+            title:
+                "Caja abierta",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Ok"]
+                    )
+                ),
+
+            timer:
+                2000,
+
+            showConfirmButton:
+                false
+
+        });
+
+        </text>
+    }
+
+
+    @if (TempData["Error"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "error",
+
+            title:
+                "No se pudo abrir la caja",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Error"]
+                    )
+                )
+
+        });
+
+        </text>
+    }
+
+</script>
+
+}

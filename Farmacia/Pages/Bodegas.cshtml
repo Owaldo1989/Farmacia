@@ -1,0 +1,1170 @@
+﻿
+@page
+@model Farmacia.Pages.BodegasModel
+
+@{
+    ViewData["Title"] = "Bodegas";
+
+    var total =
+        Model.Listado?.Count ?? 0;
+
+    var activas =
+        Model.Listado?
+            .Count(x => x.Activo) ?? 0;
+
+    var inactivas =
+        total - activas;
+
+    var sucursales =
+        Model.Listado?
+            .Select(x => x.IdSucursal)
+            .Distinct()
+            .Count() ?? 0;
+}
+
+
+<link rel="stylesheet"
+      href="~/css/bodegas.css"
+      asp-append-version="true" />
+
+
+<div class="warehouses-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="warehouses-header">
+
+        <div>
+
+            <div class="warehouses-eyebrow">
+
+                <i class="bi bi-boxes"></i>
+
+                Inventario
+
+            </div>
+
+
+            <h1>
+                Bodegas
+            </h1>
+
+
+            <p>
+                Administra las bodegas asociadas
+                a cada sucursal de la farmacia.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-warehouse"
+                onclick="nuevaBodega()">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva bodega
+
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <section class="warehouses-summary">
+
+
+        <div class="warehouse-stat">
+
+            <div class="warehouse-stat-icon total">
+
+                <i class="bi bi-boxes"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Bodegas
+                </span>
+
+                <strong>
+                    @total
+                </strong>
+
+                <small>
+                    Registradas
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="warehouse-stat">
+
+            <div class="warehouse-stat-icon active">
+
+                <i class="bi bi-check-circle"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Activas
+                </span>
+
+                <strong>
+                    @activas
+                </strong>
+
+                <small>
+                    Disponibles
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="warehouse-stat">
+
+            <div class="warehouse-stat-icon inactive">
+
+                <i class="bi bi-pause-circle"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Inactivas
+                </span>
+
+                <strong>
+                    @inactivas
+                </strong>
+
+                <small>
+                    Fuera de uso
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="warehouse-stat">
+
+            <div class="warehouse-stat-icon branch">
+
+                <i class="bi bi-buildings"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Sucursales
+                </span>
+
+                <strong>
+                    @sucursales
+                </strong>
+
+                <small>
+                    Con bodegas
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TOOLBAR
+    ====================================================== -->
+
+    <section class="warehouses-toolbar">
+
+
+        <div class="warehouse-search">
+
+            <i class="bi bi-search"></i>
+
+
+            <input type="text"
+                   id="txtBuscarBodega"
+                   placeholder="Buscar por bodega, código o sucursal..."
+                   autocomplete="off" />
+
+
+            <button type="button"
+                    id="btnLimpiarBodega"
+                    class="btn-clear-warehouse"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="warehouse-results">
+
+            <strong id="contadorBodegas">
+                @total
+            </strong>
+
+            <span>
+                resultados
+            </span>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TABLA
+    ====================================================== -->
+
+    <section class="warehouses-card">
+
+
+        <div class="warehouses-card-header">
+
+            <div>
+
+                <h2>
+                    Bodegas registradas
+                </h2>
+
+                <p>
+                    Ubicaciones que manejarán
+                    las existencias de inventario.
+                </p>
+
+            </div>
+
+
+            <div class="warehouses-card-icon">
+
+                <i class="bi bi-list-ul"></i>
+
+            </div>
+
+        </div>
+
+
+
+        @if (
+            Model.Listado != null &&
+            Model.Listado.Any()
+        )
+        {
+
+            <div class="warehouses-table-wrapper">
+
+
+                <table class="warehouses-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Código
+                            </th>
+
+                            <th>
+                                Bodega
+                            </th>
+
+                            <th>
+                                Sucursal
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th class="warehouse-actions-column">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        @foreach (
+                            var bodega in Model.Listado
+                        )
+                        {
+
+                            var filtro =
+                                (
+                                    bodega.CodigoBodega +
+                                    " " +
+                                    bodega.NombreBodega +
+                                    " " +
+                                    bodega.NombreSucursal
+                                )
+                                .ToLower();
+
+
+                            <tr class="warehouse-row"
+                                data-bodega="@filtro">
+
+
+                                <td>
+
+                                    <span class="warehouse-code">
+
+                                        @bodega.CodigoBodega
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <td>
+
+                                    <div class="warehouse-info">
+
+                                        <div class="warehouse-avatar">
+
+                                            <i class="bi bi-box-seam"></i>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <strong>
+                                                @bodega.NombreBodega
+                                            </strong>
+
+                                            <span>
+                                                Bodega #@bodega.CodBodega
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <td>
+
+                                    <div class="warehouse-branch">
+
+                                        <i class="bi bi-shop"></i>
+
+                                        <div>
+
+                                            <strong>
+                                                @bodega.NombreSucursal
+                                            </strong>
+
+                                            <span>
+                                                @bodega.CodigoSucursal
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <td>
+
+                                    @if (bodega.Activo)
+                                    {
+
+                                        <span class="warehouse-status active">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            Activa
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="warehouse-status inactive">
+
+                                            <i class="bi bi-pause-circle"></i>
+
+                                            Inactiva
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <td>
+
+                                    <div class="warehouse-actions">
+
+
+                                        <button type="button"
+                                                class="warehouse-action edit"
+                                                onclick="editarBodega(@bodega.CodBodega)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                            Editar
+
+                                        </button>
+
+
+                                        @if (bodega.Activo)
+                                        {
+
+                                            <button type="button"
+                                                    class="warehouse-action disable"
+                                                    onclick="desactivarBodega(
+                                                        @bodega.CodBodega,
+                                                        '@bodega.NombreBodega'
+                                                    )">
+
+                                                <i class="bi bi-power"></i>
+
+                                            </button>
+
+                                        }
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+
+
+            <div class="warehouses-empty"
+                 id="sinResultadosBodega"
+                 style="display:none;">
+
+                <i class="bi bi-search"></i>
+
+                <strong>
+                    No encontramos bodegas
+                </strong>
+
+                <span>
+                    Prueba con otro criterio de búsqueda.
+                </span>
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="warehouses-empty">
+
+                <i class="bi bi-boxes"></i>
+
+                <strong>
+                    No hay bodegas registradas
+                </strong>
+
+                <span>
+                    Registra una bodega para comenzar.
+                </span>
+
+                <button type="button"
+                        onclick="nuevaBodega()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Registrar bodega
+
+                </button>
+
+            </div>
+
+        }
+
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL
+========================================================== -->
+
+<div class="modal fade"
+     id="modalBodega"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content warehouse-modal">
+
+
+            <form method="post">
+
+
+                <input type="hidden"
+                       asp-for="Bodega.CodBodega" />
+
+
+
+                <div class="modal-header warehouse-modal-header">
+
+                    <div>
+
+                        <div class="warehouse-modal-eyebrow">
+
+                            <i class="bi bi-boxes"></i>
+
+                            Inventario
+
+                        </div>
+
+
+                        <h5 id="tituloModalBodega">
+
+                            Nueva bodega
+
+                        </h5>
+
+
+                        <span>
+                            Configura la ubicación
+                            de inventario.
+                        </span>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+
+                <div class="modal-body warehouse-modal-body">
+
+
+                    <div class="warehouse-form-grid">
+
+
+                        <!-- SUCURSAL -->
+
+                        <div class="warehouse-field full">
+
+                            <label asp-for="Bodega.IdSucursal">
+
+                                Sucursal
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div class="warehouse-control">
+
+                                <i class="bi bi-buildings"></i>
+
+
+                                <select asp-for="Bodega.IdSucursal">
+
+                                    <option value="0">
+                                        Seleccione sucursal
+                                    </option>
+
+
+                                    @foreach (
+                                        var sucursal
+                                        in Model.Sucursales
+                                    )
+                                    {
+
+                                        <option value="@sucursal.IdSucursal">
+
+                                            @sucursal.CodigoSucursal
+                                            -
+                                            @sucursal.NombreSucursal
+
+                                        </option>
+
+                                    }
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- CÓDIGO -->
+
+                        <div class="warehouse-field">
+
+                            <label asp-for="Bodega.CodigoBodega">
+
+                                Código
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div class="warehouse-control">
+
+                                <i class="bi bi-hash"></i>
+
+
+                                <input asp-for="Bodega.CodigoBodega"
+                                       maxlength="20"
+                                       placeholder="Ej. PRINCIPAL"
+                                       autocomplete="off" />
+
+                            </div>
+
+
+                            <small>
+                                Código dentro de la sucursal.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- NOMBRE -->
+
+                        <div class="warehouse-field">
+
+                            <label asp-for="Bodega.NombreBodega">
+
+                                Nombre
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div class="warehouse-control">
+
+                                <i class="bi bi-box-seam"></i>
+
+
+                                <input asp-for="Bodega.NombreBodega"
+                                       maxlength="100"
+                                       placeholder="Ej. Bodega Principal"
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ESTADO -->
+
+                        <div class="warehouse-field full">
+
+                            <label>
+                                Estado
+                            </label>
+
+
+                            <label class="warehouse-switch">
+
+                                <input asp-for="Bodega.Activo"
+                                       type="checkbox" />
+
+
+                                <span class="warehouse-switch-control">
+                                </span>
+
+
+                                <span class="warehouse-switch-text">
+
+                                    Bodega activa
+
+                                </span>
+
+                            </label>
+
+
+                            <small>
+                                Solo las bodegas activas podrán
+                                utilizarse para movimientos de inventario.
+                            </small>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="warehouse-notice">
+
+                        <i class="bi bi-info-circle"></i>
+
+                        <span>
+                            Esta bodega podrá utilizarse posteriormente
+                            en compras, ventas, ajustes, traslados y cajas.
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="modal-footer warehouse-modal-footer">
+
+
+                    <button type="button"
+                            class="btn-warehouse-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-warehouse-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Guardar bodega
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@section Scripts {
+
+<script>
+
+    function nuevaBodega() {
+
+        window.location.href =
+            "/Bodegas?nuevo=1";
+
+    }
+
+
+    function editarBodega(id) {
+
+        window.location.href =
+            `/Bodegas?id=${id}`;
+
+    }
+
+
+
+    function desactivarBodega(
+        id,
+        nombre)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desactivar bodega",
+
+            html:
+                `La bodega <strong>${escapeHtml(nombre)}</strong> dejará de estar disponible para nuevos movimientos.`,
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Sí, desactivar",
+
+            cancelButtonText:
+                "Cancelar",
+
+            confirmButtonColor:
+                "#d6535d"
+
+        }).then(
+            resultado => {
+
+                if (
+                    resultado.isConfirmed
+                )
+                {
+                    window.location.href =
+                        `/Bodegas?eliminar=${id}`;
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // BUSCADOR
+    // =========================================================
+
+    const txtBuscar =
+        document.getElementById(
+            "txtBuscarBodega"
+        );
+
+
+    const btnLimpiar =
+        document.getElementById(
+            "btnLimpiarBodega"
+        );
+
+
+    txtBuscar?.addEventListener(
+        "input",
+        filtrarBodegas
+    );
+
+
+    btnLimpiar?.addEventListener(
+        "click",
+        function () {
+
+            txtBuscar.value =
+                "";
+
+            filtrarBodegas();
+
+            txtBuscar.focus();
+
+        }
+    );
+
+
+    function filtrarBodegas() {
+
+        const texto =
+            (
+                txtBuscar?.value
+                ?? ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const filas =
+            document.querySelectorAll(
+                ".warehouse-row"
+            );
+
+
+        let visibles =
+            0;
+
+
+        filas.forEach(
+            fila => {
+
+                const valor =
+                    fila.dataset.bodega
+                    ?? "";
+
+
+                const mostrar =
+                    !texto ||
+                    valor.includes(texto);
+
+
+                fila.style.display =
+                    mostrar
+                        ? ""
+                        : "none";
+
+
+                if (mostrar) {
+                    visibles++;
+                }
+
+            }
+        );
+
+
+        document.getElementById(
+            "contadorBodegas"
+        ).textContent =
+            visibles;
+
+
+        btnLimpiar.style.display =
+            texto
+                ? "flex"
+                : "none";
+
+
+        const sinResultados =
+            document.getElementById(
+                "sinResultadosBodega"
+            );
+
+
+        if (sinResultados) {
+
+            sinResultados.style.display =
+                visibles === 0
+                    ? "flex"
+                    : "none";
+
+        }
+
+    }
+
+
+
+    function escapeHtml(valor) {
+
+        return String(
+            valor ?? ""
+        )
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            const parametros =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            // NUEVA
+
+            if (
+                parametros.has("nuevo")
+            )
+            {
+
+                document.getElementById(
+                    "Bodega_CodBodega"
+                ).value =
+                    "0";
+
+
+                document.getElementById(
+                    "Bodega_IdSucursal"
+                ).value =
+                    "0";
+
+
+                document.getElementById(
+                    "Bodega_CodigoBodega"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Bodega_NombreBodega"
+                ).value =
+                    "";
+
+
+                document.getElementById(
+                    "Bodega_Activo"
+                ).checked =
+                    true;
+
+
+                document.getElementById(
+                    "tituloModalBodega"
+                ).textContent =
+                    "Nueva bodega";
+
+
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalBodega"
+                    )
+                ).show();
+
+            }
+
+
+
+            // EDITAR
+
+            @if (
+                TempData["Editar"] != null
+            )
+            {
+                <text>
+
+                document.getElementById(
+                    "tituloModalBodega"
+                ).textContent =
+                    "Editar bodega";
+
+
+                new bootstrap.Modal(
+                    document.getElementById(
+                        "modalBodega"
+                    )
+                ).show();
+
+                </text>
+            }
+
+
+
+            // OK
+
+            @if (
+                TempData["Ok"] != null
+            )
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "success",
+
+                    title:
+                        "Proceso completado",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Ok"]
+                            )
+                        ),
+
+                    timer:
+                        2000,
+
+                    showConfirmButton:
+                        false
+
+                });
+
+                </text>
+            }
+
+
+
+            // ERROR
+
+            @if (
+                TempData["Error"] != null
+            )
+            {
+                <text>
+
+                Swal.fire({
+
+                    icon:
+                        "error",
+
+                    title:
+                        "No se pudo completar",
+
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Error"]
+                            )
+                        )
+
+                });
+
+                </text>
+            }
+
+
+        }
+    );
+
+</script>
+
+}

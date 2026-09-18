@@ -1,0 +1,1910 @@
+﻿@page
+@model Farmacia.Pages.Agentes.AgentesBancariosModel
+@{
+    ViewData["Title"] = "Agentes Bancarios";
+
+    var totalAgentes =
+        Model.Agentes.Count;
+
+    var agentesActivos =
+        Model.Agentes.Count(
+            x => x.Activo
+        );
+
+    var totalOperaciones =
+        Model.Operaciones.Count;
+
+    var operacionesActivas =
+        Model.Operaciones.Count(
+            x => x.Activo
+        );
+}
+
+
+<link rel="stylesheet"
+      href="~/css/agentes-bancarios.css"
+      asp-append-version="true" />
+
+
+<div class="bank-agents-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <section class="bank-header">
+
+        <div>
+
+            <div class="bank-eyebrow">
+
+                <i class="bi bi-bank"></i>
+
+                Servicios financieros
+
+            </div>
+
+
+            <h1>
+                Agentes Bancarios
+            </h1>
+
+
+            <p>
+                Configura Banpro, BAC y las operaciones
+                disponibles para cada agente.
+            </p>
+
+        </div>
+
+
+        <div class="bank-header-actions">
+
+            <button type="button"
+                    class="btn-bank-secondary"
+                    onclick="nuevoTipoOperacion()">
+
+                <i class="bi bi-list-check"></i>
+
+                Nueva operación
+
+            </button>
+
+
+            <button type="button"
+                    class="btn-bank-primary"
+                    onclick="nuevoAgente()">
+
+                <i class="bi bi-plus-lg"></i>
+
+                Nuevo agente
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <section class="bank-summary">
+
+
+        <div class="bank-stat">
+
+            <div class="bank-stat-icon">
+
+                <i class="bi bi-bank"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Agentes
+                </span>
+
+                <strong>
+                    @totalAgentes
+                </strong>
+
+                <small>
+                    Configurados
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="bank-stat">
+
+            <div class="bank-stat-icon success">
+
+                <i class="bi bi-check-circle"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Activos
+                </span>
+
+                <strong>
+                    @agentesActivos
+                </strong>
+
+                <small>
+                    Disponibles
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="bank-stat">
+
+            <div class="bank-stat-icon operation">
+
+                <i class="bi bi-arrow-left-right"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Operaciones
+                </span>
+
+                <strong>
+                    @totalOperaciones
+                </strong>
+
+                <small>
+                    Configuradas
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="bank-stat">
+
+            <div class="bank-stat-icon success">
+
+                <i class="bi bi-toggle-on"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Operaciones activas
+                </span>
+
+                <strong>
+                    @operacionesActivas
+                </strong>
+
+                <small>
+                    Disponibles
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TABS
+    ====================================================== -->
+
+    <div class="bank-tabs">
+
+        <button type="button"
+                class="bank-tab active"
+                data-tab="agentes">
+
+            <i class="bi bi-bank"></i>
+
+            Agentes
+
+        </button>
+
+
+        <button type="button"
+                class="bank-tab"
+                data-tab="operaciones">
+
+            <i class="bi bi-arrow-left-right"></i>
+
+            Tipos de operación
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         AGENTES
+    ====================================================== -->
+
+    <section id="tab-agentes"
+             class="bank-tab-content active">
+
+
+        @if (Model.Agentes.Any())
+        {
+
+            <div class="agent-grid">
+
+
+                @foreach (
+                    var agente in Model.Agentes
+                )
+                {
+
+                    <article class="agent-card @(agente.Activo ? "" : "inactive")">
+
+
+                        <div class="agent-card-header">
+
+
+                            <div class="agent-logo">
+
+                                <i class="bi bi-bank"></i>
+
+                            </div>
+
+
+                            <div class="agent-title">
+
+                                <span>
+                                    @agente.CodigoAgente
+                                </span>
+
+                                <strong>
+                                    @agente.NombreAgente
+                                </strong>
+
+                            </div>
+
+
+                            @if (agente.Activo)
+                            {
+
+                                <span class="agent-status active">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+
+                                    Activo
+
+                                </span>
+
+                            }
+                            else
+                            {
+
+                                <span class="agent-status inactive">
+
+                                    Inactivo
+
+                                </span>
+
+                            }
+
+
+                        </div>
+
+
+
+                        <div class="agent-money">
+
+                            <span>
+                                Saldo inicial configurado
+                            </span>
+
+                            <strong>
+
+                                C$
+                                @agente.SaldoInicial.ToString("N2")
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="agent-details">
+
+
+                            <div>
+
+                                <span>
+                                    Sucursal
+                                </span>
+
+                                <strong>
+                                    @agente.NombreSucursal
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Caja
+                                </span>
+
+                                <strong>
+                                    @agente.NombreCaja
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Bodega
+                                </span>
+
+                                <strong>
+                                    @agente.NombreBodega
+                                </strong>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div class="agent-card-footer">
+
+
+                            <button type="button"
+                                    class="agent-action edit"
+                                    data-id="@agente.IdAgente"
+                                    data-caja="@agente.IdCaja"
+                                    data-codigo="@agente.CodigoAgente"
+                                    data-nombre="@agente.NombreAgente"
+                                    data-saldo="@agente.SaldoInicial.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                    data-activo="@agente.Activo.ToString().ToLower()"
+                                    onclick="editarAgente(this)">
+
+                                <i class="bi bi-pencil"></i>
+
+                                Editar
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="agent-action operations"
+                                    data-id="@agente.IdAgente"
+                                    onclick="verOperacionesAgente(this)">
+
+                                <i class="bi bi-arrow-left-right"></i>
+
+                                Operaciones
+
+                            </button>
+
+
+                            @if (agente.Activo)
+                            {
+
+                                <button type="button"
+                                        class="agent-action disable"
+                                        data-id="@agente.IdAgente"
+                                        data-nombre="@agente.NombreAgente"
+                                        onclick="desactivarAgente(this)">
+
+                                    <i class="bi bi-power"></i>
+
+                                </button>
+
+                            }
+
+
+                        </div>
+
+
+                    </article>
+
+                }
+
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="bank-empty">
+
+                <i class="bi bi-bank"></i>
+
+                <strong>
+                    No hay agentes bancarios
+                </strong>
+
+                <span>
+                    Registra Banpro o BAC para comenzar.
+                </span>
+
+                <button type="button"
+                        onclick="nuevoAgente()">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Registrar agente
+
+                </button>
+
+            </div>
+
+        }
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         OPERACIONES
+    ====================================================== -->
+
+    <section id="tab-operaciones"
+             class="bank-tab-content">
+
+
+        <div class="operations-toolbar">
+
+
+            <div class="operations-filter">
+
+                <i class="bi bi-funnel"></i>
+
+                <select id="filtroAgente">
+
+                    <option value="0">
+                        Todos los agentes
+                    </option>
+
+
+                    @foreach (
+                        var agente in Model.Agentes
+                            .Where(x => x.Activo)
+                    )
+                    {
+
+                        <option value="@agente.IdAgente">
+
+                            @agente.NombreAgente
+
+                        </option>
+
+                    }
+
+                </select>
+
+            </div>
+
+
+            <button type="button"
+                    class="btn-bank-primary small"
+                    onclick="nuevoTipoOperacion()">
+
+                <i class="bi bi-plus-lg"></i>
+
+                Nueva operación
+
+            </button>
+
+
+        </div>
+
+
+
+        <div class="operations-card">
+
+
+            <div class="operations-table-wrapper">
+
+
+                <table class="operations-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Agente
+                            </th>
+
+                            <th>
+                                Operación
+                            </th>
+
+                            <th>
+                                Efectivo
+                            </th>
+
+                            <th>
+                                Saldo agente
+                            </th>
+
+                            <th>
+                                Referencia
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th>
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tablaOperaciones">
+
+
+                        @foreach (
+                            var operacion
+                            in Model.Operaciones
+                        )
+                        {
+
+                            <tr data-agente="@operacion.IdAgente">
+
+
+                                <td>
+
+                                    <span class="operation-agent">
+
+                                        @operacion.NombreAgente
+
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="operation-name">
+
+                                        <strong>
+                                            @operacion.NombreOperacion
+                                        </strong>
+
+                                        <span>
+                                            @operacion.CodigoOperacion
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (
+                                        operacion.EfectoEfectivo == 1
+                                    )
+                                    {
+
+                                        <span class="effect positive">
+
+                                            <i class="bi bi-arrow-up"></i>
+
+                                            Aumenta
+
+                                        </span>
+
+                                    }
+                                    else if (
+                                        operacion.EfectoEfectivo == -1
+                                    )
+                                    {
+
+                                        <span class="effect negative">
+
+                                            <i class="bi bi-arrow-down"></i>
+
+                                            Disminuye
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="effect neutral">
+
+                                            Sin efecto
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (
+                                        operacion.EfectoSaldoAgente == 1
+                                    )
+                                    {
+
+                                        <span class="effect positive">
+
+                                            <i class="bi bi-arrow-up"></i>
+
+                                            Aumenta
+
+                                        </span>
+
+                                    }
+                                    else if (
+                                        operacion.EfectoSaldoAgente == -1
+                                    )
+                                    {
+
+                                        <span class="effect negative">
+
+                                            <i class="bi bi-arrow-down"></i>
+
+                                            Disminuye
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="effect neutral">
+
+                                            Sin efecto
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (
+                                        operacion.RequiereReferencia
+                                    )
+                                    {
+
+                                        <span class="reference-required">
+
+                                            <i class="bi bi-check-circle"></i>
+
+                                            Requerida
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="reference-optional">
+
+                                            Opcional
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (operacion.Activo)
+                                    {
+
+                                        <span class="agent-status active">
+
+                                            Activa
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="agent-status inactive">
+
+                                            Inactiva
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="operation-actions">
+
+
+                                        <button type="button"
+                                                class="operation-action edit"
+                                                data-id="@operacion.IdTipoOperacion"
+                                                data-agente="@operacion.IdAgente"
+                                                data-codigo="@operacion.CodigoOperacion"
+                                                data-nombre="@operacion.NombreOperacion"
+                                                data-efectivo="@operacion.EfectoEfectivo"
+                                                data-saldo="@operacion.EfectoSaldoAgente"
+                                                data-referencia="@operacion.RequiereReferencia.ToString().ToLower()"
+                                                data-activo="@operacion.Activo.ToString().ToLower()"
+                                                onclick="editarOperacion(this)">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                        </button>
+
+
+                                        @if (operacion.Activo)
+                                        {
+
+                                            <button type="button"
+                                                    class="operation-action disable"
+                                                    data-id="@operacion.IdTipoOperacion"
+                                                    data-nombre="@operacion.NombreOperacion"
+                                                    onclick="desactivarOperacion(this)">
+
+                                                <i class="bi bi-power"></i>
+
+                                            </button>
+
+                                        }
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL AGENTE
+========================================================== -->
+
+<div class="modal fade"
+     id="modalAgente"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content bank-modal">
+
+
+            <form method="post"
+                  asp-page-handler="GuardarAgente">
+
+
+                <input type="hidden"
+                       asp-for="Agente.IdAgente" />
+
+
+                <div class="modal-header">
+
+
+                    <div>
+
+                        <span class="modal-eyebrow">
+
+                            Agente bancario
+
+                        </span>
+
+                        <h5 id="tituloModalAgente">
+
+                            Nuevo agente
+
+                        </h5>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+
+                </div>
+
+
+                <div class="modal-body">
+
+
+                    <div class="bank-form-grid">
+
+
+                        <div class="bank-field full">
+
+                            <label>
+                                Caja asignada *
+                            </label>
+
+
+                            <select asp-for="Agente.IdCaja">
+
+                                <option value="0">
+
+                                    Seleccione una caja
+
+                                </option>
+
+
+                                @foreach (
+                                    var caja in Model.Cajas
+                                )
+                                {
+
+                                    <option value="@caja.IdCaja">
+
+                                        @caja.NombreSucursal
+                                        ·
+                                        @caja.NombreCaja
+                                        ·
+                                        @caja.NombreBodega
+
+                                    </option>
+
+                                }
+
+
+                            </select>
+
+
+                            <small>
+                                El efectivo de este agente será
+                                parte del arqueo de esta caja.
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Código *
+                            </label>
+
+
+                            <input asp-for="Agente.CodigoAgente"
+                                   maxlength="20"
+                                   placeholder="Ej. BANPRO" />
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Nombre *
+                            </label>
+
+
+                            <input asp-for="Agente.NombreAgente"
+                                   maxlength="100"
+                                   placeholder="Ej. Agente Banpro" />
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Saldo inicial
+                            </label>
+
+
+                            <div class="bank-money">
+
+                                <span>
+                                    C$
+                                </span>
+
+
+                                <input asp-for="Agente.SaldoInicial"
+                                       type="number"
+                                       min="0"
+                                       step="0.01" />
+
+                            </div>
+
+
+                            <small>
+                                Saldo electrónico inicial para comenzar
+                                el control del agente.
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Estado
+                            </label>
+
+
+                            <label class="bank-switch">
+
+                                <input asp-for="Agente.Activo"
+                                       type="checkbox" />
+
+                                <span></span>
+
+                                Agente activo
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="modal-footer">
+
+
+                    <button type="button"
+                            class="btn-bank-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-bank-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Guardar agente
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL OPERACIÓN
+========================================================== -->
+
+<div class="modal fade"
+     id="modalOperacion"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content bank-modal">
+
+
+            <form method="post"
+                  asp-page-handler="GuardarOperacion">
+
+
+                <input type="hidden"
+                       asp-for="Operacion.IdTipoOperacion" />
+
+
+                <div class="modal-header">
+
+
+                    <div>
+
+                        <span class="modal-eyebrow">
+
+                            Agente bancario
+
+                        </span>
+
+                        <h5 id="tituloModalOperacion">
+
+                            Nueva operación
+
+                        </h5>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="modal-body">
+
+
+                    <div class="bank-form-grid">
+
+
+                        <div class="bank-field full">
+
+                            <label>
+                                Agente *
+                            </label>
+
+
+                            <select asp-for="Operacion.IdAgente">
+
+                                <option value="0">
+
+                                    Seleccione agente
+
+                                </option>
+
+
+                                @foreach (
+                                    var agente in Model.Agentes
+                                        .Where(x => x.Activo)
+                                )
+                                {
+
+                                    <option value="@agente.IdAgente">
+
+                                        @agente.NombreAgente
+                                        ·
+                                        @agente.NombreCaja
+
+                                    </option>
+
+                                }
+
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Código *
+                            </label>
+
+
+                            <input asp-for="Operacion.CodigoOperacion"
+                                   maxlength="30"
+                                   placeholder="Ej. DEPOSITO" />
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Operación *
+                            </label>
+
+
+                            <input asp-for="Operacion.NombreOperacion"
+                                   maxlength="100"
+                                   placeholder="Ej. Depósito" />
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Efecto en efectivo *
+                            </label>
+
+
+                            <select asp-for="Operacion.EfectoEfectivo">
+
+                                <option value="1">
+                                    + Aumenta efectivo
+                                </option>
+
+                                <option value="-1">
+                                    - Disminuye efectivo
+                                </option>
+
+                                <option value="0">
+                                    Sin efecto
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Efecto saldo agente *
+                            </label>
+
+
+                            <select asp-for="Operacion.EfectoSaldoAgente">
+
+                                <option value="-1">
+                                    - Disminuye saldo agente
+                                </option>
+
+                                <option value="1">
+                                    + Aumenta saldo agente
+                                </option>
+
+                                <option value="0">
+                                    Sin efecto
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Referencia bancaria
+                            </label>
+
+
+                            <label class="bank-switch">
+
+                                <input asp-for="Operacion.RequiereReferencia"
+                                       type="checkbox" />
+
+                                <span></span>
+
+                                Requerida
+
+                            </label>
+
+                        </div>
+
+
+
+                        <div class="bank-field">
+
+                            <label>
+                                Estado
+                            </label>
+
+
+                            <label class="bank-switch">
+
+                                <input asp-for="Operacion.Activo"
+                                       type="checkbox" />
+
+                                <span></span>
+
+                                Operación activa
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="operation-help">
+
+                        <i class="bi bi-info-circle"></i>
+
+                        <div>
+
+                            <strong>
+                                Ejemplo: Depósito
+                            </strong>
+
+                            <span>
+                                El cliente entrega efectivo:
+                                efectivo + / saldo agente -.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+
+                    <button type="button"
+                            class="btn-bank-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-bank-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Guardar operación
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     FORMULARIOS OCULTOS
+========================================================== -->
+
+<form method="post"
+      asp-page-handler="DesactivarAgente"
+      id="formDesactivarAgente">
+
+    <input type="hidden"
+           asp-for="IdAgenteDesactivar" />
+
+</form>
+
+
+<form method="post"
+      asp-page-handler="DesactivarOperacion"
+      id="formDesactivarOperacion">
+
+    <input type="hidden"
+           asp-for="IdOperacionDesactivar" />
+
+</form>
+
+
+
+@section Scripts {
+
+<script>
+
+    // =========================================================
+    // TABS
+    // =========================================================
+
+    document.querySelectorAll(
+        ".bank-tab"
+    ).forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                function () {
+
+                    document
+                        .querySelectorAll(
+                            ".bank-tab"
+                        )
+                        .forEach(
+                            x => x.classList.remove(
+                                "active"
+                            )
+                        );
+
+
+                    document
+                        .querySelectorAll(
+                            ".bank-tab-content"
+                        )
+                        .forEach(
+                            x => x.classList.remove(
+                                "active"
+                            )
+                        );
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    document
+                        .getElementById(
+                            `tab-${this.dataset.tab}`
+                        )
+                        .classList.add(
+                            "active"
+                        );
+
+                }
+            );
+
+        }
+    );
+
+
+    // =========================================================
+    // NUEVO AGENTE
+    // =========================================================
+
+    function nuevoAgente() {
+
+        document.getElementById(
+            "Agente_IdAgente"
+        ).value = "0";
+
+
+        document.getElementById(
+            "Agente_IdCaja"
+        ).value = "0";
+
+
+        document.getElementById(
+            "Agente_CodigoAgente"
+        ).value = "";
+
+
+        document.getElementById(
+            "Agente_NombreAgente"
+        ).value = "";
+
+
+        document.getElementById(
+            "Agente_SaldoInicial"
+        ).value = "0.00";
+
+
+        document.getElementById(
+            "Agente_Activo"
+        ).checked = true;
+
+
+        document.getElementById(
+            "tituloModalAgente"
+        ).textContent =
+            "Nuevo agente";
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "modalAgente"
+                )
+            )
+            .show();
+
+    }
+
+
+    // =========================================================
+    // EDITAR AGENTE
+    // =========================================================
+
+    function editarAgente(
+        boton)
+    {
+
+        document.getElementById(
+            "Agente_IdAgente"
+        ).value =
+            boton.dataset.id;
+
+
+        document.getElementById(
+            "Agente_IdCaja"
+        ).value =
+            boton.dataset.caja;
+
+
+        document.getElementById(
+            "Agente_CodigoAgente"
+        ).value =
+            boton.dataset.codigo;
+
+
+        document.getElementById(
+            "Agente_NombreAgente"
+        ).value =
+            boton.dataset.nombre;
+
+
+        document.getElementById(
+            "Agente_SaldoInicial"
+        ).value =
+            boton.dataset.saldo;
+
+
+        document.getElementById(
+            "Agente_Activo"
+        ).checked =
+            boton.dataset.activo ===
+            "true";
+
+
+        document.getElementById(
+            "tituloModalAgente"
+        ).textContent =
+            "Editar agente";
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "modalAgente"
+                )
+            )
+            .show();
+
+    }
+
+
+    // =========================================================
+    // NUEVA OPERACIÓN
+    // =========================================================
+
+    function nuevoTipoOperacion() {
+
+        document.getElementById(
+            "Operacion_IdTipoOperacion"
+        ).value = "0";
+
+
+        document.getElementById(
+            "Operacion_IdAgente"
+        ).value = "0";
+
+
+        document.getElementById(
+            "Operacion_CodigoOperacion"
+        ).value = "";
+
+
+        document.getElementById(
+            "Operacion_NombreOperacion"
+        ).value = "";
+
+
+        document.getElementById(
+            "Operacion_EfectoEfectivo"
+        ).value = "1";
+
+
+        document.getElementById(
+            "Operacion_EfectoSaldoAgente"
+        ).value = "-1";
+
+
+        document.getElementById(
+            "Operacion_RequiereReferencia"
+        ).checked = true;
+
+
+        document.getElementById(
+            "Operacion_Activo"
+        ).checked = true;
+
+
+        document.getElementById(
+            "tituloModalOperacion"
+        ).textContent =
+            "Nueva operación";
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "modalOperacion"
+                )
+            )
+            .show();
+
+    }
+
+
+    // =========================================================
+    // EDITAR OPERACIÓN
+    // =========================================================
+
+    function editarOperacion(
+        boton)
+    {
+
+        document.getElementById(
+            "Operacion_IdTipoOperacion"
+        ).value =
+            boton.dataset.id;
+
+
+        document.getElementById(
+            "Operacion_IdAgente"
+        ).value =
+            boton.dataset.agente;
+
+
+        document.getElementById(
+            "Operacion_CodigoOperacion"
+        ).value =
+            boton.dataset.codigo;
+
+
+        document.getElementById(
+            "Operacion_NombreOperacion"
+        ).value =
+            boton.dataset.nombre;
+
+
+        document.getElementById(
+            "Operacion_EfectoEfectivo"
+        ).value =
+            boton.dataset.efectivo;
+
+
+        document.getElementById(
+            "Operacion_EfectoSaldoAgente"
+        ).value =
+            boton.dataset.saldo;
+
+
+        document.getElementById(
+            "Operacion_RequiereReferencia"
+        ).checked =
+            boton.dataset.referencia ===
+            "true";
+
+
+        document.getElementById(
+            "Operacion_Activo"
+        ).checked =
+            boton.dataset.activo ===
+            "true";
+
+
+        document.getElementById(
+            "tituloModalOperacion"
+        ).textContent =
+            "Editar operación";
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "modalOperacion"
+                )
+            )
+            .show();
+
+    }
+
+
+    // =========================================================
+    // IR A OPERACIONES DE AGENTE
+    // =========================================================
+
+    function verOperacionesAgente(
+        boton)
+    {
+
+        document
+            .querySelector(
+                '[data-tab="operaciones"]'
+            )
+            .click();
+
+
+        document.getElementById(
+            "filtroAgente"
+        ).value =
+            boton.dataset.id;
+
+
+        filtrarOperaciones();
+
+    }
+
+
+    // =========================================================
+    // FILTRO
+    // =========================================================
+
+    document.getElementById(
+        "filtroAgente"
+    )?.addEventListener(
+        "change",
+        filtrarOperaciones
+    );
+
+
+    function filtrarOperaciones() {
+
+        const idAgente =
+            document.getElementById(
+                "filtroAgente"
+            ).value;
+
+
+        document.querySelectorAll(
+            "#tablaOperaciones tr"
+        ).forEach(
+            fila => {
+
+                fila.style.display =
+                    idAgente === "0" ||
+                    fila.dataset.agente ===
+                    idAgente
+                        ? ""
+                        : "none";
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // DESACTIVAR AGENTE
+    // =========================================================
+
+    function desactivarAgente(
+        boton)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desactivar agente",
+
+            text:
+                `Se desactivará ${boton.dataset.nombre}.`,
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Desactivar",
+
+            cancelButtonText:
+                "Cancelar"
+
+        }).then(
+            resultado => {
+
+                if (!resultado.isConfirmed)
+                    return;
+
+
+                document.getElementById(
+                    "IdAgenteDesactivar"
+                ).value =
+                    boton.dataset.id;
+
+
+                document.getElementById(
+                    "formDesactivarAgente"
+                ).submit();
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // DESACTIVAR OPERACIÓN
+    // =========================================================
+
+    function desactivarOperacion(
+        boton)
+    {
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Desactivar operación",
+
+            text:
+                `Se desactivará ${boton.dataset.nombre}.`,
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Desactivar",
+
+            cancelButtonText:
+                "Cancelar"
+
+        }).then(
+            resultado => {
+
+                if (!resultado.isConfirmed)
+                    return;
+
+
+                document.getElementById(
+                    "IdOperacionDesactivar"
+                ).value =
+                    boton.dataset.id;
+
+
+                document.getElementById(
+                    "formDesactivarOperacion"
+                ).submit();
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // MENSAJES
+    // =========================================================
+
+    @if (TempData["Ok"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "success",
+
+            title:
+                "Proceso completado",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Ok"]
+                    )
+                ),
+
+            timer:
+                2000,
+
+            showConfirmButton:
+                false
+
+        });
+
+        </text>
+    }
+
+
+    @if (TempData["Error"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "error",
+
+            title:
+                "No se pudo completar",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Error"]
+                    )
+                )
+
+        });
+
+        </text>
+    }
+
+</script>
+
+}

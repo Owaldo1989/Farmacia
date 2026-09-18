@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
+using System.IO;
 
 namespace Farmacia.Pages.Ingresos
 {
@@ -17,6 +18,10 @@ namespace Farmacia.Pages.Ingresos
             _dal = dal;
         }
 
+
+        // =====================================================
+        // GET
+        // =====================================================
 
         public IActionResult OnGet(int id)
         {
@@ -48,10 +53,14 @@ namespace Farmacia.Pages.Ingresos
                 GenerarPDF(ingreso);
 
 
+            /*
+                Lo dejamos inline para que abra
+                directamente en el navegador.
+            */
+
             return File(
                 pdf,
-                "application/pdf",
-                $"IngresoMercaderia_{id}.pdf"
+                "application/pdf"
             );
         }
 
@@ -70,6 +79,7 @@ namespace Farmacia.Pages.Ingresos
 
             documento.Info.Title =
                 $"Ingreso de Mercadería #{data.Ingreso.IdIngreso}";
+
 
 
             // =================================================
@@ -130,6 +140,7 @@ namespace Farmacia.Pages.Ingresos
                     7,
                     XFontStyle.Bold
                 );
+
 
 
             // =================================================
@@ -241,7 +252,9 @@ namespace Farmacia.Pages.Ingresos
             // =================================================
 
             PdfPage pagina =
-                CrearPagina(documento);
+                CrearPagina(
+                    documento
+                );
 
 
             XGraphics gfx =
@@ -250,7 +263,7 @@ namespace Farmacia.Pages.Ingresos
                 );
 
 
-            double margen =
+            const double margen =
                 28;
 
 
@@ -301,15 +314,11 @@ namespace Farmacia.Pages.Ingresos
                 XBrushes.White,
                 new XRect(
                     margen,
-                    24,
+                    20,
                     anchoContenido,
-                    20
+                    28
                 ),
-                new XStringFormat
-                {
-                    Alignment =
-                        XStringAlignment.Far
-                }
+                FormatoDerecha()
             );
 
 
@@ -318,7 +327,7 @@ namespace Farmacia.Pages.Ingresos
 
 
             // =================================================
-            // DATOS DE FACTURA
+            // INFORMACIÓN DEL INGRESO
             // =================================================
 
             DibujarTituloSeccion(
@@ -333,7 +342,7 @@ namespace Farmacia.Pages.Ingresos
             );
 
 
-            y += 6;
+            y += 8;
 
 
             double mitad =
@@ -436,7 +445,7 @@ namespace Farmacia.Pages.Ingresos
             // TOTALES SUPERIORES
             // =================================================
 
-            double separacion =
+            const double separacion =
                 10;
 
 
@@ -500,7 +509,7 @@ namespace Farmacia.Pages.Ingresos
 
 
             // =================================================
-            // DETALLE
+            // PRODUCTOS
             // =================================================
 
             DibujarTituloSeccion(
@@ -519,21 +528,24 @@ namespace Farmacia.Pages.Ingresos
 
 
 
-            // Anchos de columnas
+            /*
+                El total de columnas es 786 puntos,
+                exactamente el ancho útil de la página.
+            */
 
             double[] columnas =
             {
-                165, // producto
-                38,  // cantidad
-                60,  // costo anterior
-                60,  // costo base
-                35,  // iva
-                62,  // costo real
-                42,  // utilidad
-                62,  // precio anterior
-                62,  // sugerido
-                62,  // nuevo
-                72   // total
+                231, // Producto
+                38,  // Cantidad
+                60,  // Costo anterior
+                60,  // Costo base
+                35,  // IVA
+                62,  // Costo real
+                42,  // Utilidad
+                62,  // Precio anterior
+                62,  // Sugerido
+                62,  // Nuevo
+                72   // Total
             };
 
 
@@ -574,19 +586,26 @@ namespace Farmacia.Pages.Ingresos
             )
             {
                 const double alturaFila =
-                    27;
+                    29;
 
 
-                /*
-                    Saltar de página cuando
-                    ya no hay espacio.
-                */
+                // =============================================
+                // CAMBIO DE PÁGINA
+                // =============================================
 
                 if (
                     y + alturaFila >
                     pagina.Height - 55
                 )
                 {
+                    DibujarPie(
+                        gfx,
+                        pagina,
+                        data.Ingreso.IdIngreso,
+                        fontNormal
+                    );
+
+
                     gfx.Dispose();
 
 
@@ -603,7 +622,7 @@ namespace Farmacia.Pages.Ingresos
 
 
                     y =
-                        30;
+                        28;
 
 
                     gfx.DrawString(
@@ -630,6 +649,7 @@ namespace Farmacia.Pages.Ingresos
                 }
 
 
+
                 double x =
                     margen;
 
@@ -645,7 +665,10 @@ namespace Farmacia.Pages.Ingresos
                         : XBrushes.White;
 
 
-                // Fondo
+
+                // =============================================
+                // FONDO FILA
+                // =============================================
 
                 gfx.DrawRectangle(
                     fondoFila,
@@ -657,13 +680,15 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
                 // PRODUCTO
+                // =============================================
 
                 string producto =
                     TruncarTexto(
                         gfx,
                         item.NombreProducto ?? "",
-                        fontTabla,
+                        fontTablaBold,
                         columnas[0] - 8
                     );
 
@@ -674,10 +699,11 @@ namespace Farmacia.Pages.Ingresos
                     XBrushes.Black,
                     new XRect(
                         x + 4,
-                        y + 5,
+                        y + 2,
                         columnas[0] - 8,
-                        10
-                    )
+                        14
+                    ),
+                    FormatoIzquierda()
                 );
 
 
@@ -696,16 +722,21 @@ namespace Farmacia.Pages.Ingresos
                     XBrushes.Gray,
                     new XRect(
                         x + 4,
-                        y + 15,
+                        y + 14,
                         columnas[0] - 8,
-                        9
-                    )
+                        12
+                    ),
+                    FormatoIzquierda()
                 );
 
 
                 x += columnas[0];
 
 
+
+                // =============================================
+                // CANTIDAD
+                // =============================================
 
                 DibujarCeldaNumero(
                     gfx,
@@ -722,6 +753,10 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
+                // COSTO ANTERIOR
+                // =============================================
+
                 DibujarCeldaNumero(
                     gfx,
                     item.CostoAnterior.ToString("N2"),
@@ -736,6 +771,10 @@ namespace Farmacia.Pages.Ingresos
                 x += columnas[2];
 
 
+
+                // =============================================
+                // COSTO BASE
+                // =============================================
 
                 DibujarCeldaNumero(
                     gfx,
@@ -752,6 +791,10 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
+                // IVA
+                // =============================================
+
                 DibujarCeldaCentro(
                     gfx,
                     item.TasaIVA.ToString("0") + "%",
@@ -766,6 +809,10 @@ namespace Farmacia.Pages.Ingresos
                 x += columnas[4];
 
 
+
+                // =============================================
+                // COSTO REAL
+                // =============================================
 
                 DibujarCeldaNumero(
                     gfx,
@@ -787,6 +834,10 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
+                // UTILIDAD
+                // =============================================
+
                 DibujarCeldaCentro(
                     gfx,
                     item.PorcentajeUtilidad
@@ -803,6 +854,10 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
+                // PRECIO ANTERIOR
+                // =============================================
+
                 DibujarCeldaNumero(
                     gfx,
                     item.PrecioVentaAnterior
@@ -818,6 +873,10 @@ namespace Farmacia.Pages.Ingresos
                 x += columnas[7];
 
 
+
+                // =============================================
+                // PRECIO SUGERIDO
+                // =============================================
 
                 DibujarCeldaNumero(
                     gfx,
@@ -837,6 +896,10 @@ namespace Farmacia.Pages.Ingresos
 
 
 
+                // =============================================
+                // PRECIO NUEVO
+                // =============================================
+
                 DibujarCeldaNumero(
                     gfx,
                     item.PrecioVentaNuevo
@@ -853,6 +916,10 @@ namespace Farmacia.Pages.Ingresos
                 x += columnas[9];
 
 
+
+                // =============================================
+                // TOTAL REAL DE LA LÍNEA
+                // =============================================
 
                 decimal totalLinea =
                     Math.Round(
@@ -874,7 +941,9 @@ namespace Farmacia.Pages.Ingresos
 
 
 
-                // Línea inferior
+                // =============================================
+                // LÍNEA INFERIOR
+                // =============================================
 
                 gfx.DrawLine(
                     penLinea,
@@ -895,10 +964,18 @@ namespace Farmacia.Pages.Ingresos
             // =================================================
 
             if (
-                y + 105 >
+                y + 110 >
                 pagina.Height - 30
             )
             {
+                DibujarPie(
+                    gfx,
+                    pagina,
+                    data.Ingreso.IdIngreso,
+                    fontNormal
+                );
+
+
                 gfx.Dispose();
 
 
@@ -929,10 +1006,14 @@ namespace Farmacia.Pages.Ingresos
                 250;
 
 
+            double yCajaResumen =
+                y;
+
+
             gfx.DrawRectangle(
                 brushGris,
                 resumenX,
-                y,
+                yCajaResumen,
                 250,
                 82
             );
@@ -986,7 +1067,7 @@ namespace Farmacia.Pages.Ingresos
                 )
             )
             {
-                y += 20;
+                y += 18;
 
 
                 gfx.DrawString(
@@ -1001,13 +1082,17 @@ namespace Farmacia.Pages.Ingresos
                 y += 13;
 
 
-                gfx.DrawString(
+                string observacion =
                     TruncarTexto(
                         gfx,
                         data.Ingreso.Observacion,
                         fontNormal,
                         anchoContenido
-                    ),
+                    );
+
+
+                gfx.DrawString(
+                    observacion,
                     fontNormal,
                     XBrushes.Black,
                     margen,
@@ -1032,6 +1117,11 @@ namespace Farmacia.Pages.Ingresos
             gfx.Dispose();
 
 
+
+            // =================================================
+            // GUARDAR
+            // =================================================
+
             using var ms =
                 new MemoryStream();
 
@@ -1045,7 +1135,7 @@ namespace Farmacia.Pages.Ingresos
 
 
         // =====================================================
-        // CREAR A4 HORIZONTAL
+        // CREAR PÁGINA A4 HORIZONTAL
         // =====================================================
 
         private static PdfPage CrearPagina(
@@ -1056,8 +1146,10 @@ namespace Farmacia.Pages.Ingresos
 
 
             /*
-                A4 horizontal en puntos:
-                297mm x 210mm
+                A4 horizontal
+
+                297mm = 842 pt aprox.
+                210mm = 595 pt aprox.
             */
 
             pagina.Width =
@@ -1074,7 +1166,61 @@ namespace Farmacia.Pages.Ingresos
 
 
         // =====================================================
-        // TÍTULO SECCIÓN
+        // FORMATO IZQUIERDO
+        // =====================================================
+
+        private static XStringFormat FormatoIzquierda()
+        {
+            return new XStringFormat
+            {
+                Alignment =
+                    XStringAlignment.Near,
+
+                LineAlignment =
+                    XLineAlignment.Center
+            };
+        }
+
+
+
+        // =====================================================
+        // FORMATO CENTRO
+        // =====================================================
+
+        private static XStringFormat FormatoCentro()
+        {
+            return new XStringFormat
+            {
+                Alignment =
+                    XStringAlignment.Center,
+
+                LineAlignment =
+                    XLineAlignment.Center
+            };
+        }
+
+
+
+        // =====================================================
+        // FORMATO DERECHA
+        // =====================================================
+
+        private static XStringFormat FormatoDerecha()
+        {
+            return new XStringFormat
+            {
+                Alignment =
+                    XStringAlignment.Far,
+
+                LineAlignment =
+                    XLineAlignment.Center
+            };
+        }
+
+
+
+        // =====================================================
+        // TÍTULO DE SECCIÓN
         // =====================================================
 
         private static void DibujarTituloSeccion(
@@ -1106,11 +1252,7 @@ namespace Farmacia.Pages.Ingresos
                     ancho - 16,
                     24
                 ),
-                new XStringFormat
-                {
-                    LineAlignment =
-                        XLineAlignment.Center
-                }
+                FormatoIzquierda()
             );
 
 
@@ -1120,7 +1262,7 @@ namespace Farmacia.Pages.Ingresos
 
 
         // =====================================================
-        // DATOS
+        // DIBUJAR DATO
         // =====================================================
 
         private static void DibujarDato(
@@ -1154,7 +1296,7 @@ namespace Farmacia.Pages.Ingresos
 
 
         // =====================================================
-        // CAJAS TOTAL
+        // CAJA DE TOTAL
         // =====================================================
 
         private static void DibujarCajaTotal(
@@ -1193,22 +1335,18 @@ namespace Farmacia.Pages.Ingresos
                 texto,
                 new XRect(
                     x + 10,
-                    y + 23,
+                    y + 20,
                     ancho - 20,
-                    18
+                    22
                 ),
-                new XStringFormat
-                {
-                    Alignment =
-                        XStringAlignment.Far
-                }
+                FormatoDerecha()
             );
         }
 
 
 
         // =====================================================
-        // CABECERA TABLA
+        // CABECERA DE TABLA
         // =====================================================
 
         private static void DibujarCabeceraTabla(
@@ -1253,16 +1391,9 @@ namespace Farmacia.Pages.Ingresos
                         columnas[i] - 6,
                         alto
                     ),
-                    new XStringFormat
-                    {
-                        Alignment =
-                            i == 0
-                                ? XStringAlignment.Near
-                                : XStringAlignment.Center,
-
-                        LineAlignment =
-                            XLineAlignment.Center
-                    }
+                    i == 0
+                        ? FormatoIzquierda()
+                        : FormatoCentro()
                 );
 
 
@@ -1299,18 +1430,15 @@ namespace Farmacia.Pages.Ingresos
                     ancho - 6,
                     alto
                 ),
-                new XStringFormat
-                {
-                    Alignment =
-                        XStringAlignment.Far,
-
-                    LineAlignment =
-                        XLineAlignment.Center
-                }
+                FormatoDerecha()
             );
         }
 
 
+
+        // =====================================================
+        // CELDA CENTRADA
+        // =====================================================
 
         private static void DibujarCeldaCentro(
             XGraphics gfx,
@@ -1331,14 +1459,7 @@ namespace Farmacia.Pages.Ingresos
                     ancho,
                     alto
                 ),
-                new XStringFormat
-                {
-                    Alignment =
-                        XStringAlignment.Center,
-
-                    LineAlignment =
-                        XLineAlignment.Center
-                }
+                FormatoCentro()
             );
         }
 
@@ -1363,8 +1484,13 @@ namespace Farmacia.Pages.Ingresos
                 etiqueta,
                 fontEtiqueta,
                 XBrushes.Gray,
-                x + 12,
-                y + 15
+                new XRect(
+                    x + 12,
+                    y + 4,
+                    90,
+                    18
+                ),
+                FormatoIzquierda()
             );
 
 
@@ -1373,16 +1499,12 @@ namespace Farmacia.Pages.Ingresos
                 fontValor,
                 brush ?? XBrushes.Black,
                 new XRect(
-                    x,
-                    y + 7,
-                    ancho - 12,
+                    x + 100,
+                    y + 4,
+                    ancho - 112,
                     18
                 ),
-                new XStringFormat
-                {
-                    Alignment =
-                        XStringAlignment.Far
-                }
+                FormatoDerecha()
             );
 
 
@@ -1430,7 +1552,7 @@ namespace Farmacia.Pages.Ingresos
 
 
         // =====================================================
-        // TRUNCAR
+        // TRUNCAR TEXTO
         // =====================================================
 
         private static string TruncarTexto(

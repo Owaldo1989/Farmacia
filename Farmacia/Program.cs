@@ -17,6 +17,13 @@ builder.Services.AddTransient<ProductoDAL>();
 builder.Services.AddTransient<ReporteDAL>();
 builder.Services.AddTransient<TipoCambioDAL>();
 builder.Services.AddTransient<IngresoMercaderiaDAL>();
+builder.Services.AddTransient<SucursalDAL>();
+builder.Services.AddTransient<BodegaDAL>();
+builder.Services.AddTransient<CajaDAL>();
+builder.Services.AddTransient<CajaEquipoDAL>();
+builder.Services.AddTransient<CajaTurnoDAL>();
+builder.Services.AddTransient<AgenteBancarioDAL>();
+builder.Services.AddTransient<AgenteTipoOperacionDAL>();
 // Cache para Session
 builder.Services.AddDistributedMemoryCache();
 
