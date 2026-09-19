@@ -227,10 +227,8 @@ namespace Farmacia.Pages.Configuracion
                 );
 
 
-            return string.Equals(
-                rol,
-                "Administrador",
-                StringComparison.OrdinalIgnoreCase
+            return Farmacia.Helpers.RolHelper.EsAdministrador(
+                rol
             );
         }
     }

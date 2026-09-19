@@ -1,0 +1,1014 @@
+@page "/Agentes/Operaciones/{codigo}"
+@model Farmacia.Pages.Agentes.OperacionesModel
+
+@{
+    var agente = Model.Agente!;
+
+    ViewData["Title"] =
+        agente.NombreAgente;
+}
+
+<link rel="stylesheet"
+      href="~/css/agente-operaciones.css"
+      asp-append-version="true" />
+
+
+<div class="agent-operation-page">
+
+
+    <section class="agent-operation-header">
+
+        <div>
+
+            <div class="agent-operation-eyebrow">
+
+                <i class="bi bi-bank"></i>
+
+                Servicios financieros
+
+            </div>
+
+
+            <h1>
+                @agente.NombreAgente
+            </h1>
+
+
+            <p>
+
+                @agente.NombreSucursal
+
+                ·
+
+                @agente.NombreCaja
+
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-operation"
+                data-bs-toggle="modal"
+                data-bs-target="#modalOperacion">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Nueva operación
+
+        </button>
+
+    </section>
+
+
+
+    <!-- RESUMEN -->
+
+    <section class="agent-operation-summary">
+
+
+        <div class="agent-summary-card main">
+
+            <span>
+                Saldo operativo
+            </span>
+
+            <strong>
+
+                C$
+                @Model.Resumen.SaldoActual.ToString("N2")
+
+            </strong>
+
+            <small>
+                Disponible actualmente
+            </small>
+
+        </div>
+
+
+        <div class="agent-summary-card income">
+
+            <span>
+                Entradas efectivo hoy
+            </span>
+
+            <strong>
+
+                + C$
+                @Model.Resumen.EntradasEfectivoHoy.ToString("N2")
+
+            </strong>
+
+        </div>
+
+
+        <div class="agent-summary-card outcome">
+
+            <span>
+                Salidas efectivo hoy
+            </span>
+
+            <strong>
+
+                - C$
+                @Model.Resumen.SalidasEfectivoHoy.ToString("N2")
+
+            </strong>
+
+        </div>
+
+
+        <div class="agent-summary-card">
+
+            <span>
+                Comisión hoy
+            </span>
+
+            <strong>
+
+                C$
+                @Model.Resumen.ComisionHoy.ToString("N2")
+
+            </strong>
+
+            <small>
+
+                @Model.Resumen.OperacionesHoy
+                operaciones
+
+            </small>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- TRANSACCIONES -->
+
+    <section class="agent-transactions-card">
+
+
+        <div class="agent-transactions-header">
+
+            <div>
+
+                <h2>
+                    Últimas operaciones
+                </h2>
+
+                <p>
+                    Movimientos registrados en
+                    @agente.NombreAgente
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="agent-transactions-table-wrapper">
+
+
+            <table class="agent-transactions-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Fecha
+                        </th>
+
+                        <th>
+                            Operación
+                        </th>
+
+                        <th>
+                            Referencia
+                        </th>
+
+                        <th>
+                            Efectivo
+                        </th>
+
+                        <th>
+                            Monto
+                        </th>
+
+                        <th>
+                            Comisión
+                        </th>
+
+                        <th>
+                            Usuario
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th>
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    @foreach (
+                        var item
+                        in Model.Transacciones
+                    )
+                    {
+
+                        <tr class="@(item.Estado == 99 ? "cancelled" : "")">
+
+
+                            <td>
+
+                                <div class="transaction-date">
+
+                                    <strong>
+
+                                        @(item.FechaTransaccion.ToString("dd/MM/yyyy"))
+
+                                    </strong>
+
+                                    <span>
+
+                                        @(item.FechaTransaccion.ToString("HH:mm"))
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="transaction-name">
+
+                                    <strong>
+                                        @item.NombreOperacion
+                                    </strong>
+
+                                    <span>
+                                        @item.CodigoOperacion
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                @(item.NumeroReferencia ?? "-")
+
+                            </td>
+
+
+                            <td>
+
+                                @if (
+                                    item.EfectoEfectivo == 1
+                                )
+                                {
+
+                                    <span class="cash-effect income">
+
+                                        <i class="bi bi-arrow-down-left"></i>
+
+                                        Entrada
+
+                                    </span>
+
+                                }
+                                else if (
+                                    item.EfectoEfectivo == -1
+                                )
+                                {
+
+                                    <span class="cash-effect outcome">
+
+                                        <i class="bi bi-arrow-up-right"></i>
+
+                                        Salida
+
+                                    </span>
+
+                                }
+                                else
+                                {
+
+                                    <span class="cash-effect neutral">
+
+                                        Sin efecto
+
+                                    </span>
+
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="transaction-amount">
+
+                                    C$
+                                    @item.Monto.ToString("N2")
+
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                C$
+                                @item.MontoComision.ToString("N2")
+
+                            </td>
+
+
+                            <td>
+
+                                @item.NombreUsuario
+
+                            </td>
+
+
+                            <td>
+
+                                @if (item.Estado == 1)
+                                {
+
+                                    <span class="transaction-status active">
+
+                                        Aplicada
+
+                                    </span>
+
+                                }
+                                else
+                                {
+
+                                    <span class="transaction-status cancelled">
+
+                                        Anulada
+
+                                    </span>
+
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @if (item.Estado == 1)
+                                {
+
+                                    <button type="button"
+                                            class="btn-cancel-transaction"
+                                            data-id="@item.IdTransaccion"
+                                            onclick="abrirAnulacion(this)">
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                    </button>
+
+                                }
+
+                            </td>
+
+
+                        </tr>
+
+                    }
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     NUEVA OPERACIÓN
+========================================================== -->
+
+<div class="modal fade"
+     id="modalOperacion"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-lg
+                modal-dialog-centered">
+
+
+        <div class="modal-content agent-modal">
+
+
+            <form method="post"
+                  asp-page-handler="Registrar">
+
+
+                <div class="modal-header">
+
+
+                    <div>
+
+                        <span class="modal-agent-eyebrow">
+
+                            @agente.NombreAgente
+
+                        </span>
+
+                        <h5>
+                            Nueva operación
+                        </h5>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+
+                </div>
+
+
+                <div class="modal-body">
+
+
+                    <div class="operation-form-grid">
+
+
+                        <div class="operation-field full">
+
+                            <label>
+                                Operación *
+                            </label>
+
+                            <input type="search"
+                                   id="buscarOperacion"
+                                   class="operation-search-input"
+                                   placeholder="Buscar operación"
+                                   autocomplete="off" />
+
+
+                            <select asp-for="IdTipoOperacion"
+                                    id="tipoOperacion">
+
+                                <option value="0">
+
+                                    Seleccione una operación
+
+                                </option>
+
+
+                                @foreach (
+                                    var operacion
+                                    in Model.Operaciones
+                                )
+                                {
+
+                                    <option value="@operacion.IdTipoOperacion"
+                                            data-codigo="@operacion.CodigoOperacion"
+                                            data-efectivo="@operacion.EfectoEfectivo"
+                                            data-saldo="@operacion.EfectoSaldoAgente">
+
+                                        @operacion.NombreOperacion
+
+                                    </option>
+
+                                }
+
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="operation-effect-preview full"
+                             id="effectPreview">
+
+                            <div>
+
+                                <span>
+                                    Efectivo físico
+                                </span>
+
+                                <strong id="previewEfectivo">
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <i class="bi bi-arrow-left-right"></i>
+
+
+                            <div>
+
+                                <span>
+                                    Saldo agente
+                                </span>
+
+                                <strong id="previewSaldo">
+                                    -
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="operation-field">
+
+                            <label>
+                                Monto *
+                            </label>
+
+
+                            <div class="operation-money">
+
+                                <span>
+                                    C$
+                                </span>
+
+
+                                <input asp-for="Monto"
+                                       type="number"
+                                       min="0.01"
+                                       step="0.01"
+                                       placeholder="0.00" />
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="operation-field">
+
+                            <label>
+                                Referencia (opcional)
+                            </label>
+
+
+                            <input asp-for="NumeroReferencia"
+                                   maxlength="100"
+                                   autocomplete="off"
+                                   placeholder="Número del comprobante" />
+
+                        </div>
+
+
+
+                        <div class="operation-field full">
+
+                            <label>
+                                Observación
+                            </label>
+
+
+                            <textarea asp-for="Observacion"
+                                      rows="3"
+                                      maxlength="250"
+                                      placeholder="Opcional">
+                            </textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="modal-footer">
+
+
+                    <button type="button"
+                            class="btn-agent-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-agent-save">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Registrar operación
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ANULAR -->
+
+<div class="modal fade"
+     id="modalAnular"
+     tabindex="-1">
+
+
+    <div class="modal-dialog
+                modal-dialog-centered">
+
+
+        <div class="modal-content agent-modal">
+
+
+            <form method="post"
+                  asp-page-handler="Anular">
+
+
+                <input type="hidden"
+                       asp-for="IdTransaccionAnular" />
+
+
+                <div class="modal-header">
+
+                    <h5>
+                        Anular operación
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+
+                    <div class="operation-field">
+
+                        <label>
+                            Motivo de anulación *
+                        </label>
+
+
+                        <textarea asp-for="MotivoAnulacion"
+                                  rows="3"
+                                  maxlength="250">
+                        </textarea>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="modal-footer">
+
+
+                    <button type="button"
+                            class="btn-agent-cancel"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-agent-danger">
+
+                        Anular operación
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@section Scripts {
+
+<script>
+
+    const tipoOperacion =
+        document.getElementById(
+            "tipoOperacion"
+        );
+
+    const buscarOperacion =
+        document.getElementById(
+            "buscarOperacion"
+        );
+
+    const modalOperacion =
+        document.getElementById(
+            "modalOperacion"
+        );
+
+    const opcionesOperacion =
+        Array.from(
+            tipoOperacion?.options || []
+        );
+
+
+    tipoOperacion?.addEventListener(
+        "change",
+        actualizarEfectos
+    );
+
+    buscarOperacion?.addEventListener(
+        "input",
+        filtrarOperaciones
+    );
+
+    modalOperacion?.addEventListener(
+        "shown.bs.modal",
+        () => {
+
+            buscarOperacion.value =
+                "";
+
+            filtrarOperaciones();
+
+            buscarOperacion.focus();
+
+        }
+    );
+
+
+    function filtrarOperaciones() {
+
+        const filtro =
+            normalizarTexto(
+                buscarOperacion?.value || ""
+            );
+
+
+        opcionesOperacion.forEach(
+            opcion => {
+
+                if (!opcion.value ||
+                    opcion.value === "0") {
+
+                    opcion.hidden =
+                        false;
+
+                    return;
+
+                }
+
+
+                const textoBusqueda =
+                    normalizarTexto(
+                        `${opcion.textContent} ${opcion.dataset.codigo || ""}`
+                    );
+
+                opcion.hidden =
+                    filtro.length > 0 &&
+                    !textoBusqueda.includes(
+                        filtro
+                    );
+
+            }
+        );
+
+
+        const opcionSeleccionada =
+            tipoOperacion?.options[
+                tipoOperacion.selectedIndex
+            ];
+
+        if (opcionSeleccionada?.hidden) {
+
+            tipoOperacion.value =
+                "0";
+
+            actualizarEfectos();
+
+        }
+
+    }
+
+
+    function normalizarTexto(
+        texto)
+    {
+
+        return texto
+            .toString()
+            .normalize(
+                "NFD"
+            )
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .toLowerCase()
+            .trim();
+
+    }
+
+
+    function actualizarEfectos() {
+
+        const opcion =
+            tipoOperacion.options[
+                tipoOperacion.selectedIndex
+            ];
+
+
+        const efectivo =
+            Number(
+                opcion.dataset.efectivo || 0
+            );
+
+
+        const saldo =
+            Number(
+                opcion.dataset.saldo || 0
+            );
+
+
+        document.getElementById(
+            "previewEfectivo"
+        ).textContent =
+            efectoTexto(
+                efectivo
+            );
+
+
+        document.getElementById(
+            "previewSaldo"
+        ).textContent =
+            efectoTexto(
+                saldo
+            );
+
+    }
+
+
+    function efectoTexto(
+        valor)
+    {
+
+        if (valor === 1) {
+
+            return "↑ Aumenta";
+
+        }
+
+
+        if (valor === -1) {
+
+            return "↓ Disminuye";
+
+        }
+
+
+        return "Sin efecto";
+
+    }
+
+
+
+    function abrirAnulacion(
+        boton)
+    {
+
+        document.getElementById(
+            "IdTransaccionAnular"
+        ).value =
+            boton.dataset.id;
+
+
+        document.getElementById(
+            "MotivoAnulacion"
+        ).value =
+            "";
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "modalAnular"
+                )
+            )
+            .show();
+
+    }
+
+
+
+    @if (TempData["Ok"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "success",
+
+            title:
+                "Operación registrada",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Ok"]
+                    )
+                ),
+
+            timer:
+                2000,
+
+            showConfirmButton:
+                false
+
+        });
+
+        </text>
+    }
+
+
+    @if (TempData["Error"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "error",
+
+            title:
+                "No se pudo completar",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["Error"]
+                    )
+                )
+
+        });
+
+        </text>
+    }
+
+
+</script>
+
+}

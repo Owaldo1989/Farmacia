@@ -252,7 +252,7 @@ namespace Farmacia.DAL
                 CodigoAgente =dr["CodigoAgente"].ToString()?? "",
                 NombreAgente =dr["NombreAgente"].ToString()?? "",
                 SaldoInicial =Convert.ToDecimal(dr["SaldoInicial"]),
-                Activo =Convert.ToBoolean(dr["Activo"]),
+                Activo =LeerBooleano(dr["Activo"]),
                 FechaRegistro =Convert.ToDateTime(dr["FechaRegistro"]),
                 CodigoCaja =dr["CodigoCaja"].ToString()?? "",
                 NombreCaja =dr["NombreCaja"].ToString()?? "",
@@ -263,6 +263,43 @@ namespace Farmacia.DAL
                 CodigoBodega =dr["CodigoBodega"].ToString()?? "",
                 NombreBodega =dr["NombreBodega"].ToString()?? ""
             };
+        }
+
+
+        private static bool LeerBooleano(
+            object valor)
+        {
+            if (valor == DBNull.Value)
+            {
+                return false;
+            }
+
+
+            if (valor is bool booleano)
+            {
+                return booleano;
+            }
+
+
+            if (valor is byte or short or int or long)
+            {
+                return Convert.ToInt64(
+                    valor
+                ) != 0;
+            }
+
+
+            var texto =
+                valor.ToString()
+                    ?.Trim();
+
+
+            return texto == "1" ||
+                   string.Equals(
+                       texto,
+                       "true",
+                       StringComparison.OrdinalIgnoreCase
+                   );
         }
     }
 }

@@ -1,18 +1,94 @@
 ﻿@{
-    var ruta = Context.Request.Path.Value?.ToLower() ?? "";
+    var ruta =
+        Context.Request.Path.Value?.ToLower() ?? "";
+
+
+    // =========================================================
+    // PRINCIPAL
+    // =========================================================
 
     var esInicio =
         ruta == "/" ||
         ruta == "/index";
 
+
+    var principalActivo =
+        esInicio;
+
+
+    // =========================================================
+    // VENTAS
+    // =========================================================
+
+    var esNuevaVenta =
+        ruta == "/facturas/nueva";
+
+    var esListaFacturas =
+        ruta == "/facturas/lista";
+
     var esFacturas =
         ruta.StartsWith("/facturas");
+
+
+    var ventasActivo =
+        esFacturas;
+
+
+    // =========================================================
+    // INVENTARIO
+    // =========================================================
 
     var esInventario =
         ruta.StartsWith("/inventario");
 
-        var esIngresos =
-    ruta.StartsWith("/ingresos");
+    var esNuevoIngreso =
+        ruta == "/ingresos/nuevo";
+
+    var esListaIngresos =
+        ruta == "/ingresos/lista";
+
+    var esIngresos =
+        ruta.StartsWith("/ingresos");
+
+
+    var inventarioActivo =
+        esInventario ||
+        esIngresos;
+
+
+    // =========================================================
+    // CAJA OPERATIVA
+    // IMPORTANTE:
+    // /caja/ NO debe confundirse con /cajas
+    // =========================================================
+
+    var esCajaOperacion =
+        ruta.StartsWith("/caja/");
+
+    var esAgenteBanpro =
+        ruta == "/agentes/operaciones/banpro" ||
+        ruta.StartsWith("/agentes/banpro");
+
+    var esAgenteBac =
+        ruta == "/agentes/operaciones/bac" ||
+        ruta.StartsWith("/agentes/bac");
+
+    var esAgentesConfiguracion =
+        ruta.StartsWith("/agentes/agentesbancarios");
+
+
+    var cajaActivo =
+        esCajaOperacion;
+
+
+    var serviciosFinancierosActivo =
+        esAgenteBanpro ||
+        esAgenteBac ||
+        ruta.StartsWith("/agentes/operaciones");
+
+    // =========================================================
+    // CATÁLOGOS
+    // =========================================================
 
     var esProductos =
         ruta.StartsWith("/productos");
@@ -30,19 +106,6 @@
         ruta.StartsWith("/laboratorio") ||
         ruta.StartsWith("/laboratorios");
 
-        var esSucursales =
-    ruta.StartsWith("/sucursales");
-
-    var esCajas =
-    ruta.StartsWith("/cajas");
-
-var esBodegas =
-    ruta.StartsWith("/bodegas");
-
-
-
-    var esReportes =
-        ruta.StartsWith("/reportes");
 
     var catalogosActivo =
         esProductos ||
@@ -51,14 +114,64 @@ var esBodegas =
         esProveedores ||
         esLaboratorios;
 
+
+    // =========================================================
+    // ADMINISTRACIÓN
+    // =========================================================
+
+    var esSucursales =
+        ruta.StartsWith("/sucursales");
+
+    var esBodegas =
+        ruta.StartsWith("/bodegas");
+
+    var esCajas =
+        ruta.StartsWith("/cajas");
+
+    var esAgentes =
+        esAgentesConfiguracion;
+
+    var esTipoCambio =
+        ruta.StartsWith("/configuracion/tipocambio");
+
+
+    var administracionActivo =
+        esSucursales ||
+        esBodegas ||
+        esCajas ||
+        esAgentes ||
+        esTipoCambio;
+
+
+    // =========================================================
+    // REPORTES
+    // =========================================================
+
+    var esReportes =
+        ruta.StartsWith("/reportes");
+
+
+    var reportesActivo =
+        esReportes;
+
+
+    // =========================================================
+    // USUARIO
+    // =========================================================
+
     var nombre =
         Context.Session.GetString("Nombre");
 
     var rol =
-        Context.Session.GetString("Rol");
+        Farmacia.Helpers.RolHelper.NormalizarRol(
+            Context.Session.GetString("Rol")
+        );
 
-        var esAgentes =
-    ruta.StartsWith("/agentesbancarios");
+
+    var esAdministrador =
+        Farmacia.Helpers.RolHelper.EsAdministrador(
+            rol
+        );
 }
 
 <!DOCTYPE html>
@@ -208,339 +321,590 @@ var esBodegas =
              MENÚ
         ================================================== -->
 
-        <nav class="sidebar-navigation">
+      <nav class="sidebar-navigation">
 
 
-            <span class="sidebar-title">
-                PRINCIPAL
-            </span>
+    <!-- =====================================================
+         PRINCIPAL
+    ====================================================== -->
+
+    <span class="sidebar-title">
+        PRINCIPAL
+    </span>
 
 
+    <button class="sidebar-link sidebar-dropdown-button @(principalActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuPrincipal"
+            aria-expanded="@(principalActivo ? "true" : "false")"
+            aria-controls="menuPrincipal">
 
-            <!-- INICIO -->
+        <span class="sidebar-icon">
+            <i class="bi bi-grid"></i>
+        </span>
+
+        <span class="sidebar-link-text">
+            Principal
+        </span>
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(principalActivo ? "show" : "")"
+         id="menuPrincipal">
+
+        <div class="sidebar-submenu">
 
             <a href="/Index"
-               class="sidebar-link @(esInicio ? "active" : "")">
+               class="submenu-link @(esInicio ? "active" : "")">
 
-                <span class="sidebar-icon">
-                    <i class="bi bi-grid"></i>
-                </span>
+                <span class="submenu-dot"></span>
 
-                <span>
-                    Inicio
-                </span>
+                Inicio
 
             </a>
 
+        </div>
+
+    </div>
 
 
-            <!-- =================================================
-                 OPERACIONES
-            ================================================== -->
 
-            <span class="sidebar-title sidebar-group-title">
-                OPERACIONES
-            </span>
+    <!-- =====================================================
+         VENTAS
+    ====================================================== -->
 
+    <span class="sidebar-title sidebar-group-title">
+        VENTAS
+    </span>
+
+
+    <button class="sidebar-link sidebar-dropdown-button @(ventasActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuVentas"
+            aria-expanded="@(ventasActivo ? "true" : "false")"
+            aria-controls="menuVentas">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-receipt"></i>
+
+        </span>
+
+
+        <span class="sidebar-link-text">
+            Ventas
+        </span>
+
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(ventasActivo ? "show" : "")"
+         id="menuVentas">
+
+        <div class="sidebar-submenu">
 
 
             <!-- NUEVA VENTA -->
 
             <a href="/Facturas/Nueva"
-               class="sidebar-link @(ruta == "/facturas/nueva" ? "active" : "")">
+               class="submenu-link @(esNuevaVenta ? "active" : "")">
 
-                <span class="sidebar-icon">
-                    <i class="bi bi-receipt-cutoff"></i>
-                </span>
+                <span class="submenu-dot"></span>
 
-                <span>
-                    Nueva venta
-                </span>
+                Nueva venta
 
             </a>
-
-
 
             <!-- FACTURAS -->
 
             <a href="/Facturas/Lista"
-               class="sidebar-link @(ruta == "/facturas/lista" ? "active" : "")">
+               class="submenu-link @(esListaFacturas ? "active" : "")">
 
-                <span class="sidebar-icon">
-                    <i class="bi bi-receipt"></i>
-                </span>
+                <span class="submenu-dot"></span>
 
-                <span>
-                    Facturas
-                </span>
-
-            </a>
-            <!-- INGRESOS DE MERCADERÍA -->
-
-<a href="/Ingresos/Nuevo"
-   class="sidebar-link @(ruta == "/ingresos/nuevo" ? "active" : "")">
-
-    <span class="sidebar-icon">
-        <i class="bi bi-box-arrow-in-down"></i>
-    </span>
-
-    <span>
-        Nuevo ingreso
-    </span>
-
-</a>
-
-
-
-<a href="/Cajas"
-   class="sidebar-link @(esCajas ? "active" : "")">
-
-    <span class="sidebar-icon">
-        <i class="bi bi-cash-register"></i>
-    </span>
-
-    <span>
-        Cajas
-    </span>
-
-</a>
-<a href="/Caja/Apertura"
-   class="sidebar-link @(ruta.StartsWith("/caja") ? "active" : "")">
-
-    <span class="sidebar-icon">
-
-        <i class="bi bi-cash-register"></i>
-
-    </span>
-
-    <span>
-        Caja
-    </span>
-
-</a>
-
-
-<a href="/Ingresos/Lista"
-   class="sidebar-link @(ruta == "/ingresos/lista" ? "active" : "")">
-
-    <span class="sidebar-icon">
-        <i class="bi bi-clock-history"></i>
-    </span>
-
-    <span>
-        Ingresos
-    </span>
-
-</a>
-
-
-            <!-- INVENTARIO -->
-
-            <a href="/Inventario"
-               class="sidebar-link @(esInventario ? "active" : "")">
-
-                <span class="sidebar-icon">
-                    <i class="bi bi-box-seam"></i>
-                </span>
-
-                <span>
-                    Inventario
-                </span>
+                Facturas
 
             </a>
 
+        </div>
+
+    </div>
 
 
-            <!-- =================================================
-                 CATÁLOGOS
-            ================================================== -->
 
-            <span class="sidebar-title sidebar-group-title">
-                ADMINISTRACIÓN
-            </span>
+    <!-- =====================================================
+         INVENTARIO
+    ====================================================== -->
+
+    <span class="sidebar-title sidebar-group-title">
+        INVENTARIO
+    </span>
 
 
-            @if (string.Equals(
-        rol,
-        "Administrador",
-        StringComparison.OrdinalIgnoreCase))
-{
-    <a href="/Configuracion/TipoCambio"
-       class="sidebar-link @(ruta.StartsWith("/configuracion") ? "active" : "")">
+    <button class="sidebar-link sidebar-dropdown-button @(inventarioActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuInventario"
+            aria-expanded="@(inventarioActivo ? "true" : "false")"
+            aria-controls="menuInventario">
 
         <span class="sidebar-icon">
 
-            <i class="bi bi-gear"></i>
+            <i class="bi bi-box-seam"></i>
 
         </span>
 
-        <span>
-            Configuración
+
+        <span class="sidebar-link-text">
+            Inventario
         </span>
 
-    </a>
-}
 
+        <i class="bi bi-chevron-down submenu-arrow"></i>
 
-            <button class="sidebar-link sidebar-dropdown-button @(catalogosActivo ? "active" : "")"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#menuCatalogos"
-                    aria-expanded="@(catalogosActivo ? "true" : "false")">
+    </button>
 
 
-                <span class="sidebar-icon">
-                    <i class="bi bi-folder2-open"></i>
-                </span>
+    <div class="collapse @(inventarioActivo ? "show" : "")"
+         id="menuInventario">
 
+        <div class="sidebar-submenu">
 
-                <span class="sidebar-link-text">
-                    Catálogos
-                </span>
 
+            <!-- EXISTENCIAS -->
 
-                <i class="bi bi-chevron-down submenu-arrow"></i>
+            <a href="/Inventario"
+               class="submenu-link @(esInventario ? "active" : "")">
 
-            </button>
+                <span class="submenu-dot"></span>
 
-
-
-            <div class="collapse @(catalogosActivo ? "show" : "")"
-                 id="menuCatalogos">
-
-
-                <div class="sidebar-submenu">
-
-
-                    <!-- PRODUCTOS -->
-
-                    <a href="/Productos/Nuevo"
-                       class="submenu-link @(esProductos ? "active" : "")">
-
-                        <span class="submenu-dot"></span>
-
-                        Productos
-
-                    </a>
-
-
-
-                    <!-- LABORATORIOS -->
-
-                    <a href="/Laboratorio/Laboratorio"
-                       class="submenu-link @(esLaboratorios ? "active" : "")">
-
-                        <span class="submenu-dot"></span>
-
-                        Laboratorios
-
-                    </a>
-
-
-
-                    <!-- UNIDADES -->
-
-                    <a href="/Unidades"
-                       class="submenu-link @(esUnidades ? "active" : "")">
-
-                        <span class="submenu-dot"></span>
-
-                        Unidades de medida
-
-                    </a>
-
-
-
-                    <!-- CATEGORÍAS -->
-
-                    <a href="/Categorias"
-                       class="submenu-link @(esCategorias ? "active" : "")">
-
-                        <span class="submenu-dot"></span>
-
-                        Categorías
-
-                    </a>
-                    <a href="/AgentesBancarios"
-   class="sidebar-link @(esAgentes ? "active" : "")">
-
-    <span class="sidebar-icon">
-
-        <i class="bi bi-bank"></i>
-
-    </span>
-
-    <span>
-        Agentes bancarios
-    </span>
-
-</a>
-
-
-                    <!-- PROVEEDORES -->
-
-                    <a href="/Proveedores"
-                       class="submenu-link @(esProveedores ? "active" : "")">
-
-                        <span class="submenu-dot"></span>
-
-                        Proveedores
-
-                    </a>
-
-                    <a href="/Sucursales"
-   class="sidebar-link @(esSucursales ? "active" : "")">
-
-    <span class="sidebar-icon">
-        <i class="bi bi-buildings"></i>
-    </span>
-
-    <span>
-        Sucursales
-    </span>
-
-</a>
-
-
-<a href="/Bodegas"
-   class="sidebar-link @(esBodegas ? "active" : "")">
-
-    <span class="sidebar-icon">
-        <i class="bi bi-boxes"></i>
-    </span>
-
-    <span>
-        Bodegas
-    </span>
-
-</a>
-
-
-                </div>
-
-            </div>
-
-
-
-            <!-- REPORTES -->
-
-            <a href="/Reportes"
-               class="sidebar-link @(esReportes ? "active" : "")">
-
-                <span class="sidebar-icon">
-
-                    <i class="bi bi-bar-chart-line"></i>
-
-                </span>
-
-                <span>
-                    Reportes
-                </span>
+                Inventario
 
             </a>
 
 
-        </nav>
+            <!-- NUEVO INGRESO -->
+
+            <a href="/Ingresos/Nuevo"
+               class="submenu-link @(esNuevoIngreso ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Nuevo ingreso
+
+            </a>
+
+
+            <!-- HISTORIAL INGRESOS -->
+
+            <a href="/Ingresos/Lista"
+               class="submenu-link @(esListaIngresos ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Historial ingresos
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CAJA
+    ====================================================== -->
+
+    <span class="sidebar-title sidebar-group-title">
+        CAJA
+    </span>
+
+
+    <button class="sidebar-link sidebar-dropdown-button @(cajaActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuCaja"
+            aria-expanded="@(cajaActivo ? "true" : "false")"
+            aria-controls="menuCaja">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-cash-stack"></i>
+
+        </span>
+
+
+        <span class="sidebar-link-text">
+            Caja
+        </span>
+
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(cajaActivo ? "show" : "")"
+         id="menuCaja">
+
+        <div class="sidebar-submenu">
+
+
+            <!-- OPERAR CAJA -->
+
+            <a href="/Caja/Apertura"
+               class="submenu-link @(esCajaOperacion ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Operar caja
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <span class="sidebar-title sidebar-group-title">
+        SERVICIOS FINANCIEROS
+    </span>
+
+
+    <button class="sidebar-link sidebar-dropdown-button @(serviciosFinancierosActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuServiciosFinancieros"
+            aria-expanded="@(serviciosFinancierosActivo ? "true" : "false")"
+            aria-controls="menuServiciosFinancieros">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-bank"></i>
+
+        </span>
+
+
+        <span class="sidebar-link-text">
+            Servicios financieros
+        </span>
+
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(serviciosFinancierosActivo ? "show" : "")"
+         id="menuServiciosFinancieros">
+
+        <div class="sidebar-submenu">
+
+            <a href="/Agentes/Operaciones/BANPRO"
+               class="submenu-link @(esAgenteBanpro ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Agente Banpro
+
+            </a>
+
+
+            <a href="/Agentes/Operaciones/BAC"
+               class="submenu-link @(esAgenteBac ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Agente BAC
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         CATÁLOGOS
+    ====================================================== -->
+
+    <span class="sidebar-title sidebar-group-title">
+        CATÁLOGOS
+    </span>
+
+
+    <button class="sidebar-link sidebar-dropdown-button @(catalogosActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuCatalogos"
+            aria-expanded="@(catalogosActivo ? "true" : "false")"
+            aria-controls="menuCatalogos">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-folder2-open"></i>
+
+        </span>
+
+
+        <span class="sidebar-link-text">
+            Catálogos
+        </span>
+
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(catalogosActivo ? "show" : "")"
+         id="menuCatalogos">
+
+        <div class="sidebar-submenu">
+
+
+            <!-- PRODUCTOS -->
+
+            <a href="/Productos/Nuevo"
+               class="submenu-link @(esProductos ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Productos
+
+            </a>
+
+
+            <!-- CATEGORÍAS -->
+
+            <a href="/Categorias"
+               class="submenu-link @(esCategorias ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Categorías
+
+            </a>
+
+
+            <!-- UNIDADES -->
+
+            <a href="/Unidades"
+               class="submenu-link @(esUnidades ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Unidades de medida
+
+            </a>
+
+
+            <!-- LABORATORIOS -->
+
+            <a href="/Laboratorio/Laboratorio"
+               class="submenu-link @(esLaboratorios ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Laboratorios
+
+            </a>
+
+
+            <!-- PROVEEDORES -->
+
+            <a href="/Proveedores"
+               class="submenu-link @(esProveedores ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Proveedores
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ADMINISTRACIÓN
+         SOLO ADMINISTRADORES
+    ====================================================== -->
+
+    @if (esAdministrador)
+    {
+
+        <span class="sidebar-title sidebar-group-title">
+            ADMINISTRACIÓN
+        </span>
+
+
+        <button class="sidebar-link sidebar-dropdown-button @(administracionActivo ? "active" : "")"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#menuAdministracion"
+                aria-expanded="@(administracionActivo ? "true" : "false")"
+                aria-controls="menuAdministracion">
+
+            <span class="sidebar-icon">
+
+                <i class="bi bi-sliders"></i>
+
+            </span>
+
+
+            <span class="sidebar-link-text">
+                Configuración
+            </span>
+
+
+            <i class="bi bi-chevron-down submenu-arrow"></i>
+
+        </button>
+
+
+        <div class="collapse @(administracionActivo ? "show" : "")"
+             id="menuAdministracion">
+
+            <div class="sidebar-submenu">
+
+
+                <!-- SUCURSALES -->
+
+                <a href="/Sucursales"
+                   class="submenu-link @(esSucursales ? "active" : "")">
+
+                    <span class="submenu-dot"></span>
+
+                    Sucursales
+
+                </a>
+
+
+                <!-- BODEGAS -->
+
+                <a href="/Bodegas"
+                   class="submenu-link @(esBodegas ? "active" : "")">
+
+                    <span class="submenu-dot"></span>
+
+                    Bodegas
+
+                </a>
+
+
+                <!-- CAJAS -->
+
+                <a href="/Cajas"
+                   class="submenu-link @(esCajas ? "active" : "")">
+
+                    <span class="submenu-dot"></span>
+
+                    Cajas
+
+                </a>
+
+
+                <!-- AGENTES BANCARIOS -->
+
+                <a href="/Agentes/AgentesBancarios"
+                   class="submenu-link @(esAgentes ? "active" : "")">
+
+                    <span class="submenu-dot"></span>
+
+                    Agentes bancarios
+
+                </a>
+
+
+                <!-- TIPO CAMBIO -->
+
+                <a href="/Configuracion/TipoCambio"
+                   class="submenu-link @(esTipoCambio ? "active" : "")">
+
+                    <span class="submenu-dot"></span>
+
+                    Tipo de cambio
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+    }
+
+
+
+    <!-- =====================================================
+         REPORTES
+    ====================================================== -->
+
+    <span class="sidebar-title sidebar-group-title">
+        REPORTES
+    </span>
+
+
+    <button class="sidebar-link sidebar-dropdown-button @(reportesActivo ? "active" : "")"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menuReportes"
+            aria-expanded="@(reportesActivo ? "true" : "false")"
+            aria-controls="menuReportes">
+
+        <span class="sidebar-icon">
+
+            <i class="bi bi-bar-chart-line"></i>
+
+        </span>
+
+
+        <span class="sidebar-link-text">
+            Reportes
+        </span>
+
+
+        <i class="bi bi-chevron-down submenu-arrow"></i>
+
+    </button>
+
+
+    <div class="collapse @(reportesActivo ? "show" : "")"
+         id="menuReportes">
+
+        <div class="sidebar-submenu">
+
+            <a href="/Reportes"
+               class="submenu-link @(esReportes ? "active" : "")">
+
+                <span class="submenu-dot"></span>
+
+                Reportes
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+</nav>
+
+
+      
 
 
 

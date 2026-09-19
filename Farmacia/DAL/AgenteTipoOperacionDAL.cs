@@ -292,12 +292,12 @@ namespace Farmacia.DAL
                     ),
 
                 RequiereReferencia =
-                    Convert.ToBoolean(
+                    LeerBooleano(
                         dr["RequiereReferencia"]
                     ),
 
                 Activo =
-                    Convert.ToBoolean(
+                    LeerBooleano(
                         dr["Activo"]
                     ),
 
@@ -316,6 +316,43 @@ namespace Farmacia.DAL
                         .ToString()
                     ?? ""
             };
+        }
+
+
+        private static bool LeerBooleano(
+            object valor)
+        {
+            if (valor == DBNull.Value)
+            {
+                return false;
+            }
+
+
+            if (valor is bool booleano)
+            {
+                return booleano;
+            }
+
+
+            if (valor is byte or short or int or long)
+            {
+                return Convert.ToInt64(
+                    valor
+                ) != 0;
+            }
+
+
+            var texto =
+                valor.ToString()
+                    ?.Trim();
+
+
+            return texto == "1" ||
+                   string.Equals(
+                       texto,
+                       "true",
+                       StringComparison.OrdinalIgnoreCase
+                   );
         }
     }
 }

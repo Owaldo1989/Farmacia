@@ -24,6 +24,7 @@ builder.Services.AddTransient<CajaEquipoDAL>();
 builder.Services.AddTransient<CajaTurnoDAL>();
 builder.Services.AddTransient<AgenteBancarioDAL>();
 builder.Services.AddTransient<AgenteTipoOperacionDAL>();
+builder.Services.AddTransient<AgenteTransaccionDAL>();
 // Cache para Session
 builder.Services.AddDistributedMemoryCache();
 

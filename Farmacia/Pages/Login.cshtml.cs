@@ -40,7 +40,12 @@ namespace Farmacia.Pages
 
             HttpContext.Session.SetString("Usuario", u.UsuarioNombre);
             HttpContext.Session.SetString("Nombre", u.NombreCompleto);
-            HttpContext.Session.SetString("Rol", u.Rol);
+            HttpContext.Session.SetString(
+                "Rol",
+                Farmacia.Helpers.RolHelper.NormalizarRol(
+                    u.Rol
+                )
+            );
             HttpContext.Session.SetInt32( "IdUsuario", u.IdUsuario
 );
 

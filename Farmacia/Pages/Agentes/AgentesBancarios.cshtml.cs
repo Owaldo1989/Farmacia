@@ -184,7 +184,7 @@ namespace Farmacia.Pages.Agentes
 
 
             return RedirectToPage(
-                "/AgentesBancarios"
+                "/Agentes/AgentesBancarios"
             );
         }
 
@@ -281,7 +281,7 @@ namespace Farmacia.Pages.Agentes
 
 
             return RedirectToPage(
-                "/AgentesBancarios"
+                "/Agentes/AgentesBancarios"
             );
         }
 
@@ -318,7 +318,7 @@ namespace Farmacia.Pages.Agentes
 
 
             return RedirectToPage(
-                "/AgentesBancarios"
+                "/Agentes/AgentesBancarios"
             );
         }
 
@@ -355,7 +355,7 @@ namespace Farmacia.Pages.Agentes
 
 
             return RedirectToPage(
-                "/AgentesBancarios"
+                "/Agentes/AgentesBancarios"
             );
         }
 
