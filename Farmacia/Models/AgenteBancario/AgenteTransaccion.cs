@@ -12,6 +12,13 @@
 
         public decimal Monto { get; set; }
 
+        public string Moneda { get; set; }
+            = "NIO";
+
+        public decimal TasaCambio { get; set; }
+
+        public decimal MontoCordoba { get; set; }
+
         public string? NumeroReferencia { get; set; }
 
         public DateTime FechaTransaccion { get; set; }

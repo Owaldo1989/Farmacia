@@ -376,8 +376,23 @@
 
 
         <input type="hidden"
+               asp-for="Factura.VueltoCordoba"
+               id="hdVueltoCordoba" />
+
+
+        <input type="hidden"
+               asp-for="Factura.VueltoDolar"
+               id="hdVueltoDolar" />
+
+
+        <input type="hidden"
                asp-for="DetalleJson"
                id="hdDetalleJson" />
+
+
+        <input type="hidden"
+               asp-for="PagosJson"
+               id="hdPagosJson" />
 
 
     </form>
@@ -745,7 +760,7 @@
      id="modalCantidad"
      tabindex="-1">
 
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-xl payment-dialog">
 
         <div class="modal-content pharmacy-modal">
 
@@ -925,7 +940,7 @@
      id="modalPago"
      tabindex="-1">
 
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered payment-dialog">
 
         <div class="modal-content pharmacy-modal payment-modal">
 
@@ -984,10 +999,9 @@
                        type="hidden" />
 
 
-
                 <!-- PACIENTE -->
 
-                <div class="modern-form-group">
+                <div class="modern-form-group payment-patient-field">
 
                     <label>
                         Paciente / Cliente
@@ -1008,62 +1022,194 @@
 
 
 
+                @{
+                    var efectivo =
+                        Model.FormasPago
+                            .FirstOrDefault(x =>
+                                x.EsEfectivo);
+
+                    var formasPos =
+                        Model.FormasPago
+                            .Where(x => !x.EsEfectivo)
+                            .ToList();
+                }
+
+
                 <!-- PAGOS -->
 
-                <div class="form-grid">
+                <div class="payment-method-grid">
 
+                    @if (efectivo != null)
+                    {
+                        <button type="button"
+                                class="payment-method-card"
+                                data-id="@efectivo.IdFormaPago"
+                                data-nombre="Efectivo C$"
+                                data-moneda="NIO"
+                                data-es-efectivo="true"
+                                data-requiere-referencia="false"
+                                data-permite-vuelto="true"
+                                onclick="seleccionarFormaPago(this)">
 
-                    <div class="modern-form-group">
+                            <i class="bi bi-cash"></i>
 
-                        <label>
-                            Pago en córdobas
-                        </label>
+                            <span>Efectivo C$</span>
 
-                        <div class="modern-input">
+                        </button>
 
-                            <span class="input-prefix">
-                                C$
-                            </span>
+                        <button type="button"
+                                class="payment-method-card"
+                                data-id="@efectivo.IdFormaPago"
+                                data-nombre="Efectivo US$"
+                                data-moneda="USD"
+                                data-es-efectivo="true"
+                                data-requiere-referencia="false"
+                                data-permite-vuelto="true"
+                                onclick="seleccionarFormaPago(this)">
 
-                            <input id="txtPagoC"
-                                   type="number"
-                                   step="0.01"
-                                   min="0"
-                                   placeholder="0.00"
-                                   oninput="calcularVuelto()" />
+                            <i class="bi bi-currency-dollar"></i>
 
-                        </div>
+                            <span>Efectivo US$</span>
 
-                    </div>
+                        </button>
+                    }
 
+                    @foreach (var forma in formasPos)
+                    {
+                        <button type="button"
+                                class="payment-method-card"
+                                data-id="@forma.IdFormaPago"
+                                data-nombre="@forma.Nombre"
+                                data-moneda="NIO"
+                                data-es-efectivo="false"
+                                data-requiere-referencia="@forma.RequiereReferencia.ToString().ToLowerInvariant()"
+                                data-permite-vuelto="@forma.PermiteVuelto.ToString().ToLowerInvariant()"
+                                onclick="seleccionarFormaPago(this)">
 
+                            <i class="bi bi-credit-card-2-front"></i>
 
-                    <div class="modern-form-group">
+                            <span>@forma.Nombre</span>
 
-                        <label>
-                            Pago en dólares
-                        </label>
-
-                        <div class="modern-input">
-
-                            <span class="input-prefix">
-                                $
-                            </span>
-
-                            <input id="txtPagoD"
-                                   type="number"
-                                   step="0.01"
-                                   min="0"
-                                   placeholder="0.00"
-                                   oninput="calcularVuelto()" />
-
-                        </div>
-
-                    </div>
-
+                        </button>
+                    }
 
                 </div>
 
+
+                <div class="payment-layout">
+
+                    <section class="payment-capture-panel">
+
+
+                <div class="payment-entry">
+
+                    <div class="payment-entry-title">
+
+                        <span id="lblFormaSeleccionada">
+                            Selecciona una forma de pago
+                        </span>
+
+                    </div>
+
+
+                    <div class="payment-entry-grid">
+
+                        <div class="modern-form-group">
+
+                            <label>
+                                Monto recibido
+                            </label>
+
+                            <div class="modern-input">
+
+                                <span class="input-prefix"
+                                      id="lblPrefijoPago">
+                                    C$
+                                </span>
+
+                                <input id="txtPagoMonto"
+                                       type="number"
+                                       step="0.01"
+                                       min="0"
+                                       placeholder="0.00"
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="modern-form-group"
+                             id="grupoReferenciaPago">
+
+                            <label id="lblReferenciaPago">
+                                Referencia opcional
+                            </label>
+
+                            <div class="modern-input">
+
+                                <i class="bi bi-receipt"></i>
+
+                                <input id="txtPagoReferencia"
+                                       type="text"
+                                       maxlength="100"
+                                       placeholder="Voucher o autorizacion"
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-add-payment"
+                            onclick="agregarPagoActual()">
+
+                        <i class="bi bi-plus-lg"></i>
+
+                        Agregar pago
+
+                    </button>
+
+                </div>
+
+
+                    </section>
+
+
+                    <section class="payment-review-panel">
+
+
+                <div class="payment-list"
+                     id="pagosAplicados">
+
+                    <div class="payment-list-empty">
+                        No hay pagos agregados.
+                    </div>
+
+                </div>
+
+
+                <div class="payment-summary-box">
+
+                    <div>
+                        <span>Total</span>
+                        <strong id="lblTotalFacturaPago">C$ 0.00</strong>
+                    </div>
+
+                    <div>
+                        <span>Aplicado</span>
+                        <strong id="lblTotalAplicado">C$ 0.00</strong>
+                    </div>
+
+                    <div>
+                        <span>Pendiente</span>
+                        <strong id="lblPendientePago">C$ 0.00</strong>
+                    </div>
+
+                </div>
 
 
                 <!-- VUELTO -->
@@ -1078,19 +1224,46 @@
                         </span>
 
                         <small id="txtMensajeVuelto">
-                            Ingresa el monto recibido
+                            Agrega los pagos recibidos
                         </small>
 
                     </div>
 
 
-                    <strong id="lblVueltoVisual">
-                        C$ 0.00
-                    </strong>
+                    <div class="change-actions">
+
+                        <div class="change-currency-toggle"
+                             id="grupoMonedaVuelto">
+
+                            <button type="button"
+                                    class="active"
+                                    data-moneda="NIO"
+                                    onclick="seleccionarMonedaVuelto('NIO')">
+                                C$
+                            </button>
+
+                            <button type="button"
+                                    data-moneda="USD"
+                                    onclick="seleccionarMonedaVuelto('USD')">
+                                US$
+                            </button>
+
+                        </div>
+
+                        <strong id="lblVueltoVisual">
+                            C$ 0.00
+                        </strong>
+
+                    </div>
 
 
                     <input id="txtVuelto"
                            type="hidden" />
+
+                </div>
+
+
+                    </section>
 
                 </div>
 
@@ -1144,6 +1317,9 @@
 
         let productosEncontrados = [];
         let productoVistaActual = null;
+        let pagosFactura = [];
+        let formaPagoSeleccionada = null;
+        let monedaVuelto = "NIO";
 
 
         function escaparHtml(valor) {
@@ -2366,13 +2542,10 @@
 
 
             document.getElementById(
-                "txtPagoC"
-            ).value = "";
-
-
-            document.getElementById(
-                "txtPagoD"
-            ).value = "";
+                "lblTotalFacturaPago"
+            ).innerText =
+                "C$ " +
+                total.toFixed(2);
 
 
             document.getElementById(
@@ -2389,7 +2562,7 @@
             document.getElementById(
                 "txtMensajeVuelto"
             ).innerText =
-                "Ingresa el monto recibido";
+                "Agrega los pagos recibidos";
 
 
             document.getElementById(
@@ -2397,12 +2570,55 @@
             ).className =
                 "change-box";
 
+            pagosFactura = [];
+            formaPagoSeleccionada = null;
+            monedaVuelto = "NIO";
+
+            document.querySelectorAll(
+                ".payment-method-card"
+            ).forEach(x =>
+                x.classList.remove("active")
+            );
+
+            document.querySelectorAll(
+                "#grupoMonedaVuelto button"
+            ).forEach(x =>
+                x.classList.toggle(
+                    "active",
+                    x.dataset.moneda === "NIO"
+                )
+            );
+
+            document.getElementById(
+                "lblFormaSeleccionada"
+            ).innerText =
+                "Selecciona una forma de pago";
+
+            document.getElementById(
+                "lblPrefijoPago"
+            ).innerText =
+                "C$";
+
+            document.getElementById(
+                "txtPagoMonto"
+            ).value = "";
+
+            document.getElementById(
+                "txtPagoReferencia"
+            ).value = "";
+
+            document.getElementById(
+                "grupoReferenciaPago"
+            ).style.display =
+                "none";
+
 
             document.getElementById(
                 "btnGuardarFactura"
             ).disabled =
                 true;
 
+            recalcularPagos();
 
             const modal =
                 new bootstrap.Modal(
@@ -2457,11 +2673,82 @@
 
 
 
-        // =========================================================
-        // VUELTO
-        // =========================================================
+        function seleccionarFormaPago(boton) {
 
-        function calcularVuelto() {
+            formaPagoSeleccionada = {
+                idFormaPago:
+                    parseInt(
+                        boton.dataset.id
+                    ),
+                nombre:
+                    boton.dataset.nombre,
+                moneda:
+                    boton.dataset.moneda,
+                esEfectivo:
+                    boton.dataset.esEfectivo === "true",
+                requiereReferencia:
+                    boton.dataset.requiereReferencia === "true",
+                permiteVuelto:
+                    boton.dataset.permiteVuelto === "true"
+            };
+
+
+            document.querySelectorAll(
+                ".payment-method-card"
+            ).forEach(x =>
+                x.classList.remove("active")
+            );
+
+
+            boton.classList.add("active");
+
+
+            document.getElementById(
+                "lblFormaSeleccionada"
+            ).innerText =
+                formaPagoSeleccionada.nombre;
+
+
+            document.getElementById(
+                "lblPrefijoPago"
+            ).innerText =
+                formaPagoSeleccionada.moneda === "USD"
+                    ? "$"
+                    : "C$";
+
+
+            document.getElementById(
+                "grupoReferenciaPago"
+            ).style.display =
+                !formaPagoSeleccionada.esEfectivo
+                    ? "block"
+                    : "none";
+
+            document.getElementById(
+                "lblReferenciaPago"
+            ).innerText =
+                "Referencia opcional";
+
+
+            if (!formaPagoSeleccionada.esEfectivo) {
+
+                document.getElementById(
+                    "txtPagoMonto"
+                ).value =
+                    calcularPendientePago()
+                        .toFixed(2);
+
+            }
+
+
+            document.getElementById(
+                "txtPagoMonto"
+            ).select();
+
+        }
+
+
+        function calcularPendientePago() {
 
             const total =
                 parseFloat(
@@ -2471,33 +2758,262 @@
                 ) || 0;
 
 
-            const pagoC =
+            const pagado =
+                pagosFactura.reduce(
+                    (sum, x) =>
+                        sum +
+                        x.montoCordoba,
+                    0
+                );
+
+
+            const exceso =
+                Math.max(
+                    pagado - total,
+                    0
+                );
+
+
+            const neto =
+                pagado -
+                exceso;
+
+
+            return Math.max(
+                total - neto,
+                0
+            );
+
+        }
+
+
+        function agregarPagoActual() {
+
+            if (!formaPagoSeleccionada) {
+
+                Swal.fire(
+                    "Forma de pago",
+                    "Selecciona la forma de pago.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const monto =
                 parseFloat(
                     document.getElementById(
-                        "txtPagoC"
+                        "txtPagoMonto"
                     ).value
                 ) || 0;
 
 
-            const pagoD =
+            const referencia =
+                document.getElementById(
+                    "txtPagoReferencia"
+                ).value.trim();
+
+
+            if (monto <= 0) {
+
+                Swal.fire(
+                    "Monto invalido",
+                    "El monto recibido debe ser mayor que cero.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            if (referencia &&
+                !formaPagoSeleccionada.esEfectivo &&
+                pagosFactura.some(x =>
+                    x.idFormaPago === formaPagoSeleccionada.idFormaPago &&
+                    (x.referencia || "").toUpperCase() === referencia.toUpperCase())) {
+
+                Swal.fire(
+                    "Referencia repetida",
+                    "Esta referencia ya fue agregada para la misma forma de pago.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const total =
                 parseFloat(
                     document.getElementById(
-                        "txtPagoD"
+                        "txtTotal"
+                    ).value
+                ) || 0;
+
+
+            const montoCordoba =
+                formaPagoSeleccionada.moneda === "USD"
+                    ? monto * tasaCambio
+                    : monto;
+
+
+            const posActual =
+                pagosFactura
+                    .filter(x => !x.esEfectivo)
+                    .reduce(
+                        (sum, x) =>
+                            sum +
+                            x.montoCordoba,
+                        0
+                    );
+
+
+            if (!formaPagoSeleccionada.esEfectivo &&
+                posActual + montoCordoba > total + 0.05) {
+
+                Swal.fire(
+                    "Monto POS no valido",
+                    "Los pagos POS no pueden superar el total de la factura.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            pagosFactura.push({
+                idTemporal:
+                    Date.now() +
+                    Math.random(),
+                idFormaPago:
+                    formaPagoSeleccionada.idFormaPago,
+                nombre:
+                    formaPagoSeleccionada.nombre,
+                moneda:
+                    formaPagoSeleccionada.moneda,
+                monto:
+                    monto,
+                montoCordoba:
+                    montoCordoba,
+                referencia:
+                    referencia,
+                esEfectivo:
+                    formaPagoSeleccionada.esEfectivo,
+                requiereReferencia:
+                    formaPagoSeleccionada.requiereReferencia,
+                permiteVuelto:
+                    formaPagoSeleccionada.permiteVuelto
+            });
+
+
+            document.getElementById(
+                "txtPagoMonto"
+            ).value = "";
+
+
+            document.getElementById(
+                "txtPagoReferencia"
+            ).value = "";
+
+
+            recalcularPagos();
+
+        }
+
+
+        function quitarPago(idTemporal) {
+
+            pagosFactura =
+                pagosFactura.filter(
+                    x => x.idTemporal !== idTemporal
+                );
+
+
+            recalcularPagos();
+
+        }
+
+
+        function seleccionarMonedaVuelto(moneda) {
+
+            monedaVuelto = moneda;
+
+
+            document.querySelectorAll(
+                "#grupoMonedaVuelto button"
+            ).forEach(x =>
+                x.classList.toggle(
+                    "active",
+                    x.dataset.moneda === moneda
+                )
+            );
+
+
+            recalcularPagos();
+
+        }
+
+
+        function recalcularPagos() {
+
+            const total =
+                parseFloat(
+                    document.getElementById(
+                        "txtTotal"
                     ).value
                 ) || 0;
 
 
             const pagado =
-                pagoC +
+                pagosFactura.reduce(
+                    (sum, x) =>
+                        sum +
+                        x.montoCordoba,
+                    0
+                );
+
+            const exceso =
+                Math.max(
+                    pagado - total,
+                    0
+                );
+
+
+            const vueltoCordoba =
+                monedaVuelto === "NIO"
+                    ? exceso
+                    : 0;
+
+
+            const vueltoDolar =
+                monedaVuelto === "USD" &&
+                tasaCambio > 0
+                    ? exceso / tasaCambio
+                    : 0;
+
+
+            const vuelto =
+                vueltoCordoba +
                 (
-                    pagoD *
+                    vueltoDolar *
                     tasaCambio
                 );
 
 
-            const vuelto =
+            const neto =
                 pagado -
-                total;
+                vuelto;
+
+
+            const pendiente =
+                Math.max(
+                    total - neto,
+                    0
+                );
 
 
             const inputVuelto =
@@ -2529,24 +3045,46 @@
                     "btnGuardarFactura"
                 );
 
+            renderPagosAplicados();
+
 
             inputVuelto.value =
                 vuelto.toFixed(2);
 
 
             vueltoVisual.innerText =
+                monedaVuelto === "USD"
+                    ? "US$ " +
+                      vueltoDolar.toFixed(2)
+                    : "C$ " +
+                      vueltoCordoba.toFixed(2);
+
+
+            document.getElementById(
+                "lblTotalAplicado"
+            ).innerText =
                 "C$ " +
-                vuelto.toFixed(2);
+                pagado.toFixed(2);
 
 
-            if (vuelto < 0) {
+            document.getElementById(
+                "lblPendientePago"
+            ).innerText =
+                "C$ " +
+                pendiente.toFixed(2);
+
+
+            if (pendiente > 0.05 ||
+                pagosFactura.length === 0) {
 
                 box.className =
                     "change-box insufficient";
 
 
                 mensaje.innerText =
-                    "Pago insuficiente";
+                    pagosFactura.length === 0
+                        ? "Agrega los pagos recibidos"
+                        : "Pago insuficiente";
 
 
                 boton.disabled =
@@ -2569,6 +3107,51 @@
                     false;
 
             }
+
+        }
+
+
+        function renderPagosAplicados() {
+
+            const contenedor =
+                document.getElementById(
+                    "pagosAplicados"
+                );
+
+
+            if (pagosFactura.length === 0) {
+
+                contenedor.innerHTML = `
+                    <div class="payment-list-empty">
+                        No hay pagos agregados.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            contenedor.innerHTML =
+                pagosFactura
+                    .map(pago => `
+                        <div class="payment-list-item">
+                            <div>
+                                <strong>${escaparHtml(pago.nombre)}</strong>
+                                <span>
+                                    ${pago.moneda === "USD" ? "US$" : "C$"}
+                                    ${pago.monto.toFixed(2)}
+                                    ${pago.referencia ? " - Ref. " + escaparHtml(pago.referencia) : ""}
+                                </span>
+                            </div>
+                            <button type="button"
+                                    onclick="quitarPago(${pago.idTemporal})"
+                                    aria-label="Quitar pago">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    `)
+                    .join("");
 
         }
 
@@ -2661,6 +3244,89 @@
             }
 
 
+            if (pagosFactura.length === 0) {
+
+                Swal.fire(
+                    "Pago requerido",
+                    "Debe agregar al menos una forma de pago.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const total =
+                parseFloat(
+                    document.getElementById(
+                        "txtTotal"
+                    ).value
+                ) || 0;
+
+
+            const pagado =
+                pagosFactura.reduce(
+                    (sum, x) =>
+                        sum +
+                        x.montoCordoba,
+                    0
+                );
+
+
+            const exceso =
+                Math.max(
+                    pagado - total,
+                    0
+                );
+
+
+            const vueltoCordoba =
+                monedaVuelto === "NIO"
+                    ? exceso
+                    : 0;
+
+
+            const vueltoDolar =
+                monedaVuelto === "USD" &&
+                tasaCambio > 0
+                    ? exceso / tasaCambio
+                    : 0;
+
+
+            const pagoCordoba =
+                pagosFactura
+                    .filter(x =>
+                        x.esEfectivo &&
+                        x.moneda === "NIO")
+                    .reduce(
+                        (sum, x) =>
+                            sum + x.monto,
+                        0
+                    );
+
+
+            const pagoDolar =
+                pagosFactura
+                    .filter(x =>
+                        x.esEfectivo &&
+                        x.moneda === "USD")
+                    .reduce(
+                        (sum, x) =>
+                            sum + x.monto,
+                        0
+                    );
+
+
+            const pagosPost =
+                pagosFactura.map(x => ({
+                    IdFormaPago: x.idFormaPago,
+                    Moneda: x.moneda,
+                    Monto: x.monto,
+                    Referencia: x.referencia
+                }));
+
+
             document.getElementById(
                 "hdPaciente"
             ).value =
@@ -2670,25 +3336,35 @@
             document.getElementById(
                 "hdPagoCordoba"
             ).value =
-                document.getElementById(
-                    "txtPagoC"
-                ).value || 0;
+                pagoCordoba.toFixed(2);
 
 
             document.getElementById(
                 "hdPagoDolar"
             ).value =
-                document.getElementById(
-                    "txtPagoD"
-                ).value || 0;
+                pagoDolar.toFixed(2);
 
 
             document.getElementById(
                 "hdVuelto"
             ).value =
-                document.getElementById(
-                    "txtVuelto"
-                ).value || 0;
+                (
+                    vueltoCordoba +
+                    vueltoDolar *
+                    tasaCambio
+                ).toFixed(2);
+
+
+            document.getElementById(
+                "hdVueltoCordoba"
+            ).value =
+                vueltoCordoba.toFixed(2);
+
+
+            document.getElementById(
+                "hdVueltoDolar"
+            ).value =
+                vueltoDolar.toFixed(2);
 
 
             document.getElementById(
@@ -2696,6 +3372,14 @@
             ).value =
                 JSON.stringify(
                     detalle
+                );
+
+
+            document.getElementById(
+                "hdPagosJson"
+            ).value =
+                JSON.stringify(
+                    pagosPost
                 );
 
 

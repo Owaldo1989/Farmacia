@@ -12,6 +12,12 @@
         public decimal PagoCordoba { get; set; }
         public decimal PagoDolar { get; set; }
         public decimal Vuelto { get; set; }
+        public decimal VueltoCordoba { get; set; }
+        public decimal VueltoDolar { get; set; }
         public decimal TasaCambio { get; set; }
+        public int? IdTurno { get; set; }
+        public int? IdUsuario { get; set; }
+
+        public List<FacturaPagoDTO> Pagos { get; set; } = new();
     }
 }

@@ -485,8 +485,7 @@
                     </span>
 
                     <strong>
-                        @Model.Turno.FechaApertura
-                            .ToString("dd/MM/yyyy HH:mm")
+                        @(Model.Turno.FechaApertura.ToString("dd/MM/yyyy HH:mm"))
                     </strong>
 
                 </div>
@@ -499,8 +498,7 @@
                     </span>
 
                     <strong>
-                        C$ @Model.Turno.FondoInicial
-                            .ToString("N2")
+                        C$ @(Model.Turno.FondoInicial.ToString("N2"))
                     </strong>
 
                 </div>
@@ -577,8 +575,7 @@
                         </span>
 
                         <strong>
-                            C$ @Model.Equipo.FondoFijo
-                                .ToString("N2")
+                            C$ @(Model.Equipo.FondoFijo.ToString("N2"))
                         </strong>
 
                     </div>
@@ -709,6 +706,31 @@
                 @Html.Raw(
                     System.Text.Json.JsonSerializer.Serialize(
                         TempData["Error"]
+                    )
+                )
+
+        });
+
+        </text>
+    }
+
+
+    @if (TempData["ErrorCaja"] != null)
+    {
+        <text>
+
+        Swal.fire({
+
+            icon:
+                "warning",
+
+            title:
+                "Caja requerida",
+
+            text:
+                @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                        TempData["ErrorCaja"]
                     )
                 )
 

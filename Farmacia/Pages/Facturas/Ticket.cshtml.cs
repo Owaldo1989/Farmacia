@@ -84,9 +84,10 @@ namespace Farmacia.Pages.Facturas
 
             // ===== Altura dinámica =====
             int items = f?.Detalles?.Count ?? 0;
+            int pagos = f?.Pagos?.Count ?? 0;
             // Cada item: 1 línea descripción + 1 línea números + espacios
             double perItem = (lhDet + gapDescToNums) + (lhDet + gapNumsToNext);
-            page.Height = System.Math.Max(980, 520 + items * perItem);
+            page.Height = System.Math.Max(980, 560 + items * perItem + pagos * (lhNorm + gapSmall));
 
             double y = 12;
 
@@ -156,13 +157,49 @@ namespace Farmacia.Pages.Facturas
             gfx.DrawString($"TOTAL: C${f.Total:0.00}", fontBold, XBrushes.Black, left, y);
             y += lhBold + gapBlock;
 
-            gfx.DrawString($"Pago C$: {f.PagoCordoba:0.00}", fontNorm, XBrushes.Black, left, y);
-            y += lhNorm + gapSmall;
+            if (f.Pagos != null && f.Pagos.Count > 0)
+            {
+                gfx.DrawString("PAGOS", fontCol, XBrushes.Black, left, y);
+                y += lhCol + gapSmall;
 
-            gfx.DrawString($"Pago US$: {f.PagoDolar:0.00}", fontNorm, XBrushes.Black, left, y);
-            y += lhNorm + gapSmall;
+                foreach (var pago in f.Pagos)
+                {
+                    string referencia = string.IsNullOrWhiteSpace(pago.Referencia)
+                        ? ""
+                        : $" Ref: {pago.Referencia}";
 
-            gfx.DrawString($"Vuelto: C${f.Vuelto:0.00}", fontBold, XBrushes.Black, left, y);
+                    string linea = $"{pago.NombreFormaPago}: {SimboloMoneda(pago.Moneda)}{pago.Monto:0.00}{referencia}";
+
+                    gfx.DrawString(TruncarTexto(gfx, linea, fontNorm, contentW), fontNorm, XBrushes.Black, left, y);
+                    y += lhNorm + gapSmall;
+                }
+            }
+            else
+            {
+                gfx.DrawString($"Pago C$: {f.PagoCordoba:0.00}", fontNorm, XBrushes.Black, left, y);
+                y += lhNorm + gapSmall;
+
+                gfx.DrawString($"Pago US$: {f.PagoDolar:0.00}", fontNorm, XBrushes.Black, left, y);
+                y += lhNorm + gapSmall;
+            }
+
+            if (f.VueltoCordoba > 0)
+            {
+                gfx.DrawString($"Vuelto C$: {f.VueltoCordoba:0.00}", fontBold, XBrushes.Black, left, y);
+                y += lhBold + gapSmall;
+            }
+
+            if (f.VueltoDolar > 0)
+            {
+                gfx.DrawString($"Vuelto US$: {f.VueltoDolar:0.00}", fontBold, XBrushes.Black, left, y);
+                y += lhBold + gapSmall;
+            }
+
+            if (f.VueltoCordoba <= 0 && f.VueltoDolar <= 0)
+            {
+                gfx.DrawString($"Vuelto: C${f.Vuelto:0.00}", fontBold, XBrushes.Black, left, y);
+            }
+
             y += lhBold + (gapBlock * 2);
 
             gfx.DrawString("GRACIAS POR SU PREFERENCIA", fontBold, XBrushes.Black,
@@ -177,6 +214,11 @@ namespace Farmacia.Pages.Facturas
 
         private static double LineHeight(XGraphics gfx, XFont font)
             => gfx.MeasureString("Ag", font).Height;
+
+        private static string SimboloMoneda(string moneda)
+            => string.Equals(moneda?.Trim(), "USD", StringComparison.OrdinalIgnoreCase)
+                ? "US$"
+                : "C$";
 
         private static void DrawLine(XGraphics gfx, ref double y, double left, double right)
         {

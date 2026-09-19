@@ -161,6 +161,8 @@ namespace Farmacia.DAL
             int idAgente,
             int idTipoOperacion,
             decimal monto,
+            string moneda,
+            decimal tasaCambio,
             string? referencia,
             string? observacion,
             int idUsuario)
@@ -208,6 +210,22 @@ namespace Farmacia.DAL
             pMonto.Scale = 2;
             pMonto.Value = monto;
 
+            cmd.Parameters.AddWithValue(
+                "@Moneda",
+                moneda
+            );
+
+
+            var pTasaCambio =
+                cmd.Parameters.Add(
+                    "@TasaCambio",
+                    SqlDbType.Decimal
+                );
+
+            pTasaCambio.Precision = 10;
+            pTasaCambio.Scale = 4;
+            pTasaCambio.Value = tasaCambio;
+
 
             cmd.Parameters.AddWithValue(
                 "@NumeroReferencia",
@@ -245,6 +263,80 @@ namespace Farmacia.DAL
 
 
             return 0;
+        }
+
+
+        public AgenteTransaccion? Obtener(
+            long idTransaccion)
+        {
+            using var cn =
+                new SqlConnection(_cn);
+
+
+            using var cmd =
+                new SqlCommand(@"
+                    SELECT
+                        T.IdTransaccion,
+                        T.IdAgente,
+                        T.IdTipoOperacion,
+                        T.IdCaja,
+                        T.Monto,
+                        ISNULL(T.Moneda, 'NIO') AS Moneda,
+                        ISNULL(T.TasaCambio, 1) AS TasaCambio,
+                        ISNULL(T.MontoCordoba, T.Monto) AS MontoCordoba,
+                        T.NumeroReferencia,
+                        T.FechaTransaccion,
+                        T.IdUsuario,
+                        T.Observacion,
+                        T.EfectoEfectivo,
+                        T.EfectoSaldoAgente,
+                        T.TipoComision,
+                        T.ValorComision,
+                        T.MontoComision,
+                        T.Estado,
+                        T.IdUsuarioAnula,
+                        T.FechaAnulacion,
+                        T.MotivoAnulacion,
+                        A.CodigoAgente,
+                        A.NombreAgente,
+                        O.CodigoOperacion,
+                        O.NombreOperacion,
+                        U.NombreCompleto AS NombreUsuario,
+                        C.NombreCaja
+                    FROM dbo.tbAgenteTransacciones T
+                    INNER JOIN dbo.tbAgentesBancarios A
+                        ON A.IdAgente = T.IdAgente
+                    INNER JOIN dbo.tbAgenteTipoOperacion O
+                        ON O.IdTipoOperacion = T.IdTipoOperacion
+                    INNER JOIN dbo.tbUsuarios U
+                        ON U.IdUsuario = T.IdUsuario
+                    INNER JOIN dbo.tbCajas C
+                        ON C.IdCaja = T.IdCaja
+                    WHERE T.IdTransaccion = @IdTransaccion;",
+                    cn
+                );
+
+
+            cmd.Parameters.AddWithValue(
+                "@IdTransaccion",
+                idTransaccion
+            );
+
+
+            cn.Open();
+
+
+            using var dr =
+                cmd.ExecuteReader();
+
+
+            if (!dr.Read())
+            {
+                return null;
+            }
+
+
+            return Mapear(dr);
         }
 
 
@@ -336,6 +428,36 @@ namespace Farmacia.DAL
                         dr["Monto"]
                     ),
 
+                Moneda =
+                    HasColumn(
+                        dr,
+                        "Moneda"
+                    )
+                        ? dr["Moneda"].ToString()?.Trim() ?? "NIO"
+                        : "NIO",
+
+                TasaCambio =
+                    HasColumn(
+                        dr,
+                        "TasaCambio"
+                    )
+                        ? Convert.ToDecimal(
+                            dr["TasaCambio"]
+                        )
+                        : 1,
+
+                MontoCordoba =
+                    HasColumn(
+                        dr,
+                        "MontoCordoba"
+                    )
+                        ? Convert.ToDecimal(
+                            dr["MontoCordoba"]
+                        )
+                        : Convert.ToDecimal(
+                            dr["Monto"]
+                        ),
+
                 NumeroReferencia =
                     dr["NumeroReferencia"] == DBNull.Value
                         ? null
@@ -423,6 +545,25 @@ namespace Farmacia.DAL
                 NombreCaja =
                     dr["NombreCaja"].ToString() ?? ""
             };
+        }
+
+
+        private static bool HasColumn(
+            IDataRecord reader,
+            string columnName)
+        {
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                if (string.Equals(
+                    reader.GetName(i),
+                    columnName,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

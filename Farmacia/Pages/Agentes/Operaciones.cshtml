@@ -324,10 +324,17 @@
 
                                 <strong class="transaction-amount">
 
-                                    C$
+                                    @(item.Moneda == "USD" ? "US$" : "C$")
                                     @item.Monto.ToString("N2")
 
                                 </strong>
+
+                                @if (item.Moneda == "USD")
+                                {
+                                    <span class="transaction-equivalent">
+                                        Eq. C$ @item.MontoCordoba.ToString("N2")
+                                    </span>
+                                }
 
                             </td>
 
@@ -377,6 +384,14 @@
 
                                 @if (item.Estado == 1)
                                 {
+                                    <a class="btn-print-transaction"
+                                       href="/Agentes/Comprobante/@item.IdTransaccion"
+                                       target="_blank"
+                                       title="Imprimir comprobante">
+
+                                        <i class="bi bi-printer"></i>
+
+                                    </a>
 
                                     <button type="button"
                                             class="btn-cancel-transaction"
@@ -552,13 +567,38 @@
                         <div class="operation-field">
 
                             <label>
+                                Moneda *
+                            </label>
+
+
+                            <select asp-for="Moneda"
+                                    id="monedaOperacion"
+                                    onchange="actualizarMonedaOperacion()">
+
+                                <option value="NIO">
+                                    Córdobas
+                                </option>
+
+                                <option value="USD">
+                                    Dólares
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="operation-field">
+
+                            <label>
                                 Monto *
                             </label>
 
 
                             <div class="operation-money">
 
-                                <span>
+                                <span id="simboloMontoOperacion">
                                     C$
                                 </span>
 
@@ -759,6 +799,11 @@
             "modalOperacion"
         );
 
+    const monedaOperacion =
+        document.getElementById(
+            "monedaOperacion"
+        );
+
     const opcionesOperacion =
         Array.from(
             tipoOperacion?.options || []
@@ -784,9 +829,17 @@
 
             filtrarOperaciones();
 
+            actualizarMonedaOperacion();
+
             buscarOperacion.focus();
 
         }
+    );
+
+
+    monedaOperacion?.addEventListener(
+        "change",
+        actualizarMonedaOperacion
     );
 
 
@@ -901,6 +954,22 @@
     }
 
 
+    function actualizarMonedaOperacion() {
+
+        const simbolo =
+            monedaOperacion?.value === "USD"
+                ? "US$"
+                : "C$";
+
+
+        document.getElementById(
+            "simboloMontoOperacion"
+        ).textContent =
+            simbolo;
+
+    }
+
+
     function efectoTexto(
         valor)
     {
@@ -979,6 +1048,18 @@
                 false
 
         });
+
+        @if (TempData["ComprobanteId"] != null)
+        {
+            <text>
+
+            window.open(
+                "/Agentes/Comprobante/@TempData["ComprobanteId"]",
+                "_blank"
+            );
+
+            </text>
+        }
 
         </text>
     }

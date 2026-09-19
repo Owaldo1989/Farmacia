@@ -1,0 +1,794 @@
+@page
+@model Farmacia.Pages.UsuariosModel
+@using System.Text.Encodings.Web
+
+@{
+    ViewData["Title"] = "Usuarios";
+
+    var totalUsuarios =
+        Model.Listado?.Count ?? 0;
+
+    var activos =
+        Model.Listado?
+            .Count(x => x.Estado) ?? 0;
+
+    var administradores =
+        Model.Listado?
+            .Count(x =>
+                Farmacia.Helpers.RolHelper.EsAdministrador(
+                    x.Rol
+                )
+            ) ?? 0;
+}
+
+
+<link rel="stylesheet"
+      href="~/css/usuarios.css"
+      asp-append-version="true" />
+
+
+<div class="users-page">
+
+
+    <section class="users-header">
+
+        <div>
+
+            <div class="users-eyebrow">
+                <i class="bi bi-people"></i>
+                Administración
+            </div>
+
+            <h1>
+                Usuarios
+            </h1>
+
+            <p>
+                Administra accesos, roles y contraseñas del sistema.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-user"
+                onclick="nuevoUsuario()">
+
+            <i class="bi bi-person-plus"></i>
+
+            Nuevo usuario
+
+        </button>
+
+    </section>
+
+
+    <section class="users-summary">
+
+        <div class="user-stat">
+
+            <div class="user-stat-icon total">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <div>
+                <span>Usuarios</span>
+                <strong>@totalUsuarios</strong>
+                <small>Registrados</small>
+            </div>
+
+        </div>
+
+
+        <div class="user-stat">
+
+            <div class="user-stat-icon active">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <div>
+                <span>Activos</span>
+                <strong>@activos</strong>
+                <small>Con acceso</small>
+            </div>
+
+        </div>
+
+
+        <div class="user-stat">
+
+            <div class="user-stat-icon admin">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+
+            <div>
+                <span>Admin</span>
+                <strong>@administradores</strong>
+                <small>Configuración</small>
+            </div>
+
+        </div>
+
+
+        <div class="user-summary-message">
+            <i class="bi bi-key"></i>
+            <div>
+                <strong>Contraseñas separadas</strong>
+                <span>Cada usuario tiene una acción propia para cambiar su contraseña.</span>
+            </div>
+        </div>
+
+    </section>
+
+
+    <section class="users-toolbar">
+
+        <div class="user-search">
+            <i class="bi bi-search"></i>
+
+            <input type="text"
+                   id="txtBuscarUsuario"
+                   placeholder="Buscar por usuario, nombre, rol o sucursal..."
+                   autocomplete="off" />
+
+            <button type="button"
+                    id="btnLimpiarUsuario"
+                    class="btn-clear-user"
+                    title="Limpiar"
+                    style="display:none;">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+        </div>
+
+
+        <div class="user-results">
+            <strong id="contadorUsuarios">
+                @totalUsuarios
+            </strong>
+            <span>resultados</span>
+        </div>
+
+    </section>
+
+
+    <section class="users-card">
+
+        <div class="users-card-header">
+
+            <div>
+                <h2>Usuarios registrados</h2>
+                <p>Accesos disponibles para operar el sistema.</p>
+            </div>
+
+            <div class="users-card-icon">
+                <i class="bi bi-list-ul"></i>
+            </div>
+
+        </div>
+
+
+        @if (Model.Listado == null ||
+             !Model.Listado.Any())
+        {
+            <div class="users-empty">
+                <div class="users-empty-icon">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <strong>No hay usuarios registrados</strong>
+                <span>Crea el primer acceso del sistema.</span>
+                <button type="button"
+                        onclick="nuevoUsuario()">
+                    Nuevo usuario
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="users-table-wrapper">
+
+                <table class="users-table">
+
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Sucursal</th>
+                            <th>Estado</th>
+                            <th class="user-actions-column">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var usuario in Model.Listado)
+                        {
+                            var sucursal =
+                                Model.Sucursales
+                                    .FirstOrDefault(x =>
+                                        x.IdSucursal ==
+                                        usuario.IdSucursal
+                                    );
+
+                            var sucursalTexto =
+                                sucursal?.NombreSucursal
+                                ?? "Sin sucursal";
+
+                            var rolTexto =
+                                Farmacia.Helpers.RolHelper.EsAdministrador(
+                                    usuario.Rol
+                                )
+                                    ? "Administrador"
+                                    : usuario.Rol;
+
+                            var datosBusqueda =
+                                $"{usuario.UsuarioNombre} {usuario.NombreCompleto} {rolTexto} {sucursalTexto}"
+                                    .ToLower();
+
+                            <tr class="user-row"
+                                data-usuario="@datosBusqueda">
+
+                                <td>
+                                    <span class="user-code">
+                                        @usuario.UsuarioNombre
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="user-information">
+                                        <div class="user-avatar">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div class="user-name">
+                                            <strong>
+                                                @usuario.NombreCompleto
+                                            </strong>
+                                            <span>
+                                                #@usuario.IdUsuario
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="user-role @(Farmacia.Helpers.RolHelper.EsAdministrador(usuario.Rol) ? "admin" : "employee")">
+                                        @rolTexto
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @sucursalTexto
+                                </td>
+
+                                <td>
+                                    <span class="user-status @(usuario.Estado ? "active" : "inactive")">
+                                        @(usuario.Estado ? "Activo" : "Inactivo")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="user-actions">
+
+                                        <button type="button"
+                                                class="user-action password"
+                                                title="Cambiar contraseña"
+                                                onclick="abrirClave(@usuario.IdUsuario, '@JavaScriptEncoder.Default.Encode(usuario.UsuarioNombre)')">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+
+                                        <button type="button"
+                                                class="user-action edit"
+                                                onclick="editarUsuario(@usuario.IdUsuario)">
+                                            <i class="bi bi-pencil-square"></i>
+                                            Editar
+                                        </button>
+
+                                        <form method="post"
+                                              asp-page-handler="CambiarEstado"
+                                              class="user-state-form">
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@usuario.IdUsuario" />
+                                            <input type="hidden"
+                                                   name="estado"
+                                                   value="@(!usuario.Estado)" />
+
+                                            <button type="button"
+                                                    class="user-action @(usuario.Estado ? "disable" : "enable")"
+                                                    title="@(usuario.Estado ? "Desactivar" : "Activar")"
+                                                    onclick="confirmarEstado(this, '@JavaScriptEncoder.Default.Encode(usuario.UsuarioNombre)', @(usuario.Estado.ToString().ToLower()))">
+                                                <i class="bi @(usuario.Estado ? "bi-person-slash" : "bi-person-check")"></i>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="users-no-results"
+                 id="sinResultadosUsuario"
+                 style="display:none;">
+                <div class="users-empty-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <strong>No se encontraron usuarios</strong>
+                <span>Prueba con otro nombre, rol o sucursal.</span>
+            </div>
+        }
+
+    </section>
+
+</div>
+
+
+<div class="modal fade"
+     id="modalUsuario"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content user-modal">
+
+            <form method="post"
+                  asp-page-handler="Guardar">
+
+                <input asp-for="Usuario.IdUsuario"
+                       type="hidden" />
+
+                <div class="modal-header user-modal-header">
+                    <div>
+                        <div class="user-modal-eyebrow">
+                            <i class="bi bi-person-gear"></i>
+                            Usuario
+                        </div>
+                        <h5 id="tituloModalUsuario">
+                            Nuevo usuario
+                        </h5>
+                        <span>
+                            Configura datos de acceso y rol.
+                        </span>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body user-modal-body">
+
+                    <div class="user-form-grid">
+
+                        <div class="user-field">
+                            <label>Usuario <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-person"></i>
+                                <input asp-for="Usuario.UsuarioNombre"
+                                       maxlength="50"
+                                       autocomplete="off" />
+                            </div>
+                        </div>
+
+
+                        <div class="user-field">
+                            <label>Nombre completo <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-card-text"></i>
+                                <input asp-for="Usuario.NombreCompleto"
+                                       maxlength="150"
+                                       autocomplete="off" />
+                            </div>
+                        </div>
+
+
+                        <div class="user-field">
+                            <label>Rol <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-shield-check"></i>
+                                <select asp-for="Usuario.Rol">
+                                    <option value="Empleado">Empleado</option>
+                                    <option value="Admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="user-field">
+                            <label>Sucursal</label>
+                            <div class="user-control">
+                                <i class="bi bi-building"></i>
+                                <select asp-for="Usuario.IdSucursal">
+                                    <option value="">Sin sucursal</option>
+                                    @foreach (var sucursal in Model.Sucursales)
+                                    {
+                                        <option value="@sucursal.IdSucursal">
+                                            @sucursal.NombreSucursal
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="user-field"
+                             id="campoClaveInicial">
+                            <label>Contraseña inicial <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="ClaveInicial"
+                                       type="password"
+                                       maxlength="200"
+                                       autocomplete="new-password" />
+                            </div>
+                            <small>
+                                Luego puede cambiarse desde la acción de contraseña.
+                            </small>
+                        </div>
+
+
+                        <div class="user-field">
+                            <label class="user-switch">
+                                <input asp-for="Usuario.Estado" />
+                                <span class="user-switch-control"></span>
+                                <span class="user-switch-text">
+                                    Usuario activo
+                                </span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer user-modal-footer">
+                    <button type="button"
+                            class="btn-user-cancel"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="btn-user-save">
+                        <i class="bi bi-save"></i>
+                        Guardar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="modal fade"
+     id="modalClave"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content user-modal">
+
+            <form method="post"
+                  asp-page-handler="CambiarClave">
+
+                <input asp-for="IdUsuarioClave"
+                       type="hidden" />
+
+                <div class="modal-header user-modal-header">
+                    <div>
+                        <div class="user-modal-eyebrow">
+                            <i class="bi bi-key"></i>
+                            Contraseña
+                        </div>
+                        <h5>
+                            Cambiar contraseña
+                        </h5>
+                        <span id="subtituloClave">
+                            Usuario seleccionado
+                        </span>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body user-modal-body">
+
+                    <div class="user-form-grid one">
+
+                        <div class="user-field full">
+                            <label>Nueva contraseña <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="NuevaClave"
+                                       type="password"
+                                       maxlength="200"
+                                       autocomplete="new-password" />
+                            </div>
+                        </div>
+
+
+                        <div class="user-field full">
+                            <label>Confirmar contraseña <span>*</span></label>
+                            <div class="user-control">
+                                <i class="bi bi-lock-fill"></i>
+                                <input asp-for="ConfirmarClave"
+                                       type="password"
+                                       maxlength="200"
+                                       autocomplete="new-password" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer user-modal-footer">
+                    <button type="button"
+                            class="btn-user-cancel"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="btn-user-save">
+                        <i class="bi bi-key"></i>
+                        Actualizar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+<script>
+
+    function nuevoUsuario() {
+        window.location.href =
+            "/Usuarios?nuevo=1";
+    }
+
+
+    function editarUsuario(id) {
+        window.location.href =
+            `/Usuarios?id=${id}`;
+    }
+
+
+    function abrirClave(id, usuario) {
+        document.getElementById("IdUsuarioClave").value =
+            id;
+
+        document.getElementById("NuevaClave").value =
+            "";
+
+        document.getElementById("ConfirmarClave").value =
+            "";
+
+        document.getElementById("subtituloClave").textContent =
+            usuario;
+
+        new bootstrap.Modal(
+            document.getElementById("modalClave")
+        ).show();
+    }
+
+
+    function confirmarEstado(boton, usuario, activo) {
+        const accion =
+            activo
+                ? "desactivar"
+                : "activar";
+
+        Swal.fire({
+            icon:
+                activo ? "warning" : "question",
+            title:
+                `${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario`,
+            html:
+                `Se va a ${accion} el usuario <strong>${escapeHtml(usuario)}</strong>.`,
+            showCancelButton:
+                true,
+            confirmButtonText:
+                activo ? "Sí, desactivar" : "Sí, activar",
+            cancelButtonText:
+                "Cancelar",
+            confirmButtonColor:
+                activo ? "#d6535d" : "#079667"
+        }).then(resultado => {
+            if (resultado.isConfirmed) {
+                boton.closest("form").submit();
+            }
+        });
+    }
+
+
+    const txtBuscarUsuario =
+        document.getElementById("txtBuscarUsuario");
+
+    const btnLimpiarUsuario =
+        document.getElementById("btnLimpiarUsuario");
+
+
+    txtBuscarUsuario?.addEventListener(
+        "input",
+        filtrarUsuarios
+    );
+
+
+    btnLimpiarUsuario?.addEventListener(
+        "click",
+        function () {
+            txtBuscarUsuario.value = "";
+            filtrarUsuarios();
+            txtBuscarUsuario.focus();
+        }
+    );
+
+
+    function filtrarUsuarios() {
+        const texto =
+            (txtBuscarUsuario?.value ?? "")
+                .trim()
+                .toLowerCase();
+
+        const filas =
+            document.querySelectorAll(".user-row");
+
+        let visibles =
+            0;
+
+        filas.forEach(fila => {
+            const contenido =
+                fila.dataset.usuario ?? "";
+
+            const mostrar =
+                !texto ||
+                contenido.includes(texto);
+
+            fila.style.display =
+                mostrar ? "" : "none";
+
+            if (mostrar) {
+                visibles++;
+            }
+        });
+
+        document.getElementById("contadorUsuarios").textContent =
+            visibles;
+
+        btnLimpiarUsuario.style.display =
+            texto ? "flex" : "none";
+
+        const sinResultados =
+            document.getElementById("sinResultadosUsuario");
+
+        if (sinResultados) {
+            sinResultados.style.display =
+                visibles === 0 ? "flex" : "none";
+        }
+    }
+
+
+    function escapeHtml(valor) {
+        return String(valor ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            const parametros =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            if (parametros.has("nuevo")) {
+                document.getElementById("Usuario_IdUsuario").value =
+                    "0";
+                document.getElementById("Usuario_UsuarioNombre").value =
+                    "";
+                document.getElementById("Usuario_NombreCompleto").value =
+                    "";
+                document.getElementById("Usuario_Rol").value =
+                    "Empleado";
+                document.getElementById("Usuario_IdSucursal").value =
+                    "";
+                document.getElementById("ClaveInicial").value =
+                    "";
+                document.getElementById("Usuario_Estado").checked =
+                    true;
+                document.getElementById("campoClaveInicial").style.display =
+                    "";
+                document.getElementById("tituloModalUsuario").textContent =
+                    "Nuevo usuario";
+
+                new bootstrap.Modal(
+                    document.getElementById("modalUsuario")
+                ).show();
+            }
+
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+                document.getElementById("campoClaveInicial").style.display =
+                    "none";
+                document.getElementById("tituloModalUsuario").textContent =
+                    "Editar usuario";
+                new bootstrap.Modal(
+                    document.getElementById("modalUsuario")
+                ).show();
+                </text>
+            }
+
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon:
+                        "success",
+                    title:
+                        "Correcto",
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Ok"]
+                            )
+                        ),
+                    timer:
+                        1800,
+                    showConfirmButton:
+                        false
+                });
+                </text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon:
+                        "error",
+                    title:
+                        "No se pudo completar",
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Error"]
+                            )
+                        )
+                });
+                </text>
+            }
+        }
+    );
+
+</script>
+
+}

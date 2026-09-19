@@ -164,8 +164,16 @@
 }
 
 .transaction-amount {
+  display: block;
   color: var(--text);
   font-size: 11px;
+}
+
+.transaction-equivalent {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-light);
+  font-size: 8px;
 }
 
 .cash-effect,
@@ -204,13 +212,27 @@ tr.cancelled {
   opacity: 0.55;
 }
 
-.btn-cancel-transaction {
+.btn-cancel-transaction,
+.btn-print-transaction {
   width: 30px;
   height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 7px;
+  text-decoration: none;
+}
+
+.btn-cancel-transaction {
   background: var(--danger-soft);
   color: var(--danger);
+}
+
+.btn-print-transaction {
+  margin-right: 5px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
 }
 
 /* MODAL */

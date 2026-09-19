@@ -10,16 +10,19 @@ namespace Farmacia.Pages.Agentes
         private readonly AgenteBancarioDAL _agenteDal;
         private readonly AgenteTipoOperacionDAL _tipoDal;
         private readonly AgenteTransaccionDAL _transaccionDal;
+        private readonly TipoCambioDAL _tipoCambioDal;
 
 
         public OperacionesModel(
             AgenteBancarioDAL agenteDal,
             AgenteTipoOperacionDAL tipoDal,
-            AgenteTransaccionDAL transaccionDal)
+            AgenteTransaccionDAL transaccionDal,
+            TipoCambioDAL tipoCambioDal)
         {
             _agenteDal = agenteDal;
             _tipoDal = tipoDal;
             _transaccionDal = transaccionDal;
+            _tipoCambioDal = tipoCambioDal;
         }
 
 
@@ -65,6 +68,14 @@ namespace Farmacia.Pages.Agentes
             get;
             set;
         }
+
+
+        [BindProperty]
+        public string Moneda
+        {
+            get;
+            set;
+        } = "NIO";
 
 
         [BindProperty]
@@ -182,12 +193,36 @@ namespace Farmacia.Pages.Agentes
                     );
                 }
 
+                Moneda =
+                    (Moneda ?? "NIO")
+                        .Trim()
+                        .ToUpperInvariant();
+
+
+                if (Moneda != "NIO" &&
+                    Moneda != "USD")
+                {
+                    throw new Exception(
+                        "La moneda seleccionada no es valida."
+                    );
+                }
+
+
+                decimal tasaCambio =
+                    Moneda == "USD"
+                        ? _tipoCambioDal.ObtenerVigente(
+                            DateTime.Now
+                        )
+                        : 1;
+
 
                 long id =
                     _transaccionDal.Registrar(
                         agente.IdAgente,
                         IdTipoOperacion,
                         Monto,
+                        Moneda,
+                        tasaCambio,
                         NumeroReferencia,
                         Observacion,
                         idUsuario.Value
@@ -196,6 +231,9 @@ namespace Farmacia.Pages.Agentes
 
                 TempData["Ok"] =
                     $"Operación #{id} registrada correctamente.";
+
+                TempData["ComprobanteId"] =
+                    id.ToString();
             }
             catch (Exception ex)
             {

@@ -1,0 +1,633 @@
+@page
+@model Farmacia.Pages.DenominacionesModel
+@using System.Text.Encodings.Web
+
+@{
+    ViewData["Title"] = "Denominaciones";
+
+    var total =
+        Model.Listado?.Count ?? 0;
+
+    var activas =
+        Model.Listado?
+            .Count(x => x.Activo) ?? 0;
+
+    var inactivas =
+        total - activas;
+}
+
+
+<link rel="stylesheet"
+      href="~/css/denominaciones.css"
+      asp-append-version="true" />
+
+
+<div class="denominations-page">
+
+    <section class="denominations-header">
+
+        <div>
+
+            <div class="denominations-eyebrow">
+                <i class="bi bi-cash-coin"></i>
+                Administración
+            </div>
+
+            <h1>
+                Denominaciones
+            </h1>
+
+            <p>
+                Configura billetes y monedas disponibles para arqueo de caja.
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn-new-denomination"
+                onclick="nuevaDenominacion()">
+            <i class="bi bi-plus-lg"></i>
+            Nueva denominación
+        </button>
+
+    </section>
+
+
+    <section class="denominations-summary">
+
+        <div class="denomination-stat">
+            <div class="denomination-stat-icon total">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div>
+                <span>Denominaciones</span>
+                <strong>@total</strong>
+                <small>Registradas</small>
+            </div>
+        </div>
+
+
+        <div class="denomination-stat">
+            <div class="denomination-stat-icon active">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div>
+                <span>Activas</span>
+                <strong>@activas</strong>
+                <small>Disponibles</small>
+            </div>
+        </div>
+
+
+        <div class="denomination-stat">
+            <div class="denomination-stat-icon inactive">
+                <i class="bi bi-pause-circle"></i>
+            </div>
+            <div>
+                <span>Inactivas</span>
+                <strong>@inactivas</strong>
+                <small>Ocultas</small>
+            </div>
+        </div>
+
+
+        <div class="denomination-summary-message">
+            <i class="bi bi-info-circle"></i>
+            <div>
+                <strong>Arqueo de caja</strong>
+                <span>Estas denominaciones servirán para contar efectivo por moneda y tipo.</span>
+            </div>
+        </div>
+
+    </section>
+
+
+    <section class="denominations-toolbar">
+
+        <div class="denomination-search">
+            <i class="bi bi-search"></i>
+
+            <input type="text"
+                   id="txtBuscarDenominacion"
+                   placeholder="Buscar por moneda, tipo, valor o descripción..."
+                   autocomplete="off" />
+
+            <button type="button"
+                    id="btnLimpiarDenominacion"
+                    class="btn-clear-denomination"
+                    title="Limpiar"
+                    style="display:none;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="denomination-results">
+            <strong id="contadorDenominaciones">
+                @total
+            </strong>
+            <span>resultados</span>
+        </div>
+
+    </section>
+
+
+    <section class="denominations-card">
+
+        <div class="denominations-card-header">
+            <div>
+                <h2>Listado de denominaciones</h2>
+                <p>Billetes y monedas configuradas para caja.</p>
+            </div>
+
+            <div class="denominations-card-icon">
+                <i class="bi bi-list-ul"></i>
+            </div>
+        </div>
+
+
+        @if (Model.Listado == null ||
+             !Model.Listado.Any())
+        {
+            <div class="denominations-empty">
+                <div class="denominations-empty-icon">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <strong>No hay denominaciones registradas</strong>
+                <span>Crea la primera denominación para caja.</span>
+                <button type="button"
+                        onclick="nuevaDenominacion()">
+                    Nueva denominación
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="denominations-table-wrapper">
+
+                <table class="denominations-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Moneda</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Descripción</th>
+                            <th>Orden</th>
+                            <th>Estado</th>
+                            <th class="denomination-actions-column">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.Listado)
+                        {
+                            var tipoTexto =
+                                item.Tipo == "B"
+                                    ? "Billete"
+                                    : "Moneda";
+
+                            var filtro =
+                                $"{item.Moneda} {tipoTexto} {item.Valor:N2} {item.Descripcion} {(item.Activo ? "activo" : "inactivo")}"
+                                .ToLower();
+
+                            <tr class="denomination-row"
+                                data-denominacion="@filtro">
+
+                                <td>
+                                    <span class="denomination-code">
+                                        #@item.IdDenominacion
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="denomination-currency">
+                                        @item.Moneda
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="denomination-type @(item.Tipo == "B" ? "bill" : "coin")">
+                                        @tipoTexto
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.Valor.ToString("N2")
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.Descripcion
+                                </td>
+
+                                <td>
+                                    @item.Orden
+                                </td>
+
+                                <td>
+                                    <span class="denomination-status @(item.Activo ? "active" : "inactive")">
+                                        @(item.Activo ? "Activa" : "Inactiva")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="denomination-actions">
+
+                                        <button type="button"
+                                                class="denomination-action edit"
+                                                onclick="editarDenominacion(@item.IdDenominacion)">
+                                            <i class="bi bi-pencil-square"></i>
+                                            Editar
+                                        </button>
+
+                                        <form method="post"
+                                              asp-page-handler="CambiarEstado"
+                                              class="denomination-state-form">
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@item.IdDenominacion" />
+                                            <input type="hidden"
+                                                   name="activo"
+                                                   value="@(!item.Activo)" />
+
+                                            <button type="button"
+                                                    class="denomination-action @(item.Activo ? "disable" : "enable")"
+                                                    title="@(item.Activo ? "Inactivar" : "Activar")"
+                                                    onclick="confirmarEstado(this, '@JavaScriptEncoder.Default.Encode(item.Descripcion)', @(item.Activo.ToString().ToLower()))">
+                                                <i class="bi @(item.Activo ? "bi-pause-circle" : "bi-check-circle")"></i>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            <div class="denominations-no-results"
+                 id="sinResultadosDenominacion"
+                 style="display:none;">
+                <div class="denominations-empty-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <strong>No se encontraron denominaciones</strong>
+                <span>Prueba con otro filtro.</span>
+            </div>
+        }
+
+    </section>
+
+</div>
+
+
+<div class="modal fade"
+     id="modalDenominacion"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content denomination-modal">
+
+            <form method="post"
+                  asp-page-handler="Guardar">
+
+                <input asp-for="Denominacion.IdDenominacion"
+                       type="hidden" />
+
+                <div class="modal-header denomination-modal-header">
+                    <div>
+                        <div class="denomination-modal-eyebrow">
+                            <i class="bi bi-cash-coin"></i>
+                            Denominación
+                        </div>
+                        <h5 id="tituloModalDenominacion">
+                            Nueva denominación
+                        </h5>
+                        <span>
+                            Configura moneda, tipo, valor y orden.
+                        </span>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body denomination-modal-body">
+
+                    <div class="denomination-form-grid">
+
+                        <div class="denomination-field">
+                            <label>Moneda <span>*</span></label>
+                            <div class="denomination-control">
+                                <i class="bi bi-currency-exchange"></i>
+                                <select asp-for="Denominacion.Moneda">
+                                    <option value="NIO">Córdoba - NIO</option>
+                                    <option value="USD">Dólar - USD</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="denomination-field">
+                            <label>Tipo <span>*</span></label>
+                            <div class="denomination-control">
+                                <i class="bi bi-wallet2"></i>
+                                <select asp-for="Denominacion.Tipo">
+                                    <option value="B">Billete</option>
+                                    <option value="M">Moneda</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="denomination-field">
+                            <label>Valor <span>*</span></label>
+                            <div class="denomination-control">
+                                <i class="bi bi-cash"></i>
+                                <input asp-for="Denominacion.Valor"
+                                       type="number"
+                                       min="0.01"
+                                       step="0.01" />
+                            </div>
+                        </div>
+
+
+                        <div class="denomination-field">
+                            <label>Orden</label>
+                            <div class="denomination-control">
+                                <i class="bi bi-sort-numeric-down"></i>
+                                <input asp-for="Denominacion.Orden"
+                                       type="number"
+                                       min="0"
+                                       step="1" />
+                            </div>
+                            <small>Si queda en 0, se asigna al final de la moneda.</small>
+                        </div>
+
+
+                        <div class="denomination-field full">
+                            <label>Descripción <span>*</span></label>
+                            <div class="denomination-control">
+                                <i class="bi bi-card-text"></i>
+                                <input asp-for="Denominacion.Descripcion"
+                                       maxlength="50"
+                                       autocomplete="off" />
+                            </div>
+                        </div>
+
+
+                        <div class="denomination-field">
+                            <label class="denomination-switch">
+                                <input asp-for="Denominacion.Activo" />
+                                <span class="denomination-switch-control"></span>
+                                <span class="denomination-switch-text">
+                                    Denominación activa
+                                </span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer denomination-modal-footer">
+                    <button type="button"
+                            class="btn-denomination-cancel"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="btn-denomination-save">
+                        <i class="bi bi-save"></i>
+                        Guardar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+<script>
+
+    function nuevaDenominacion() {
+        window.location.href =
+            "/Denominaciones?nuevo=1";
+    }
+
+
+    function editarDenominacion(id) {
+        window.location.href =
+            `/Denominaciones?id=${id}`;
+    }
+
+
+    function confirmarEstado(boton, descripcion, activo) {
+        const accion =
+            activo
+                ? "inactivar"
+                : "activar";
+
+        Swal.fire({
+            icon:
+                activo ? "warning" : "question",
+            title:
+                `${accion.charAt(0).toUpperCase() + accion.slice(1)} denominación`,
+            html:
+                `Se va a ${accion} <strong>${escapeHtml(descripcion)}</strong>.`,
+            showCancelButton:
+                true,
+            confirmButtonText:
+                activo ? "Sí, inactivar" : "Sí, activar",
+            cancelButtonText:
+                "Cancelar",
+            confirmButtonColor:
+                activo ? "#d6535d" : "#079667"
+        }).then(resultado => {
+            if (resultado.isConfirmed) {
+                boton.closest("form").submit();
+            }
+        });
+    }
+
+
+    const txtBuscarDenominacion =
+        document.getElementById("txtBuscarDenominacion");
+
+    const btnLimpiarDenominacion =
+        document.getElementById("btnLimpiarDenominacion");
+
+
+    txtBuscarDenominacion?.addEventListener(
+        "input",
+        filtrarDenominaciones
+    );
+
+
+    btnLimpiarDenominacion?.addEventListener(
+        "click",
+        function () {
+            txtBuscarDenominacion.value = "";
+            filtrarDenominaciones();
+            txtBuscarDenominacion.focus();
+        }
+    );
+
+
+    function filtrarDenominaciones() {
+        const texto =
+            (txtBuscarDenominacion?.value ?? "")
+                .trim()
+                .toLowerCase();
+
+        const filas =
+            document.querySelectorAll(".denomination-row");
+
+        let visibles =
+            0;
+
+        filas.forEach(fila => {
+            const contenido =
+                fila.dataset.denominacion ?? "";
+
+            const mostrar =
+                !texto ||
+                contenido.includes(texto);
+
+            fila.style.display =
+                mostrar ? "" : "none";
+
+            if (mostrar) {
+                visibles++;
+            }
+        });
+
+        document.getElementById("contadorDenominaciones").textContent =
+            visibles;
+
+        btnLimpiarDenominacion.style.display =
+            texto ? "flex" : "none";
+
+        const sinResultados =
+            document.getElementById("sinResultadosDenominacion");
+
+        if (sinResultados) {
+            sinResultados.style.display =
+                visibles === 0 ? "flex" : "none";
+        }
+    }
+
+
+    function escapeHtml(valor) {
+        return String(valor ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            const parametros =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            if (parametros.has("nuevo")) {
+                document.getElementById("Denominacion_IdDenominacion").value =
+                    "0";
+                document.getElementById("Denominacion_Moneda").value =
+                    "NIO";
+                document.getElementById("Denominacion_Tipo").value =
+                    "B";
+                document.getElementById("Denominacion_Valor").value =
+                    "";
+                document.getElementById("Denominacion_Descripcion").value =
+                    "";
+                document.getElementById("Denominacion_Orden").value =
+                    "0";
+                document.getElementById("Denominacion_Activo").checked =
+                    true;
+                document.getElementById("tituloModalDenominacion").textContent =
+                    "Nueva denominación";
+
+                new bootstrap.Modal(
+                    document.getElementById("modalDenominacion")
+                ).show();
+            }
+
+            @if (TempData["Editar"] != null)
+            {
+                <text>
+                document.getElementById("tituloModalDenominacion").textContent =
+                    "Editar denominación";
+                new bootstrap.Modal(
+                    document.getElementById("modalDenominacion")
+                ).show();
+                </text>
+            }
+
+            @if (TempData["Ok"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon:
+                        "success",
+                    title:
+                        "Correcto",
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Ok"]
+                            )
+                        ),
+                    timer:
+                        1800,
+                    showConfirmButton:
+                        false
+                });
+                </text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon:
+                        "error",
+                    title:
+                        "No se pudo completar",
+                    text:
+                        @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                TempData["Error"]
+                            )
+                        )
+                });
+                </text>
+            }
+        }
+    );
+
+</script>
+
+}

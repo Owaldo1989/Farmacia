@@ -1,5 +1,5 @@
-﻿using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 using Farmacia.Models;
 
 namespace Farmacia.DAL
@@ -25,17 +25,49 @@ namespace Farmacia.DAL
             cmd.ExecuteNonQuery();
         }
 
+        public List<FormaPagoDTO> ListarFormasPagoActivas()
+        {
+            var lista = new List<FormaPagoDTO>();
+
+            using var cn = new SqlConnection(_cn);
+            using var cmd = new SqlCommand(@"
+                SELECT IdFormaPago, Codigo, Nombre, EsEfectivo, RequiereReferencia, PermiteVuelto, Activo
+                FROM dbo.tbFormasPago
+                WHERE Activo = 1
+                ORDER BY
+                    CASE WHEN EsEfectivo = 1 THEN 0 ELSE 1 END,
+                    Nombre;", cn);
+
+            cn.Open();
+            using var dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                lista.Add(new FormaPagoDTO
+                {
+                    IdFormaPago = dr.GetInt32(dr.GetOrdinal("IdFormaPago")),
+                    Codigo = dr["Codigo"]?.ToString() ?? string.Empty,
+                    Nombre = dr["Nombre"]?.ToString() ?? string.Empty,
+                    EsEfectivo = dr.GetBoolean(dr.GetOrdinal("EsEfectivo")),
+                    RequiereReferencia = dr.GetBoolean(dr.GetOrdinal("RequiereReferencia")),
+                    PermiteVuelto = dr.GetBoolean(dr.GetOrdinal("PermiteVuelto")),
+                    Activo = dr.GetBoolean(dr.GetOrdinal("Activo"))
+                });
+            }
+
+            return lista;
+        }
+
         public List<FacturaDetalleDTO> ObtenerDetalle(int idFactura)
         {
             var lista = new List<FacturaDetalleDTO>();
 
             using var cn = new SqlConnection(_cn);
             using var cmd = new SqlCommand(@"
-        SELECT D.IdProducto, P.NombreProducto, P.CodBarra,
-               D.Cantidad, D.Precio
-        FROM tbFacturaDetalle D
-        INNER JOIN tbProductos P ON D.IdProducto = P.IdProducto
-        WHERE D.IdFactura = @ID", cn);
+                SELECT D.IdProducto, P.NombreProducto, P.CodBarra, D.Cantidad, D.Precio
+                FROM tbFacturaDetalle D
+                INNER JOIN tbProductos P ON D.IdProducto = P.IdProducto
+                WHERE D.IdFactura = @ID", cn);
 
             cmd.Parameters.AddWithValue("@ID", idFactura);
 
@@ -53,6 +85,7 @@ namespace Farmacia.DAL
                     Precio = dr.GetDecimal(4)
                 });
             }
+
             return lista;
         }
 
@@ -62,16 +95,17 @@ namespace Farmacia.DAL
 
             using var cn = new SqlConnection(_cn);
             using var cmd = new SqlCommand(@"
-        SELECT IdFactura, IdFacturaCliente, Fecha, Paciente, Total, PagoCordoba, PagoDolar, Vuelto,TasaCambio
-        FROM tbFactura
-        WHERE CONVERT(date, Fecha) BETWEEN @F1 AND @F2
-        ORDER BY Fecha DESC", cn);
+                SELECT IdFactura, IdFacturaCliente, Fecha, Paciente, Total, PagoCordoba, PagoDolar, Vuelto, TasaCambio
+                FROM tbFactura
+                WHERE CONVERT(date, Fecha) BETWEEN @F1 AND @F2
+                ORDER BY Fecha DESC", cn);
 
             cmd.Parameters.AddWithValue("@F1", fechaInicio);
             cmd.Parameters.AddWithValue("@F2", fechaFin);
 
             cn.Open();
             using var dr = cmd.ExecuteReader();
+
             while (dr.Read())
             {
                 lista.Add(new FacturaDTO
@@ -93,8 +127,6 @@ namespace Farmacia.DAL
 
         public FacturaCompleta ObtenerFacturaCompleta(int idFactura)
         {
-            Console.WriteLine("→ Entrando a ObtenerFacturaCompleta. ID = " + idFactura);
-
             var factura = new FacturaCompleta();
 
             using var cn = new SqlConnection(_cn);
@@ -104,56 +136,76 @@ namespace Farmacia.DAL
 
             cn.Open();
 
-            using (var dr = cmd.ExecuteReader())
+            using var dr = cmd.ExecuteReader();
+
+            if (!dr.Read())
             {
-                if (!dr.Read())
+                throw new Exception("No hay datos del encabezado.");
+            }
+
+            factura.NombreFarmacia = dr["NombreFarmacia"].ToString();
+            factura.Direccion = dr["Direccion"].ToString();
+            factura.Telefono = dr["Telefono"].ToString();
+            factura.IdFactura = dr.GetInt32(dr.GetOrdinal("IdFactura"));
+            factura.Fecha = dr.GetDateTime(dr.GetOrdinal("Fecha"));
+            factura.TasaCambio = dr.GetDecimal(dr.GetOrdinal("TasaCambio"));
+            factura.Paciente = dr["Paciente"].ToString();
+            factura.Total = dr.GetDecimal(dr.GetOrdinal("Total"));
+            factura.PagoCordoba = dr.GetDecimal(dr.GetOrdinal("PagoCordoba"));
+            factura.PagoDolar = dr.GetDecimal(dr.GetOrdinal("PagoDolar"));
+            factura.Vuelto = dr.GetDecimal(dr.GetOrdinal("Vuelto"));
+            factura.VueltoCordoba = HasColumn(dr, "VueltoCordoba")
+                ? dr.GetDecimal(dr.GetOrdinal("VueltoCordoba"))
+                : factura.Vuelto;
+            factura.VueltoDolar = HasColumn(dr, "VueltoDolar")
+                ? dr.GetDecimal(dr.GetOrdinal("VueltoDolar"))
+                : 0;
+
+            if (!dr.NextResult())
+            {
+                throw new Exception("No devolvio detalle.");
+            }
+
+            while (dr.Read())
+            {
+                factura.Detalles.Add(new FacturaDetalleDTO
                 {
-                    Console.WriteLine("❌ NO SE ENCONTRÓ ENCABEZADO");
-                    throw new Exception("No hay datos del encabezado.");
-                }
+                    IdProducto = dr.GetInt32(dr.GetOrdinal("IdProducto")),
+                    NombreProducto = dr["NombreProducto"].ToString(),
+                    Cantidad = dr.GetDecimal(dr.GetOrdinal("Cantidad")),
+                    Precio = dr.GetDecimal(dr.GetOrdinal("Precio"))
+                });
+            }
 
-                Console.WriteLine("✔ Encabezado leído correctamente");
-                factura.NombreFarmacia = dr["NombreFarmacia"].ToString();
-                factura.Direccion = dr["Direccion"].ToString();
-                factura.Telefono = dr["Telefono"].ToString();
-                factura.IdFactura = dr.GetInt32(dr.GetOrdinal("IdFactura"));
-                factura.Fecha = dr.GetDateTime(dr.GetOrdinal("Fecha"));
-                factura.TasaCambio = dr.GetDecimal(dr.GetOrdinal("TasaCambio"));
-                factura.Paciente = dr["Paciente"].ToString();
-                factura.Total = dr.GetDecimal(dr.GetOrdinal("Total"));             
-                factura.PagoCordoba = dr.GetDecimal(dr.GetOrdinal("PagoCordoba"));
-                factura.PagoDolar = dr.GetDecimal(dr.GetOrdinal("PagoDolar"));
-                factura.Vuelto = dr.GetDecimal(dr.GetOrdinal("Vuelto"));
-                Console.WriteLine($"→ Paciente: {factura.Paciente}, Total: {factura.Total}");
-
-                if (!dr.NextResult())
-                {
-                    Console.WriteLine("❌ NO HAY DETALLE");
-                    throw new Exception("No devolvió detalle.");
-                }
-
-                Console.WriteLine("✔ Leyendo detalle…");
-
+            if (dr.NextResult())
+            {
                 while (dr.Read())
                 {
-                    factura.Detalles.Add(new FacturaDetalleDTO
+                    factura.Pagos.Add(new FacturaPagoDTO
                     {
-                        IdProducto = dr.GetInt32(dr.GetOrdinal("IdProducto")),
-                        NombreProducto = dr["NombreProducto"].ToString(),
-                        Cantidad = dr.GetDecimal(dr.GetOrdinal("Cantidad")),
-                        Precio = dr.GetDecimal(dr.GetOrdinal("Precio"))
+                        IdFacturaPago = dr.GetInt64(dr.GetOrdinal("IdFacturaPago")),
+                        IdFactura = dr.GetInt32(dr.GetOrdinal("IdFactura")),
+                        IdFormaPago = dr.GetInt32(dr.GetOrdinal("IdFormaPago")),
+                        CodigoFormaPago = dr["Codigo"]?.ToString() ?? string.Empty,
+                        NombreFormaPago = dr["Nombre"]?.ToString() ?? string.Empty,
+                        Moneda = dr["Moneda"]?.ToString()?.Trim() ?? "NIO",
+                        Monto = dr.GetDecimal(dr.GetOrdinal("Monto")),
+                        TasaCambio = dr.GetDecimal(dr.GetOrdinal("TasaCambio")),
+                        Referencia = dr["Referencia"] == DBNull.Value ? null : dr["Referencia"].ToString(),
+                        EsEfectivo = dr.GetBoolean(dr.GetOrdinal("EsEfectivo")),
+                        RequiereReferencia = dr.GetBoolean(dr.GetOrdinal("RequiereReferencia")),
+                        PermiteVuelto = dr.GetBoolean(dr.GetOrdinal("PermiteVuelto"))
                     });
                 }
             }
 
-            Console.WriteLine($"✔ Factura cargada. Detalles = {factura.Detalles.Count}");
-
             return factura;
         }
 
-
-
-        public int GuardarFactura(FacturaDTO factura, List<FacturaDetalleDTO> detalle)
+        public int GuardarFactura(
+            FacturaDTO factura,
+            List<FacturaDetalleDTO> detalle,
+            List<FacturaPagoDTO> pagos)
         {
             using var cn = new SqlConnection(_cn);
             using var cmd = new SqlCommand("SpGuardarFactura", cn);
@@ -166,29 +218,68 @@ namespace Farmacia.DAL
             cmd.Parameters.AddWithValue("@PagoCordoba", factura.PagoCordoba);
             cmd.Parameters.AddWithValue("@PagoDolar", factura.PagoDolar);
             cmd.Parameters.AddWithValue("@Vuelto", factura.Vuelto);
-            cmd.Parameters.Add("@TasaCambio",SqlDbType.Decimal).Value = factura.TasaCambio;
-            cmd.Parameters["@TasaCambio"].Precision = 10;
-            cmd.Parameters["@TasaCambio"].Scale = 4;
+            cmd.Parameters.AddWithValue("@VueltoCordoba", factura.VueltoCordoba);
+            cmd.Parameters.AddWithValue("@VueltoDolar", factura.VueltoDolar);
+            cmd.Parameters.AddWithValue("@IdTurno", factura.IdTurno ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@IdUsuario", factura.IdUsuario ?? (object)DBNull.Value);
 
-            // Tabla tipo para detalle
-            var tvp = new DataTable();
-            tvp.Columns.Add("IdProducto", typeof(int));
-            tvp.Columns.Add("Cantidad", typeof(decimal));
-            tvp.Columns.Add("Precio", typeof(decimal));
+            var tasaParam = cmd.Parameters.Add("@TasaCambio", SqlDbType.Decimal);
+            tasaParam.Precision = 10;
+            tasaParam.Scale = 4;
+            tasaParam.Value = factura.TasaCambio;
+
+            var detalleTvp = new DataTable();
+            detalleTvp.Columns.Add("IdProducto", typeof(int));
+            detalleTvp.Columns.Add("Cantidad", typeof(decimal));
+            detalleTvp.Columns.Add("Precio", typeof(decimal));
 
             foreach (var d in detalle)
             {
-                tvp.Rows.Add(d.IdProducto, d.Cantidad, d.Precio);
+                detalleTvp.Rows.Add(d.IdProducto, d.Cantidad, d.Precio);
             }
 
-            var param = cmd.Parameters.AddWithValue("@DetalleFactura", tvp);
-            param.SqlDbType = SqlDbType.Structured;
-            param.TypeName = "dbo.TipoDetalleFactura";
+            var detalleParam = cmd.Parameters.AddWithValue("@DetalleFactura", detalleTvp);
+            detalleParam.SqlDbType = SqlDbType.Structured;
+            detalleParam.TypeName = "dbo.TipoDetalleFactura";
+
+            var pagosTvp = new DataTable();
+            pagosTvp.Columns.Add("IdFormaPago", typeof(int));
+            pagosTvp.Columns.Add("Moneda", typeof(string));
+            pagosTvp.Columns.Add("Monto", typeof(decimal));
+            pagosTvp.Columns.Add("Referencia", typeof(string));
+
+            foreach (var p in pagos)
+            {
+                pagosTvp.Rows.Add(
+                    p.IdFormaPago,
+                    (p.Moneda ?? "NIO").Trim().ToUpperInvariant(),
+                    p.Monto,
+                    string.IsNullOrWhiteSpace(p.Referencia)
+                        ? DBNull.Value
+                        : p.Referencia.Trim());
+            }
+
+            var pagosParam = cmd.Parameters.AddWithValue("@PagosFactura", pagosTvp);
+            pagosParam.SqlDbType = SqlDbType.Structured;
+            pagosParam.TypeName = "dbo.TipoPagoFactura";
 
             cn.Open();
-            var result = cmd.ExecuteScalar();  // el SP devuelve IdFactura
+            var result = cmd.ExecuteScalar();
 
             return Convert.ToInt32(result);
+        }
+
+        private static bool HasColumn(IDataRecord reader, string columnName)
+        {
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                if (string.Equals(reader.GetName(i), columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

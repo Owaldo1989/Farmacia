@@ -657,6 +657,19 @@
     padding: 20px;
 }
 
+.payment-dialog {
+    width: min(1220px, calc(100vw - 36px));
+    max-width: min(1220px, calc(100vw - 36px)) !important;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.payment-modal .pharmacy-modal-body {
+    max-height: calc(100vh - 190px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .pharmacy-modal-footer {
     padding: 14px 20px;
     border-top: 1px solid var(--border);
@@ -1337,8 +1350,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 14px;
+    padding: 12px 15px;
     border-radius: 12px;
     background: var(--primary-soft);
 }
@@ -1353,11 +1366,196 @@
         font-size: 19px;
     }
 
+.payment-layout {
+    display: grid;
+    grid-template-columns: minmax(430px, .95fr) minmax(430px, 1.05fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.payment-capture-panel,
+.payment-review-panel {
+    min-width: 0;
+}
+
+.payment-review-panel {
+    position: sticky;
+    top: 0;
+}
+
+.payment-method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+    gap: 9px;
+    margin-bottom: 12px;
+}
+
+.payment-method-card {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: .18s ease;
+}
+
+    .payment-method-card span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .payment-method-card i {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 8px;
+        background: var(--primary-soft);
+        color: var(--primary);
+        font-size: 14px;
+    }
+
+    .payment-method-card:hover,
+    .payment-method-card.active {
+        border-color: var(--primary);
+        background: #f6fcfa;
+        box-shadow: 0 6px 18px rgba(7, 150, 103, .10);
+    }
+
+.payment-entry {
+    margin-bottom: 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fbfdfc;
+}
+
+.payment-entry-title {
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.payment-entry-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(190px, 1fr));
+    gap: 12px;
+}
+
+.btn-add-payment {
+    width: 100%;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.payment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.payment-list-empty,
+.payment-list-item {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+}
+
+.payment-list-empty {
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 9px;
+}
+
+.payment-list-item strong {
+    display: block;
+    color: var(--text);
+    font-size: 10px;
+}
+
+.payment-list-item span {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-secondary);
+    font-size: 8px;
+}
+
+.payment-list-item button {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 8px;
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.payment-summary-box {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(125px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.payment-summary-box > div {
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fbfdfc;
+}
+
+.payment-summary-box span {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-light);
+    font-size: 8px;
+}
+
+.payment-summary-box strong {
+    display: block;
+    color: var(--text);
+    font-size: 11px;
+}
+
 .change-box {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 4px;
+    margin-top: 0;
     padding: 13px 14px;
     border: 1px solid var(--border);
     border-radius: 11px;
@@ -1383,6 +1581,35 @@
     .change-box strong {
         color: var(--text);
         font-size: 15px;
+    }
+
+.change-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.change-currency-toggle {
+    display: inline-flex;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+}
+
+    .change-currency-toggle button {
+        min-width: 40px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .change-currency-toggle button.active {
+        background: var(--primary);
+        color: white;
     }
 
     .change-box.insufficient {
@@ -1450,6 +1677,58 @@
 }
 
 
+@media(max-width: 900px) {
+
+    .payment-dialog {
+        width: calc(100vw - 18px);
+        max-width: calc(100vw - 18px);
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .payment-review-panel {
+        position: static;
+    }
+
+    .payment-list {
+        max-height: 180px;
+    }
+
+    .payment-method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media(max-height: 760px) and (min-width: 901px) {
+
+    .payment-modal .pharmacy-modal-body {
+        max-height: calc(100vh - 150px);
+    }
+
+    .payment-total {
+        margin-bottom: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .payment-method-card {
+        min-height: 48px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+    }
+
+    .payment-list {
+        max-height: 120px;
+    }
+}
+
+
 @media(max-width: 700px) {
 
     .product-photo-body {
@@ -1513,7 +1792,26 @@
         gap: 0;
     }
 
+    .payment-entry-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .payment-summary-box {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .sale-table {
         min-width: 730px;
+    }
+}
+
+@media(max-width: 430px) {
+
+    .payment-summary-box {
+        grid-template-columns: 1fr;
     }
 }
